@@ -1,0 +1,6 @@
+content fireinput jar:chrome/fireinput.jar!/content/fireinput/
+skin    fireinput classic/1.0 jar:chrome/fireinput.jar!/skin/classic/
+locale  fireinput en-US jar:chrome/fireinput.jar!/locale/en-US/
+overlay chrome://browser/content/browser.xul chrome://fireinput/content/browserOverlay.xul
+overlay chrome://navigator/content/navigator.xul chrome://fireinput/content/browserOverlay.xul
+

@@ -1,0 +1,192 @@
+.charinputlabel {
+    text-align: left; 
+    margin-bottom: 5px; 
+    background: none; 
+    font-size: 15px; 
+}
+
+.charinputlabel:hover {
+    background: #87CEFA; 
+}
+
+.charinputlabel:hover:active {
+    background: #87CEFA; 
+}
+
+#fireinputToggleIMEButton {
+    margin: 0 ;
+    text-align: center;
+}
+
+#fireinputToggleIMEButton:hover {
+    cursor: pointer;
+}
+
+#fireinputToggleIMEButton:hover:active {
+    cursor: pointer;
+}
+
+#fireinputIMEBarCloseButton {
+    margin: 0 0 0 0;
+    -moz-appearance: none;
+    border:none !important;
+    background: transparent !important;
+    -moz-image-region: rect(auto, auto, auto, auto);
+    list-style-image: url("chrome://fireinput/skin/close.png");
+}
+
+#fireinputIMEBarCloseButton:hover {
+    list-style-image: url("chrome://fireinput/skin/closeHover.png");
+}
+
+#fireinputIMEBarCloseButton:hover:active {
+    list-style-image: url("chrome://fireinput/skin/closeHover.png");
+}
+
+#fireinputToggleHalfButton {
+    margin: 0 0 0 0;
+    -moz-image-region: rect(auto, auto, auto, auto);
+    list-style-image: url("chrome://fireinput/skin/half-letter.png");
+}
+
+#fireinputToggleHalfButton:hover {
+    cursor: pointer;
+}
+
+#fireinputToggleHalfButton:hover:active {
+    cursor: pointer;
+}
+
+#fireinputTogglePunctButton {
+    margin: 0 0 0 0;
+    -moz-image-region: rect(auto, auto, auto, auto);
+    list-style-image: url("chrome://fireinput/skin/half-punct.png");
+}
+
+#fireinputTogglePunctButton:hover {
+    cursor: pointer;
+}
+
+#fireinputTogglePunctButton:hover:active {
+    cursor: pointer;
+}
+
+#fireinputPrevSelButton[disabled="true"] {
+    list-style-image: none; 
+}
+
+#fireinputPrevSelButton[disabled="true"]:hover {
+    list-style-image: none; 
+}
+
+#fireinputPrevSelButton[disabled="true"]:hover:active {
+    list-style-image: none; 
+}
+
+#fireinputPrevSelButton {
+    -moz-appearance: none;
+    border:none !important;
+    background: transparent !important;
+    list-style-image: url("chrome://fireinput/skin/fp-prev.png");
+}
+
+#fireinputPrevSelButton:hover {
+    list-style-image: url("chrome://fireinput/skin/fp-prevHover.png");
+}
+
+#fireinputPrevSelButton:hover:active {
+    list-style-image: url("chrome://fireinput/skin/fp-prevHover.png");
+}
+
+#fireinputNextSelButton[disabled="true"] {
+    list-style-image: none;
+}
+
+#fireinputNextSelButton[disabled="true"]:hover {
+    list-style-image: none;
+}
+
+#fireinputNextSelButton[disabled="true"]:hover:active {
+    list-style-image: none;
+}
+
+#fireinputNextSelButton {
+    -moz-appearance: none;
+    border:none !important;
+    background: transparent !important;
+    list-style-image: url("chrome://fireinput/skin/fp-next.png");
+}
+
+#fireinputNextSelButton:hover {
+    list-style-image: url("chrome://fireinput/skin/fp-nextHover.png");
+}
+
+#fireinputNextSelButton:hover:active {
+    list-style-image: url("chrome://fireinput/skin/fp-nextHover.png");
+}
+
+#fireinputOptionBox {
+  overflow: hidden;
+  margin: 0px;
+  padding: 0px;
+}
+
+#fireinputField {
+    -moz-appearance: none;
+    margin: 0; 
+    border: 1px solid;
+    -moz-border-top-colors: #96969D !important;
+    -moz-border-right-colors: #96969D !important;
+    -moz-border-bottom-colors: #96969D !important;
+    -moz-border-left-colors: #96969D !important;
+    padding: 2px 0 1px 3px;
+    background: lightgrey; 
+    font: icon;
+    font-size: 15px;
+    width: 120px;
+}
+
+#fireinputHelp, #fireinputSpecialCharMenu,#fireinputEmotionMenu {
+    -moz-binding: url("chrome://fireinput/content/bindings.xml#buttonmenu");
+}
+
+.toolbarbuttonStyle {
+    -moz-appearance: none;
+    margin: 0; 
+    border: none !important;
+    background: transparent !important;
+}
+
+.toolbarbuttonStyle:hover {
+    cursor: pointer;
+    color: blue;
+}
+
+.toolbarbuttonStyle:hover:active {
+    cursor: pointer;
+    color: blue;
+}
+
+.specialcharlabel {
+    text-align: center;
+    margin: 1px 2px 1px 2px; 
+    padding: 1px 5px 1px 5px; 
+    font-size: 15px; 
+    color: blue; 
+    background: none; 
+}
+
+.specialcharlabel:hover {
+    background: #87CEFA; 
+}
+
+.specialcharlabel:hover:active {
+    background: #87CEFA; 
+}
+
+.specialcharbar {
+    margin: 0 2px;
+    font-size: 15px;
+    background: none;
+}
+
