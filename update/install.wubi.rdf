@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+    
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <Description about="urn:mozilla:install-manifest">
+
+    <em:id>fireinput@software.fireinput.com</em:id>
+    <em:name>Fireinput</em:name>
+    <em:version>%FIREINPUT_VERSION%</em:version>
+    <em:type>2</em:type>
+
+
+    <em:description>Fireinput Chinese IME</em:description>
+    <em:creator>Olly Ja</em:creator>
+    <em:homepageURL>http://www.fireinput.com</em:homepageURL>
+    <!--<em:updateURL>http://www.fireinput.com/releases/update.wubi.rdf</em:updateURL>-->
+    <em:iconURL>chrome://fireinput/skin/fireinput.png</em:iconURL>
+
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <em:minVersion>1.5</em:minVersion>
+        <em:maxVersion>3.0.0.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
+  </Description>
+</RDF>
