@@ -1,0 +1,10 @@
+#include "nsISupports.idl" 
+#include "nsIDOMElement.idl" 
+
+[scriptable, uuid(b3d34bb1-405f-485d-a11b-39d90de735b4)]
+interface nsIFireinput: nsISupports
+{
+    void reload(); 
+    void disableIME(in ACString h, in nsIDOMElement of); 
+    void enableIME(in ACString h, in nsIDOMElement of); 
+};

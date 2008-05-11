@@ -1,0 +1,4 @@
+content fireinput content/fireinput/
+skin    fireinput classic/1.0 skin/classic/
+overlay chrome://browser/content/browser.xul chrome://fireinput/content/browserOverlay.xul
+locale  fireinput en-US locale/en-US/

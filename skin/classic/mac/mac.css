@@ -1,0 +1,31 @@
+
+.charinputlabel {
+    text-align: left; 
+    margin: 3px 3px 0px 3px; 
+    background: none; 
+    font-size: 15px; 
+}
+
+.charinputlabel:hover {
+    background: #87CEFA; 
+}
+
+.charinputlabel:hover:active {
+    background: #87CEFA; 
+}
+
+#fireinputField {
+    -moz-appearance: none !important;
+    margin: 0; 
+    border: 1px solid #7F7357;
+    -moz-border-top-colors: #7F7357 !important;
+    -moz-border-right-colors: #7F7357 !important;
+    -moz-border-bottom-colors: #7F7357 !important;
+    -moz-border-left-colors: #7F7357 !important;
+    padding: 1px 0 1px 3px;
+    background: #CFD5DC; 
+    font: icon;
+    font-size: 15px;
+    min-width: 100px; 
+}
+

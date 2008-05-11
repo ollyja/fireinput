@@ -1,0 +1,340 @@
+/* same as menuitem-non-iconic but make it's easy for all menuitems */
+@import "chrome://fireinput-os/skin/fireinput.css";
+#fireinputHelp menuitem {
+    -moz-binding: url("chrome://global/content/bindings/menu.xml#menubutton-item");
+}
+
+#fireinputMenu {
+    -moz-appearance: none;
+    margin: 0; 
+    border: none !important;
+    cursor: pointer;
+    background: transparent !important;
+    list-style-image: url("chrome://fireinput/skin/fireinput_run.png");
+}
+
+#fireinputMenu:hover {
+    list-style-image: url("chrome://fireinput/skin/fireinput_runHover.png");
+}
+
+#fireinputMenu:hover:active {
+    list-style-image: url("chrome://fireinput/skin/fireinput_runHover.png");
+}
+
+#fireinputToggleIMEButton {
+    margin: 0 ;
+    text-align: center;
+}
+
+#fireinputToggleIMEButton:hover {
+    cursor: pointer;
+}
+
+#fireinputToggleIMEButton:hover:active {
+    cursor: pointer;
+}
+
+#fireinputIMEBarCloseButton {
+    margin: 0 0 0 0;
+    -moz-appearance: none;
+    border:none !important;
+    background: transparent !important;
+    -moz-image-region: rect(auto, auto, auto, auto);
+    list-style-image: url("chrome://fireinput/skin/close.png");
+    cursor: pointer; 
+}
+
+#fireinputIMEBarCloseButton:hover {
+    list-style-image: url("chrome://fireinput/skin/closeHover.png");
+}
+
+#fireinputIMEBarCloseButton:hover:active {
+    list-style-image: url("chrome://fireinput/skin/closeHover.png");
+}
+
+#fireinputToggleHalfButton {
+    margin: 0 0 0 0;
+    -moz-image-region: rect(auto, auto, auto, auto);
+    list-style-image: url("chrome://fireinput/skin/half-letter.png");
+}
+
+#fireinputToggleHalfButton:hover {
+    cursor: pointer;
+}
+
+#fireinputToggleHalfButton:hover:active {
+    cursor: pointer;
+}
+
+#fireinputTogglePunctButton {
+    margin: 0 0 0 0;
+    -moz-image-region: rect(auto, auto, auto, auto);
+    list-style-image: url("chrome://fireinput/skin/half-punct.png");
+}
+
+#fireinputTogglePunctButton:hover {
+    cursor: pointer;
+}
+
+#fireinputTogglePunctButton:hover:active {
+    cursor: pointer;
+}
+
+#fireinputPrevSelButton[disabled="true"] {
+    list-style-image: none; 
+}
+
+#fireinputPrevSelButton[disabled="true"]:hover {
+    list-style-image: none; 
+}
+
+#fireinputPrevSelButton[disabled="true"]:hover:active {
+    list-style-image: none; 
+}
+
+#fireinputPrevSelButton {
+    -moz-appearance: none;
+    border:none !important;
+    background: transparent !important;
+    list-style-image: url("chrome://fireinput/skin/fp-prev.png");
+}
+
+#fireinputPrevSelButton:hover {
+    list-style-image: url("chrome://fireinput/skin/fp-prevHover.png");
+}
+
+#fireinputPrevSelButton:hover:active {
+    list-style-image: url("chrome://fireinput/skin/fp-prevHover.png");
+}
+
+#fireinputNextSelButton[disabled="true"] {
+    list-style-image: none;
+}
+
+#fireinputNextSelButton[disabled="true"]:hover {
+    list-style-image: none;
+}
+
+#fireinputNextSelButton[disabled="true"]:hover:active {
+    list-style-image: none;
+}
+
+#fireinputNextSelButton {
+    -moz-appearance: none;
+    border:none !important;
+    background: transparent !important;
+    list-style-image: url("chrome://fireinput/skin/fp-next.png");
+}
+
+#fireinputNextSelButton:hover {
+    list-style-image: url("chrome://fireinput/skin/fp-nextHover.png");
+}
+
+#fireinputNextSelButton:hover:active {
+    list-style-image: url("chrome://fireinput/skin/fp-nextHover.png");
+}
+
+#fireinputOptionBox {
+  overflow: hidden;
+  margin: 0px;
+  padding: 0px;
+}
+
+#mainPopupSet, #fireinputIMEContainer {
+  -moz-user-focus: normal !important;
+}
+
+#inputMethod, #fireinputMenu, #fireinputSpecialCharMenu,#fireinputEmotionMenu {
+    -moz-binding: url("chrome://fireinput/content/bindings.xml#buttonmenu");
+}
+
+.toolbarbuttonStyle {
+    -moz-appearance: none;
+    margin: 0; 
+    border: none !important;
+    background: transparent !important;
+}
+
+.toolbarbuttonStyle:hover {
+    cursor: pointer;
+    color: blue;
+}
+
+.toolbarbuttonStyle:hover:active {
+    cursor: pointer;
+    color: blue;
+}
+
+.specialcharlabel {
+    text-align: center;
+    margin: 1px 2px 1px 2px; 
+    padding: 1px 5px 1px 5px; 
+    font-size: 15px; 
+    color: blue; 
+    background: none; 
+}
+
+.specialcharlabel:hover {
+    background: #87CEFA; 
+}
+
+.specialcharlabel:hover:active {
+    background: #87CEFA; 
+}
+
+.specialcharbar {
+    margin: 0 2px;
+    font-size: 15px;
+    background: none;
+}
+
+.composeeditorlabel {
+    text-align: left;
+    padding: 5px 1px 5px 1px; 
+    margin: 0px; 
+    background: #E5E8EC;
+    font-size: 14px;
+    text-decoration: underline;
+}
+
+.composeeditorlabel:hover {
+    background: #87CEFA;
+}
+
+.composeeditorlabel:hover:active {
+    background: #87CEFA;
+}
+
+.composeeditorboxview {
+    -moz-appearance: none;
+    margin: 0px;
+    border: 1px;
+    padding: 5px 1px 5px 1px;
+    -moz-border-top-colors: none !important;
+    -moz-border-right-colors: none !important;
+    -moz-border-bottom-colors: none !important;
+    -moz-border-left-colors: none !important;
+    background: #E5E8EC;
+    font-family: icon; 
+    font-size: 12px;
+}
+
+.composeeditorbox {
+    -moz-appearance: none;
+    margin: 0px; 
+    border: 1px solid;
+    -moz-border-top-colors: #96969D !important;
+    -moz-border-right-colors: #96969D !important;
+    -moz-border-bottom-colors: #96969D !important;
+    -moz-border-left-colors: #96969D !important;
+    padding: 2px 0 1px 3px;
+    background: #FFFFF0; 
+    font-family: icon; 
+    font-size: 12px;
+}
+
+.fireinputSearchbox {
+    -moz-appearance: none;
+    margin: 4px 2px 4px 3px;
+    border: 1px solid;
+    -moz-border-top-colors: #96969D !important;
+    -moz-border-right-colors: #96969D !important;
+    -moz-border-bottom-colors: #96969D !important;
+    -moz-border-left-colors: #96969D !important;
+    padding: 1px 0 1px 2px;
+    background: #FFFFF0;
+    font: icon;
+    width: 120px; 
+    font-size: 14px;
+    color: #6F767C; 
+}
+
+.fireinputSearchbox:hover {
+    -moz-border-top-colors: #7197D3 !important;
+    -moz-border-right-colors: #7197D3 !important;
+    -moz-border-bottom-colors: #7197D3 !important;
+    -moz-border-left-colors: #7197D3 !important;
+}
+
+.fireinputSearchbox:hover:active {
+    -moz-border-top-colors: #7197D3 !important;
+    -moz-border-right-colors: #7197D3 !important;
+    -moz-border-bottom-colors: #7197D3 !important;
+    -moz-border-left-colors: #7197D3 !important;
+}
+
+#fireinputSearchButton {
+    margin: 6px 2px 4px 2px;
+}
+
+#fireinputSearchButton:hover {
+   color: blue; 
+   cursor: pointer; 
+}
+#fireinputSearchButton:hover:active {
+   color: blue; 
+   cursor: pointer; 
+}
+
+.largetablelabel {
+    margin:  4px 3px 0px 3px; 
+    font-size: 12px; 
+}
+
+/* all for theme */
+#fireinputIMEContainerBox[fireinputtheme] {
+    -moz-appearance: none !important;
+    background-repeat: no-repeat !important; 
+    background-position: top right !important;
+    background-color: transparent !important; 
+    background-image: none !important;
+    color: white; 
+}
+
+#fireinputIMEContainerBox[fireinputtheme] #fireinputComposeField .composeeditorboxview {
+    margin: 0px;
+    padding: 3px 1px 5px 1px !important;
+    background: transparent !important; 
+    color: white; 
+}
+
+#fireinputIMEContainerBox[fireinputtheme] #fireinputField{
+    margin: 0;
+    border: none; 
+    background: transparent !important; 
+    padding: 1px 0 1px 3px;
+    font: icon;
+    font-size: 15px;
+    min-width: 100px;
+}
+
+#fireinputIMEBar_bottom[fireinputtheme] {
+    -moz-appearance: none !important;
+    border-bottom: 0 !important;
+    background-repeat: no-repeat !important; 
+    background-position: top right !important;
+    background-color: transparent !important; 
+    background-image: none !important;
+}
+
+#fireinputIMEBar_bottom[fireinputtheme] menulist, #fireinputIMEBar_bottom[fireinputtheme] toolbarseparator {
+    -moz-appearance: none !important;
+    border-bottom: 0 !important;
+    background-color: transparent !important;
+}
+
+#fireinputIMEBar_top[fireinputtheme] {
+    -moz-appearance: none !important;
+    border-bottom: 0 !important;
+    background-repeat: no-repeat !important;
+    background-position: top right !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+#fireinputIMEBar_top[fireinputtheme] menulist, #fireinputIMEBar_top[fireinputtheme] toolbarseparator {
+    -moz-appearance: none !important;
+    border-bottom: 0 !important;
+    background-color: transparent !important;
+}
+

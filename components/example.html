@@ -1,0 +1,30 @@
+<html>
+<head>
+<script language="JavaScript">
+   function btnClick()
+   {
+         try {
+//           netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+//           var myservice = Components.classes['@fireinput.com/fireinput;1']. 
+//                        getService(Components.interfaces.nsIFireinput); 
+//component constructor
+var myservice = new Components.Constructor('@fireinput.com/fireinput;1','nsIFireinput');
+
+
+           alert(myservice);
+        }
+        catch(e) { alert(e); }
+   }
+</script>
+
+<body>
+<div><h3> Test Fireinput service: @fireinput.com/fireinput;1 </h3></div>
+<button onclick="btnClick()">Test me</button>
+</body>
+</html>
+
+
+
+
+	
+

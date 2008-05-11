@@ -1,0 +1,1131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>火输文本编辑器</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="chrome://fireinput/skin/editor.css" type="text/css"/>
+    <script type="text/javascript" src="chrome://fireinput/content/constant.js"></script>
+    <script type="text/javascript" src="chrome://fireinput/content/lib.js"></script>
+    <script type="text/javascript" src="chrome://fireinput/content/stream.js"></script>
+    <script type="text/javascript" src="chrome://fireinput/content/utils.js"></script>
+    <script type="text/javascript" src="chrome://fireinput/content/store/storedoc.js"></script>
+    <script type="text/javascript" language="JavaScript1.2">
+       function copyToClipboard()
+       {
+         var source = document.getElementById("editorContext");
+         if(source)
+         {
+            if(source.value.length <= 0)
+               return; 
+            try {
+               var clipboard = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
+                                    .getService(Components.interfaces.nsIClipboardHelper);
+               clipboard.copyString(source.value);
+            } 
+            catch(e) {}
+         }
+       }
+
+       function setInitSize()
+       {
+         var dheight = document.documentElement.clientHeight; 
+         var dwidth = document.documentElement.clientWidth; 
+         document.getElementById("localEditor").style.height =(dheight - 50) + "px"; 
+         document.getElementById("localEditor").style.width =(dwidth - 100) + "px"; 
+         document.getElementById("fireinputEditor").style.height =(dheight - 180) + "px"; 
+         document.getElementById("fireinputEditor").style.width =  (dwidth - 105) + "px"; 
+       }
+
+       function setOpacity (obj, opacity)
+       {
+         opacity = (opacity == 100)?99.999:opacity;
+         obj.style.MozOpacity = opacity/100;
+       }
+
+       function confirmDialog(title, message)
+       {
+          var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+                             .getService(Components.interfaces.nsIPromptService);
+          var flags=promptService.BUTTON_TITLE_IS_STRING * promptService.BUTTON_POS_0 +
+              promptService.BUTTON_TITLE_IS_STRING * promptService.BUTTON_POS_1 +
+              promptService.BUTTON_TITLE_IS_STRING * promptService.BUTTON_POS_2;
+
+          var ret = promptService.confirmEx(window,title, message, 
+              flags, '保存', '取消', "不保存", null, {});
+
+          return ret; 
+       }
+
+       function confirmExitDialog(title, message)
+       {
+          var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+                             .getService(Components.interfaces.nsIPromptService);
+          var flags=promptService.BUTTON_TITLE_IS_STRING * promptService.BUTTON_POS_0 +
+              promptService.BUTTON_TITLE_IS_STRING * promptService.BUTTON_POS_1; 
+
+          var ret = promptService.confirmEx(window,title, message, 
+              flags, '保存', "不保存", null, null, {});
+
+          return ret; 
+       }
+
+       function showHelp(e)
+       {
+         var id = document.getElementById("helpContext"); 
+         var mouseY = e.clientY + document.body.scrollTop + 
+                       document.documentElement.scrollTop;
+         var mouseX = e.clientX + document.body.scrollLeft +
+                       document.documentElement.scrollLeft;
+         if(id.style.display == "block")
+         {
+            id.style.display = "none"; 
+            return; 
+         }
+
+         id.style.display = "block"; 
+         id.style.left = (mouseX - 220) + "px"; 
+         id.style.top = (mouseY + 20) + "px";
+       }
+
+       const BLANK_DOC = "<br>";
+
+       var FireinputEditor = {
+         viewsourcing: false, 
+         autoSaveTimer: null, 
+         savedFileName: null, 
+         savedContent: BLANK_DOC, 
+         audosavedContent: BLANK_DOC, 
+         dirty: false, 
+	
+         initToolbarButtons: function() 
+         {
+             var kids = document.getElementsByTagName('div');
+
+             for (var i= kids.length-1; i >=0; i--) {
+                if (/imagebutton/.test(kids[i].className)) {
+                   kids[i].addEventListener("click", bind(this.buttonClick, this), true);
+                }
+		else if(/styleFormat/.test(kids[i].id) && /floatWindowItem/.test(kids[i].className)) {
+                   kids[i].addEventListener("click", bind(this.selectStyle, this), true);
+                   kids[i].addEventListener("mouseover", bind(this.setUIStyle, this), true);
+                }
+		else if(/fontSizeWindow/.test(kids[i].id) && /floatWindowItem/.test(kids[i].className)) {
+                   kids[i].addEventListener("click", bind(this.selectFontSize, this), true);
+                   kids[i].addEventListener("mouseover", bind(this.setUIStyle, this), true);
+                }
+		else if(/fontWindow/.test(kids[i].id) && /floatWindowItem/.test(kids[i].className)) {
+                   kids[i].addEventListener("click", bind(this.selectFontName, this), true);
+                   kids[i].addEventListener("mouseover", bind(this.setUIStyle, this), true);
+                }
+		else if(/linkFormProtocolWindow/.test(kids[i].id) && /floatWindowItem/.test(kids[i].className)) {
+                   kids[i].addEventListener("click", bind(this.selectLinkProtocol, this), true);
+                }
+		
+             }
+
+         }, 
+
+         newDocInternal: function(keepContent)
+         {
+             if(keepContent)
+                return; 
+
+             var editor = document.getElementById('fireinputEditor');
+             this.setHTML(BLANK_DOC); 
+             this.savedFileName = null; 
+             this.savedContent = BLANK_DOC; 
+             document.getElementById('savedFileName').innerHTML = '<span style="color:#EDC555">草稿</span>'; 
+
+             // clear autosave stuff 
+             this.dirty = false; 
+             this.audosavedContent = BLANK_DOC; 
+             FireinputDocSaver.autosave(BLANK_DOC); 
+             // launch autoSave if it was cancelled 
+             if(!this.autoSaveTimer)
+                this.autoSaveTimer = setInterval(bind(this.autoSave, this), 10000); 
+          }, 
+
+         
+         newDoc: function(keepContent)
+         {
+             var html = this.getHTML(); 
+
+             if(this.savedFileName)
+             {
+                 if(this.savedContent == html)
+                 {
+                     this.newDocInternal(keepContent); 
+                     return true; 
+                 }
+             }
+             else if(!this.dirty && this.audosavedContent == html)
+             {
+                 this.newDocInternal(keepContent); 
+                 return true; 
+             }
+                 
+             var ret = confirmDialog('保存文档?', '您的文档还没有保存, 需要保存?'); 
+             if(ret == 1)
+                 return false; 
+             if(ret == 2)
+             {
+                 this.newDocInternal(keepContent);
+                 return true; 
+             }
+
+             ret = FireinputDocSaver.save(html, '保存文档...', true, this.savedFileName);      
+             if(ret)
+                 this.newDocInternal(keepContent); 
+
+             return true; 
+         }, 
+
+         openDoc: function()
+         {
+             if(!this.newDoc(true))
+                 return; 
+
+             var openfile = FireinputDocSaver.open("打开文档...");
+             if(!openfile)
+                 return; 
+
+             var editor = document.getElementById('fireinputEditor');
+             var readDone = function(docData)
+             {
+                    var openContent = FireinputUnicode.getUnicodeString(docData);
+                    FireinputEditor.setHTML(openContent); 
+                    FireinputEditor.savedContent = openContent; 
+
+             }; 
+
+             FireinputDocSaver.read(openfile, readDone);
+             this.savedFileName = openfile; 
+             document.getElementById('savedFileName').innerHTML = openfile; 
+             this.clearAutoSave();    
+         }, 
+            
+         saveDoc: function()
+         {
+             var html = this.getHTML(); 
+             if(!this.savedFileName)
+             {
+                this.savedFileName = FireinputDocSaver.save(html, '保存文档...'); 
+                if(!this.savedFileName)
+                   return false; 
+
+                this.savedContent = html; 
+                document.getElementById('savedFileName').innerHTML = this.savedFileName; 
+
+                // file has been saved. clear auto save 
+                this.clearAutoSave();    
+                
+             } 
+             else
+             {
+                var handle = document.getElementById('savedFileName'); 
+                setOpacity(handle, 50); 
+                FireinputDocSaver.save(html, '保存文档...', true, this.savedFileName); 
+                this.savedContent = html; 
+                setTimeout(function() { setOpacity(handle, 100);}, 1000); 
+             }
+
+             return true; 
+                
+         }, 
+
+         saveasDoc: function()
+         {
+             var html = this.getHTML(); 
+             if(!this.savedFileName)
+             {
+                this.saveDoc(); 
+             } 
+             else
+             {
+                var path = FireinputDocSaver.save(html, '另保存文档为...'); 
+                if(!path)
+                   return;
+
+                this.savedFileName = path; 
+                this.savedContent = html; 
+                document.getElementById('savedFileName').innerHTML = this.savedFileName; 
+             }
+                
+         }, 
+
+         saveDocExit: function()
+         {
+             var html = this.getHTML(); 
+
+             if(this.savedFileName)
+             {
+                 if(this.savedContent == html)
+                     return true; 
+             }
+             else if(!this.dirty && this.audosavedContent == html)
+                 return true; 
+                 
+             var ret = confirmExitDialog('保存文档?', '您的文档还没有保存, 需要保存?'); 
+             if(ret == 1)
+             {
+                 this.clearAutoSave();    
+                 return false; 
+             }
+
+             ret = FireinputDocSaver.save(html, '保存文档...', true, this.savedFileName);      
+             return ret; 
+         }, 
+
+         clearAutoSave: function()
+         {
+             if(this.autoSaveTimer)
+                 clearInterval(this.autoSaveTimer);  
+             this.autoSaveTimer = null; 
+             this.audosavedContent = BLANK_DOC; 
+             this.dirty = false; 
+             FireinputDocSaver.autosave(BLANK_DOC); 
+         }, 
+
+         autoSave: function()
+         {
+             if(this.viewsourcing)
+                 return; 
+
+             var html = this.getHTML(); 
+
+             if(this.audosavedContent == html)
+                 return; 
+
+             if(this.savedFileName)
+                 return; 
+
+             var handle = document.getElementById('autoSavedMessage'); 
+             handle.style.display = ""; 
+             setOpacity(handle, 100); 
+             FireinputDocSaver.autosave(html); 
+             var i = 100;
+             var fadetimer=setInterval(function() {
+                 setOpacity(handle, i);
+                 i-= 10;
+                 if(i < 10)
+                 {
+                    clearInterval(fadetimer);
+                    handle.style.display = "none"; 
+                 }
+             }, 100);
+
+             this.audosavedContent = html;  
+             this.dirty = true; 
+         },
+
+         loadAutoSaved: function()
+         {
+             var editor = document.getElementById('fireinputEditor');
+             var readDone = function(docData)
+             {
+                    var openContent = FireinputUnicode.getUnicodeString(docData);
+                    editor.contentWindow.document.body.innerHTML = openContent; 
+                    FireinputEditor.audosavedContent = openContent; 
+             }; 
+
+             FireinputDocSaver.autoload(readDone);
+         }, 
+
+         printDoc: function()
+         {
+         //    frames.fireinputEditor.focus();   
+         //    frames.fireinputEditor.print();   
+            var title = this.savedFileName ? this.savedFileName : '打印火输编辑器文本'; 
+            var wsetting ="toolbar=no,location=no,directories=no,menubar=no,resizable=yes,";
+            wsetting +="scrollbars=yes,width=600, height=700";
+            var htmlContent = this.getHTML(); 
+
+            var printdoc =window.open("","火输编辑器",wsetting);
+            printdoc.moveTo(100, 50);
+            printdoc.document.open();
+            printdoc.document.write('<html style="background-color: #FFF; padding: 25px; 15px; 5px; 15px;"><head><title>' + title + '</title>\n');
+            printdoc.document.write('<style type="text/css">body { margin: 0px; padding: 0px; height: 90%; width: 90%;} a {color: #000} a.visited {color: #000}</style>\n');
+            printdoc.document.write('<scr'+'ipt type="text/javascript">function printDoc() {window.print(); return false;}' + '</scr'+'ipt>\n');
+            printdoc.document.write('</head><body onLoad="printDoc()" style="font-family: Arial, Tahoma; font-size: 1.0em;">');
+            printdoc.document.write(htmlContent);
+            printdoc.document.write('</body></html>');
+            printdoc.document.close();
+            printdoc.focus(); 
+         }, 
+
+         insertNodeAtSelection: function(win, insertNode)
+         {
+             // get current selection
+             var sel = win.getSelection();
+
+             // get the first range of the selection
+             // (there's almost always only one range)
+             var range = sel.getRangeAt(0);
+
+             // deselect everything
+             sel.removeAllRanges();
+
+             // remove content of current selection from document
+             range.deleteContents();
+
+             // get location of current selection
+             var container = range.startContainer;
+             var pos = range.startOffset;
+
+             // make a new range for the new selection
+             range=document.createRange();
+
+             if (container.nodeType==3 && insertNode.nodeType==3) {
+
+                // if we insert text in a textnode, do optimized insertion
+                container.insertData(pos, insertNode.nodeValue);
+
+                // put cursor after inserted text
+                range.setEnd(container, pos+insertNode.length);
+                range.setStart(container, pos+insertNode.length);
+
+             } else {
+
+                var afterNode;
+                if (container.nodeType==3) {
+
+                   // when inserting into a textnode
+                   // we create 2 new textnodes
+                   // and put the insertNode in between
+
+                   var textNode = container;
+                   container = textNode.parentNode;
+                   var text = textNode.nodeValue;
+
+                   // text before the split
+                   var textBefore = text.substr(0,pos);
+                   // text after the split
+                   var textAfter = text.substr(pos);
+
+                   var beforeNode = document.createTextNode(textBefore);
+                   afterNode = document.createTextNode(textAfter);
+
+                   // insert the 3 new nodes before the old one
+                   container.insertBefore(afterNode, textNode);
+                   container.insertBefore(insertNode, afterNode);
+                   container.insertBefore(beforeNode, insertNode);
+
+                   // remove the old node
+                   container.removeChild(textNode);
+
+                } else {
+
+                   // else simply insert the node
+                   afterNode = container.childNodes[pos];
+                   container.insertBefore(insertNode, afterNode);
+                }
+
+                range.setEnd(afterNode, 0);
+                range.setStart(afterNode, 0);
+             }
+
+             sel.addRange(range);
+         }, 
+
+         getOffsetTop: function(elm) {
+             var mOffsetTop = elm.offsetTop;
+             var mOffsetParent = elm.offsetParent;
+
+             while(mOffsetParent){
+                 mOffsetTop += mOffsetParent.offsetTop;
+                 mOffsetParent = mOffsetParent.offsetParent;
+             }
+            return mOffsetTop;
+         }, 
+
+         getOffsetLeft: function(elm) {
+            var mOffsetLeft = elm.offsetLeft;
+            var mOffsetParent = elm.offsetParent;
+            while(mOffsetParent){
+                mOffsetLeft += mOffsetParent.offsetLeft;
+                mOffsetParent = mOffsetParent.offsetParent;
+            }
+            return mOffsetLeft;
+         }, 
+
+         buttonClick: function(e)
+         {
+             var evt = e ? e : window.event; 
+             var target = evt.target; 
+
+	     if (/^linkFormProtocol/.test(target.id)) {
+                var buttonElement = document.getElementById(target.id);
+                var handle = document.getElementById("linkFormProtocolWindow"); 
+                handle.style.left = this.getOffsetLeft(buttonElement)+ "px";
+                handle.style.top = (this.getOffsetTop(buttonElement) + buttonElement.offsetHeight+4) + "px";
+                handle.style.display = "block"; 
+             }
+	     else if (/^formatblock/.test(target.id)) {
+                var buttonElement = document.getElementById(target.id);
+                var handle = document.getElementById("styleFormat"); 
+                handle.style.left = this.getOffsetLeft(buttonElement)+ "px";
+                handle.style.top = (this.getOffsetTop(buttonElement) + buttonElement.offsetHeight+4) + "px";
+                handle.style.display = "block"; 
+                this.previewCommand = null; 
+                this.htmlSource = this.getHTML(); 
+	     }
+	     else if(/^fontname/.test(target.id)) {
+                var buttonElement = document.getElementById(target.id);
+                var handle = document.getElementById("fontWindow"); 
+                handle.style.left = this.getOffsetLeft(buttonElement)+ "px";
+                handle.style.top = (this.getOffsetTop(buttonElement) + buttonElement.offsetHeight+4) + "px";
+                handle.style.display = "block"; 
+                this.previewCommand = null; 
+                this.htmlSource = this.getHTML(); 
+	     } 
+	     else if (/^fontsize/.test(target.id)) {
+                var buttonElement = document.getElementById(target.id);
+                var handle = document.getElementById("fontSizeWindow"); 
+                handle.style.left = this.getOffsetLeft(buttonElement)+ "px";
+                handle.style.top = (this.getOffsetTop(buttonElement) + buttonElement.offsetHeight+4) + "px";
+                handle.style.display = "block"; 
+                this.previewCommand = null; 
+                this.htmlSource = this.getHTML(); 
+	     } 
+             else if ((target.id == "forecolor") || (target.id == "backcolor")) {
+                document.getElementById("colorpalette").setAttribute("command", target.id);
+
+                var buttonElement = document.getElementById(target.id);
+		var handle = document.getElementById("colorpalette"); 
+                handle.style.left = (this.getOffsetLeft(buttonElement) -100)+ "px";
+                handle.style.top = (this.getOffsetTop(buttonElement) + buttonElement.offsetHeight - 25) + "px";
+                handle.style.display = "block";
+                this.previewCommand = null; 
+                this.htmlSource = this.getHTML(); 
+             } else if (target.id == "createlink") {
+                var handle = document.getElementById('dform'); 
+                var form = document.getElementById('linkForm'); 
+                if(handle.style.display != 'none' && handle.hasAttribute('showup') && handle.getAttribute('showup') == "linkForm")
+                {
+                    handle.setAttribute("showup", ""); 
+                    handle.style.display = "none"; 
+                    document.getElementById("fireinputEditor").contentWindow.focus();
+                    return; 
+                } 
+                handle.innerHTML = form.innerHTML; 
+                handle.style.display = "block"; 
+                document.getElementById('linkFormField').focus(); 
+                handle.setAttribute("showup", "linkForm"); 
+             } else if (target.id == "createimage") {
+                var handle = document.getElementById('dform'); 
+                var form = document.getElementById('imageForm'); 
+                if(handle.style.display != 'none' && handle.hasAttribute('showup') && handle.getAttribute('showup') == "imageForm")
+                {
+                    handle.setAttribute("showup", ""); 
+                    handle.style.display = "none"; 
+                    document.getElementById("fireinputEditor").contentWindow.focus();
+                    return; 
+                } 
+                handle.innerHTML = form.innerHTML; 
+                handle.style.display = "block"; 
+                document.getElementById('imageFormField').focus(); 
+                handle.setAttribute("showup", "imageForm"); 
+
+            } else if (target.id == "createtable") {
+                var handle = document.getElementById('dform'); 
+                var form = document.getElementById('tableForm'); 
+                if(handle.style.display != 'none' && handle.hasAttribute('showup') && handle.getAttribute('showup') == "tableForm")
+                {
+                    handle.setAttribute("showup", ""); 
+                    handle.style.display = "none"; 
+                    document.getElementById("fireinputEditor").contentWindow.focus();
+                    return; 
+                } 
+                handle.innerHTML = form.innerHTML; 
+                handle.style.display = "block"; 
+                document.getElementById('tableFormColField').focus(); 
+                handle.setAttribute("showup", "tableForm"); 
+
+            } else if (target.id == 'new') {
+                this.newDoc(); 
+
+            } else if (target.id == 'open') {
+                this.openDoc();
+
+            } else if (target.id == 'openfire') {
+                this.openDocFromServer();
+	
+            } else if (target.id == 'save') {
+                this.saveDoc(); 
+           
+            } else if (target.id == 'saveas') {
+                this.saveasDoc(); 
+
+            } else if (target.id == 'savefire') {
+                this.savefireToServer(); 
+
+            } else if (target.id == 'print') {
+                this.printDoc(); 
+
+            } else if (target.id == 'savetoserver') {
+                this.saveDocToServer(); 
+
+            } else if (target.id == 'viewsource') {
+                this.viewSource(); 
+            }
+            else {
+              document.getElementById('fireinputEditor').contentWindow.document.execCommand(target.id, false, null);
+            }
+         }, 
+
+         setUIStyle: function(e)
+         {
+            var evt = e ? e : window.event; 
+            var target = evt.target; 
+	    var value = target.getAttribute('stylevalue'); 
+            var command = target.getAttribute('command'); 
+            if(this.previewCommand)
+            {
+               try {
+                   document.getElementById('fireinputEditor').contentWindow.document.execCommand("undo", false, null);
+               }
+               catch(e) {}
+            }
+
+            this.previewCommand = command; 
+            document.getElementById('fireinputEditor').contentWindow.document.execCommand(command, false, value); 
+         }, 
+
+         selectStyle: function(e)
+         {
+            var evt = e ? e : window.event; 
+            var target = evt.target; 
+	    var stylevalue = target.getAttribute('stylevalue'); 
+            this.previewCommand = null;   
+	    document.getElementById('formatblockinput').value = target.innerHTML; 
+            // document.getElementById('fireinputEditor').contentWindow.document.execCommand("formatblock", false, stylevalue);
+            document.getElementById('styleFormat').style.display = 'none'; 
+            document.getElementById("fireinputEditor").contentWindow.focus();
+         },
+
+         selectFontSize: function(e)
+         {
+            var evt = e ? e : window.event; 
+            var target = evt.target; 
+	    var stylevalue = target.getAttribute('stylevalue'); 
+
+            this.previewCommand = null;   
+	    document.getElementById('fontsizeinput').value = target.innerHTML; 
+            // document.getElementById('fireinputEditor').contentWindow.document.execCommand("fontsize", false, stylevalue);
+            document.getElementById('fontSizeWindow').style.display = 'none'; 
+            document.getElementById("fireinputEditor").contentWindow.focus();
+         },
+
+         selectFontName: function(e)
+         {
+            var evt = e ? e : window.event; 
+            var target = evt.target; 
+	    var stylevalue = target.getAttribute('stylevalue'); 
+
+            this.previewCommand = null;   
+	    document.getElementById('fontnameinput').value = target.innerHTML; 
+            // document.getElementById('fireinputEditor').contentWindow.document.execCommand("fontname", false, stylevalue);
+            document.getElementById('fontWindow').style.display = 'none'; 
+            document.getElementById("fireinputEditor").contentWindow.focus();
+         },
+
+         selectLinkProtocol: function(e)
+         {
+            var evt = e ? e : window.event; 
+            var target = evt.target; 
+
+            document.getElementById('linkFormProtocolValue').value = target.innerHTML; 
+            document.getElementById('linkFormProtocolWindow').style.display = 'none'; 
+            document.getElementById("linkFormField").focus();
+         },
+
+         hideAllFloatWindows: function(e)
+         {
+            var handle1 = document.getElementById("colorpalette"); 
+            var handle2 = document.getElementById("styleFormat"); 
+            var handle3 = document.getElementById("fontSizeWindow"); 
+            var handle4 = document.getElementById("fontWindow"); 
+
+            if(handle1.style.display != 'none' || handle2.style.display != 'none' ||
+               handle3.style.display != 'none' || handle4.style.display != 'none')
+            {
+                var evt = e ? e : window.event; 
+                var target = evt.target; 
+                if(!target.hasAttribute('command'))
+                {
+                   if(this.previewCommand) 
+                      this.setHTML(this.htmlSource); 
+                }
+            }
+            handle1.style.display = 'none'; 
+            handle2.style.display = 'none'; 
+            handle3.style.display = 'none'; 
+            handle4.style.display = 'none'; 
+
+            document.getElementById("linkFormProtocolWindow").style.display="none"; 
+         }, 
+
+         start: function()
+         {
+            document.getElementById('fireinputEditor').contentWindow.document.designMode = "on";
+            try {
+               document.getElementById('fireinputEditor').contentWindow.document.execCommand("undo", false, null);
+            }  catch (e) {
+               alert("Freinput Text Editor couldn't run in your browser"); 
+            }
+            setInitSize(); 
+            this.initToolbarButtons(); 
+            document.addEventListener("mouseup", bind(this.hideAllFloatWindows, this), true);
+            document.getElementById("fireinputEditor").contentWindow.document.addEventListener("mousedown", bind(this.hideAllFloatWindows,this), true);
+            document.addEventListener("keypress", this.hideAllFloatWindows, true);
+            document.getElementById("fireinputEditor").contentWindow.document.addEventListener("keypress", bind(this.hideAllFloatWindows,this), true);
+
+            // launch autoSave 
+            this.autoSaveTimer = setInterval(bind(this.autoSave, this), 10000); 
+         }, 
+
+         viewSource: function()
+         {
+            var html;
+            var button = document.getElementById('viewsource');
+            var editor = document.getElementById('fireinputEditor'); 
+            if(!this.viewsourcing) {
+               this.viewsourcing = true; 
+               html = document.createTextNode(editor.contentWindow.document.body.innerHTML);
+               editor.contentWindow.document.body.innerHTML = "";
+               html = editor.contentWindow.document.importNode(html,false);
+               editor.contentWindow.document.body.appendChild(html);
+               button.className = 'imagebutton textbutton viewsourcing'; 
+            } else {
+               this.viewsourcing = false; 
+               html = editor.contentWindow.document.body.ownerDocument.createRange();
+               html.selectNodeContents(editor.contentWindow.document.body);
+               editor.contentWindow.document.body.innerHTML = html.toString();
+               button.className = 'imagebutton textbutton viewsource'; 
+            }
+         }, 
+         setHTML: function(html)
+         {
+            var editor = document.getElementById('fireinputEditor');
+            if(!this.viewsourcing)
+            {
+               editor.contentWindow.document.body.innerHTML = html; 
+               return; 
+            }
+
+            var texthtml = document.createTextNode(html); 
+            editor.contentWindow.document.body.innerHTML = "";
+            texthtml = editor.contentWindow.document.importNode(texthtml,false);
+            editor.contentWindow.document.body.appendChild(texthtml);
+         }, 
+
+         getHTML: function()
+         {
+            var editor = document.getElementById('fireinputEditor');
+            if(!this.viewsourcing)
+               return editor.contentWindow.document.body.innerHTML; 
+           
+            html = editor.contentWindow.document.body.ownerDocument.createRange();
+            html.selectNodeContents(editor.contentWindow.document.body);
+            return html.toString();
+         }, 
+            
+         onEnter: function(e, callback)
+         {
+            if(e.keyCode == '13' )
+            {
+              callback(e); 
+              return false;
+            }
+            return true;
+         }, 
+
+         confirmLinkForm: function(e, cancel)
+         {
+            var handle = document.getElementById('linkFormField'); 
+            var protocol = document.getElementById('linkFormProtocolValue').value; 
+            var link = handle.value; 
+            if(protocol == 'http' || protocol == 'ftp' || protocol == 'mailto')
+                link = protocol + "://" + link; 
+
+            if(!cancel && handle.value != '')
+            {
+               document.getElementById('fireinputEditor').contentWindow.document.execCommand("CreateLink",false,link);
+            }
+            document.getElementById('dform').style.display = "none"; 
+            document.getElementById("fireinputEditor").contentWindow.focus();
+         },
+
+         confirmImageForm: function(e, cancel)
+         {
+            var handle = document.getElementById('imageFormField'); 
+            var link = handle.value; 
+
+            if(!cancel && link != '')
+            {
+               document.getElementById('fireinputEditor').contentWindow.document.execCommand("InsertImage",false,link);
+            }
+            document.getElementById('dform').style.display = "none"; 
+            document.getElementById("fireinputEditor").contentWindow.focus();
+         },   
+
+         confirmTableForm: function(e, cancel)
+         {
+            if(cancel)
+            {
+               document.getElementById('dform').style.display = "none";
+               document.getElementById("fireinputEditor").contentWindow.focus();
+               return; 
+            }
+               
+            var editor = document.getElementById("fireinputEditor");
+            var cols = parseInt(document.getElementById('tableFormColField').value); 
+            cols = cols > 0 ? cols : 1; 
+            var rows = parseInt(document.getElementById('tableFormRowField').value); 
+            rows = rows > 0 ? rows : 1; 
+
+            var table = editor.contentWindow.document.createElement("table");
+            table.setAttribute("border", "1");
+            table.setAttribute("width", "90%");
+            table.setAttribute("cellpadding", "2");
+            table.setAttribute("cellspacing", "2");
+            var tbody = editor.contentWindow.document.createElement("tbody");
+            for (var i=0; i < rows; i++) {
+                 var tr =editor.contentWindow.document.createElement("tr");
+                 for (var j=0; j < cols; j++) {
+                    var td =editor.contentWindow.document.createElement("td");
+                    var br =editor.contentWindow.document.createElement("br");
+                    td.appendChild(br);
+                    tr.appendChild(td);
+                 }
+                 tbody.appendChild(tr);
+            }
+            table.appendChild(tbody);      
+            this.insertNodeAtSelection(editor.contentWindow, table);
+
+            document.getElementById('dform').style.display = "none";
+            editor.contentWindow.focus();
+         }
+
+       }; 
+       function editor_onbeforeunload()
+       {
+         if(this.autoSaveTimer)
+           clearInterval(this.autoSaveTimer);  
+         FireinputEditor.autoSave(); 
+         FireinputEditor.saveDocExit(); 
+       }
+
+       function editor_start()
+       {
+         FireinputEditor.start(); 
+         FireinputEditor.loadAutoSaved();
+         document.getElementById("fireinputEditor").contentWindow.focus();
+
+       }
+
+       window.addEventListener("resize", setInitSize, true);
+       window.addEventListener("beforeunload", editor_onbeforeunload, true);
+</script>
+</head>
+<body onLoad="editor_start()">
+  <div id="localEditor" class="localEditor">
+    <div class="editorHead">火输文本编辑器<span style="font-size: 10px; font-style: italic" id="savedFileName"><span style="color: #EDC555">草稿</span></span></div>
+    <div class="editorHeadSaveFile"><span  id="autoSavedMessage" style="display: none; background-color: #EDC555">自动保存草稿</span></div>
+    <div id="editorToolbar">
+       <table cellpadding=0> 
+       <tr>
+          <td>
+            <div class="imagebutton textbutton viewsource" id="viewsource" title="源代码">源代码</div>
+          </td>
+          <td>
+            <div class="imagebutton newimagebutton" id="new" title="新建"></div>
+          </td>
+          <td>
+            <div class="imagebutton openimagebutton" id="open" title="打开"></div>
+          </td>
+          <td>
+            <div class="imagebutton openfireimagebutton" id="openfire" style="display: none" title="打开(从火输网fireinput.com)"></div>
+          </td>
+          <td>
+            <div class="imagebutton saveimagebutton" id="save" title="保存"></div>
+          </td>
+          <td>
+            <div class="imagebutton saveasimagebutton" id="saveas" title="另保存"></div>
+          </td>
+          <td>
+            <div class="imagebutton savefireimagebutton" id="savefire" style="display: none" title="保存到火输网(fireinput.com)"></div>
+          </td>
+          <td>
+            <div class="imagebutton printimagebutton" id="print" title="打印"></div>
+          </td>
+          <td>
+            <div class="imagebutton cutimagebutton" id="cut" title="剪切"></div>
+          </td>
+          <td>
+            <div class="imagebutton copyimagebutton" id="copy" title="复制"></div>
+          </td>
+          <td>
+            <div class="imagebutton pasteimagebutton" id="paste" title="粘贴"></div>
+          </td>
+          <td>
+            <div class="imagebutton undoimagebutton" id="undo" title="撤消">
+            </div>
+          </td>
+          <td>
+            <div class="imagebutton redoimagebutton" id="redo" title="重做">
+            </div>
+          </td>
+          <td>
+            <div class="imagebutton linkimagebutton" id="createlink" title="插入链接">
+            </div>
+          </td>
+          <td>
+            <div class="imagebutton unlinkimagebutton" id="unlink" title="删除链接">
+            </div>
+          </td>
+          <td>
+            <div class="imagebutton imageimagebutton" id="createimage" title="插入图象">
+            </div>
+          </td>
+          <td>
+            <div class="imagebutton tableimagebutton" id="createtable" title="插入/编辑表格">
+            </div>
+          </td>
+          </tr>
+        </table>
+        <table>
+          <tr>
+          <td> 
+            <table cellspacing=0 cellpadding=0>
+              <tr>
+                 <td><div class="textbutton">格式&nbsp;</div></td>
+                 <td>
+                    <div id="formatblock" class="inputblockArrow" onclick="FireinputEditor.buttonClick(event);">
+                       <input id="formatblockinput" class="inputblock" value="" readonly="true"></input>  
+                    </div>
+                 </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table cellspacing=0 cellpadding=0>
+              <tr>
+                 <td><div class="textbutton">字体&nbsp;</div></td>
+                 <td>
+                     <div id="fontname" class="inputblockArrow" onclick="FireinputEditor.buttonClick(event);">
+                       <input id="fontnameinput" class="inputblock" value="" readonly="true"></input>
+                    </div>
+                 </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table cellspacing=0 cellpadding=0>
+              <tr>
+                 <td><div class="textbutton">大小&nbsp;</div></td>
+                 <td>
+                    <div id="fontsize" class="inputblockArrow" onclick="FireinputEditor.buttonClick(event);">
+                      <input id="fontsizeinput" class="inputblock" value="" readonly="true"></input>
+                    </div>
+                 </td>
+              </tr>
+            </table>
+         </td>
+         <td>
+           <div class="imagebutton boldimagebutton" id="bold" title="加粗">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton italicimagebutton" id="italic" title="倾斜">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton underlineimagebutton" id="underline" title="下划线">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton underlinedoubleimagebutton" style="display: none" id="underlinedouble" title="双删除线">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton strikethroughimagebutton" id="strikethrough" title="删除线">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton subscriptmagebutton" id="subscript" title="下标">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton superscriptmagebutton" id="superscript" title="上标">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton forecolorimagebutton" id="forecolor" title="字体颜色">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton backcolorimagebutton" id="backcolor" title="背景颜色">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton alignleftimagebutton" id="justifyleft" title="左对齐">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton aligncenterimagebutton" id="justifycenter" title="居中对齐">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton alignrightimagebutton" id="justifyright" title="右对齐">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton numberlistimagebutton" id="insertorderedlist" title="插入/删除编号列表">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton bulletlistimagebutton" id="insertunorderedlist" title="插入/删除项目列表">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton outdentimagebutton" id="outdent" title="减少缩进">
+           </div>
+         </td>
+         <td>
+           <div class="imagebutton indentimagebutton" id="indent" title="增加缩进">
+           </div>
+         </td>
+       </tr>
+      </table>
+      <div id="dform" style="display: none" class="embeddedForm">
+      </div>
+    </div>
+    <div style="margin: 0px; padding: 0px;">
+       <iframe id="fireinputEditor" name="fireinputEditor" style="min-width: 795px; background-color: #FFFFFF"></iframe>
+       <iframe width="250" height="185" id="colorpalette" src="chrome://fireinput/content/color.html" style="display:none; z-index: 10; position: absolute;"></iframe>
+    </div>
+  </div>
+  
+  <!-- all hidden panels -->
+  <div id="styleFormat" class="floatWindow" style="width: 140px; height: 250px;">
+     <div id="styleFormat1" class="floatWindowItem" command="formatblock" style="font-weight: 500; margin-top: 3px" stylevalue="<p>">普通</div>
+     <div id="styleFormat2" class="floatWindowItem" command="formatblock" style="font-weight: 500" stylevalue="<div>">段落(div)</div>
+     <div id="styleFormat3" class="floatWindowItem" command="formatblock" style="font-weight: 500; font-style: italic" stylevalue="<address>">地址</div>
+     <div id="styleFormat4" class="floatWindowItem" command="formatblock" style="font-weight: 500" stylevalue="<pre>">已编排格式</div>
+     <div id="styleFormat5" class="floatWindowItem" command="formatblock" style="height: 30px; font-size: 20px" stylevalue="<h1>">标题１</div>
+     <div id="styleFormat6" class="floatWindowItem" command="formatblock" style="height: 24px; font-size: 15px;" stylevalue="<h2>">标题２</div>
+     <div id="styleFormat7" class="floatWindowItem" command="formatblock" style="height: 20px; font-size: 13px;" stylevalue="<h3>">标题３</div>
+     <div id="styleFormat8" class="floatWindowItem" command="formatblock" style="height: 15px; font-size: 11px;" stylevalue="<h4>">标题４</div>
+     <div id="styleFormat9" class="floatWindowItem" command="formatblock" style="height: 12px; font-size: 10px;" stylevalue="<h5>">标题５</div>
+     <div id="styleFormat10" class="floatWindowItem" command="formatblock" style="height: 10px; font-size: 8px;" stylevalue="<h6>">标题６</div>
+  </div>
+
+  <div id="fontSizeWindow" class="floatWindow" style="width: 140px; height: 190px;">
+     <div id="fontSizeWindow1" class="floatWindowItem" command="fontsize" style="margin-top: 3px; font-size: 10px;" stylevalue="1">小小小</div>
+     <div id="fontSizeWindow2" class="floatWindowItem" command="fontsize" style="height: 15px; font-size: 12px;" stylevalue="2">小小</div>
+     <div id="fontSizeWindow3" class="floatWindowItem" command="fontsize" style="height: 20px; font-size: 14px;" stylevalue="3">小</div>
+     <div id="fontSizeWindow4" class="floatWindowItem" command="fontsize" style="height: 20px; font-size: 16px;" stylevalue="4">中</div>
+     <div id="fontSizeWindow5" class="floatWindowItem" command="fontsize" style="height: 20px; font-size: 18px;" stylevalue="5">大</div>
+     <div id="fontSizeWindow6" class="floatWindowItem" command="fontsize" style="height: 22px; font-size: 20px;" stylevalue="6">大大</div>
+     <div id="fontSizeWindow7" class="floatWindowItem" command="fontsize" style="height: 25px; font-size: 24px;" stylevalue="7">大大大</div>
+  </div>
+  <div id="fontWindow" class="floatWindow" style="width: 140px; height: 115px;">
+     <div id="fontWindow1" class="floatWindowItem" command="fontname" style="margin-top: 3px; font-family: Arial" stylevalue="Arial">Arial</div>
+     <div id="fontWindow2" class="floatWindowItem" command="fontname" style="font-family: Courier New" stylevalue="Courier New">Courier New</div>
+     <div id="fontWindow2" class="floatWindowItem" command="fontname" style="font-family: Times New Roman" stylevalue="Times New Roman">Times New Roman</div>
+     <div id="fontWindow2" class="floatWindowItem" command="fontname" style="font-family: Tahoma" stylevalue="Tahoma">Tahoma</div>
+     <div id="fontWindow2" class="floatWindowItem" command="fontname" style="font-family: Comic Sans MS" stylevalue="Comic Sans MS">Comic Sans MS</div>
+  </div>
+  <div id="linkFormProtocolWindow" class="floatWindow" style="width: 60px; height: 90px;">
+     <div id="linkFormProtocolWindow1"  class="floatWindowItem" style="width: 50px">http</div>
+     <div id="linkFormProtocolWindow2"  class="floatWindowItem" style="width: 50px">ftp</div>
+     <div id="linkFormProtocolWindow3"  class="floatWindowItem" style="width: 50px">mailto</div>
+     <div id="linkFormProtocolWindow4"  class="floatWindowItem" style="width: 50px">其它</div>
+  </div>
+  
+  <div id="linkForm" style="display: none">
+     <table cellspacing=0 cellpadding=0 border=0>
+        <tr>
+          <td>
+            <div class="textInputName">网址(www)或其他链接：</div>
+          </td>
+          <td>
+              <table cellspacing=0 cellpadding=0 border=0>
+                 <tr>
+                    <td>
+                       <div id="linkFormProtocol" class="inputblockArrow" style="width: 60px; margin-right: 2px" onclick="FireinputEditor.buttonClick(event);">
+                         <input id="linkFormProtocolValue" class="inputblock" style="width: 40px" value="http" readonly="true"></input>
+                       </div>
+                    </td>
+                    <td>
+                       <div class="textInput">
+                       <input type="text" id="linkFormField" class="textInputField" value="" 
+                         onkeypress="FireinputEditor.onEnter(event, FireinputEditor.confirmLinkForm)"></input>
+                       </div>
+                    </td>
+                 </tr>
+              </table>
+          </td>
+          <td>
+             <input class="textInputButton" style="margin-left: 20px;" type="button" value="确定" onclick="FireinputEditor.confirmLinkForm(event)">
+             <input class="textInputButton" type="button" value="取消" onclick="FireinputEditor.confirmLinkForm(event, true)">
+          </td>
+        </tr>
+    </table>    
+  </div>
+
+  <div id="imageForm" style="display: none">
+     <table cellspacing=0 cellpadding=0 border=0>
+        <tr>
+          <td>
+            <div class="textInputName">图案的链接：</div>
+          </td>
+          <td>
+            <div class="textInput">
+             <input type="text" id="imageFormField" class="textInputField" value="http://" 
+              onkeypress="FireinputEditor.onEnter(event, FireinputEditor.confirmImageForm)"></input>
+            </div>
+          </td>
+          <td>
+             <input class="textInputButton" style="margin-left: 20px;" type="button" value="确定" onclick="FireinputEditor.confirmImageForm(event)">
+             <input class="textInputButton" type="button" value="取消" onclick="FireinputEditor.confirmImageForm(event, true)">
+          </td>
+        </tr>
+    </table>
+  </div>
+
+  <div id="tableForm" style="display: none">
+     <table cellspacing=0 cellpadding=0 border=0>
+        <tr>
+          <td>
+            <div class="textInputName">方格的行数：</div>
+          </td>
+          <td>
+            <div class="textInput" style="width: 40px">
+             <input type="text" nofireinput="true" id="tableFormColField" class="textInputField" style="width: 40px" value="2" 
+              onkeypress="FireinputEditor.onEnter(event, function() { document.getElementById('tableFormRowField').focus();})"></input>
+            </div>
+          </td>
+          <td>
+            <div class="textInputName">&nbsp;列数：</div>
+          </td>
+          <td>
+            <div class="textInput" style="width: 40px">
+             <input type="text" nofireinput="true" id="tableFormRowField" class="textInputField" style="width: 40px" value="2" 
+              onkeypress="FireinputEditor.onEnter(event, FireinputEditor.confirmTableForm)"></input>
+            </div>
+          </td>
+          <td>
+             <input class="textInputButton" style="margin-left: 20px;" type="button" value="确定" onclick="FireinputEditor.confirmTableForm(event)">
+             <input class="textInputButton" type="button" value="取消" onclick="FireinputEditor.confirmTableForm(event, true)">
+          </td>
+        </tr>
+    </table>
+  </div>
+
+</body>
+</html>
+

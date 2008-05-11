@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>火输(Fireinput) - 基于火狐(Firefox)浏览器的中文输入</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="description" content="Fireinput, IME, chinese, input method">
+<meta name="keywords" content="Fireinput, IME, chinese, input method">
+<link href="chrome://fireinput/skin/emotionmgr.css" rel="stylesheet" type="text/css">
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/utils.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/md5.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/constant.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/stream.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/store/storeemotion.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/emotion.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/fireinputPrefs.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/thememgr/thememgr.js"></script>
+</head>
+
+<body>
+
+<div id="main">
+      <div style="float: right; margin-right: 3px; display: none">
+        <span id="logonUserBox" style="margin-left:25px">
+          <span id="logonUser" style="color: blue;margin-right: 10px;"></span>
+        </span>
+        <span id="shareFileCommand">
+          <span id="uploadLink" class="textLink logonLink" onclick="EmotionMgr.toggleUploadForm()">上传</span>
+        </span>
+        <span id="logonLink">|<span class="textLink logonLink" onclick="EmotionMgr.toggleLogonForm(event)">登录</span></span>
+      </div>
+ 
+      <!-- logon form -->
+      <div id="logonForm" class="logonForm" style="display: none">
+        <div style="margin: 10px 10px 10px 5px">
+          <div id="logonMessage" style="color: red; margin-bottom: 5px;"></div>
+          <form onsubmit="javascript:return false;">
+            <table>
+                 <tr><td style="vertical-align:top">注册邮箱:</td><td><input id="logonEmail" type="text" /></td></tr>
+                 <tr><td style="text-align:right">密码:</td><td><input id="logonPasswd" type="password" onkeypress="EmotionMgr.logon(event)"/></td></tr>
+                 <tr><td><input id="logonSeed" type="hidden" value=""/></td></tr>
+                 <tr><td></td><td><input type="button" id="logonButton" value="登录" onclick="EmotionMgr.logon()"/></td></tr>
+           </table>
+          </form>
+        </div>
+      </div>
+
+     <div id="topTabMenu" style="border-top: 1px solid #97a5b0; padding: 1em 8px;background: #FFFFF0; ">
+      <div id="addFile">
+      <div id="uploadLinkBox" style="margin-right: 5px">
+        <br/>
+        <div id="uploadFileHelp" style="text-align:left; padding-left: 5px;">
+        想上传您的图片? 点击"Browser..."按钮选择您想上传的图案，然后点击上传按钮。 <span id="needLogonHelp" style="display:none">如果您想管理所上传的图案，请到<a href="javascript:void(0)" class="textLink" onclick="EmotionMgr.goToPage('http://www.fireinput.com/account/create_user.php')">www.fireinput.com</a>去注册。如果您已经注册，请先登录。非注册用户依然可以上传，但将不能够管理所上传图案</span>
+        </div>
+     </div> <!-- Upload part --> 
+
+     <br/>
+     <div style="margin-right: 3px">
+        <div id="uploadForm" style="padding-left: 5px;">
+          <form enctype="multipart/form-data" action="http://www.fireinput.com/emotions/uploadem.php" method="POST" onsubmit="return EmotionMgr.uploadFile(this)">
+            <div>
+            <input id="uploadFileValue" type="file" name="NewFile" size="50" onchange="EmotionMgr.addFileOnInput()"/>
+            </div>
+            <div style="margin-top: 10px">
+            <input id="uploadFileValue" type="file" name="NewFile" size="50" onchange="EmotionMgr.addFileOnInput()"/>
+            </div>
+          </form>
+        </div>
+     </div>
+
+      <br/>
+      <table cellspacing='0' cellpadding='0' width='100%' border=0>
+       <tr><td width="164">
+        <div style="border: 1px solid #999;height: 64px; width:64px; margin-left: 100px">
+         <img id="addFileShowImage" src="" width="64" height="64"/>
+        </div>
+       </td>
+       <td>
+        <div style="border: 1px solid #999;height: 64px; width:64px; margin-left: 5px">
+         <img id="addFileShowImage" src="" width="64" height="64"/>
+       </div>
+       </td></tr>
+      </table>
+      <br/>
+      <div style="margin-left:50px;text-align:center; width: 150px;">
+        <span id="addFileMessage" style="color: green;"></span>
+      </div>
+      <br/>
+      <div style="margin-left: 50px">图案只有在上面显示后方能成功加入</div>
+      <div style="margin-left: 50px; margin-top: 10px">
+           <input type="button" id="updateButton" value="保存" onclick="EmotionMgr.saveFileToList()"/>
+           <span id="saveFileMessage" style="margin-left: 5px; color: green;"></span>
+      </div>
+
+    </div>
+
+   </div>
+</div>
+</body>
+</html>
