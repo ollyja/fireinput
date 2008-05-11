@@ -1,7 +1,0 @@
-statusbarpanel#fireinputStatusBar {
-  list-style-image: url("chrome://fireinput/skin/fireinput.png");
-  padding-left: 5px;
-  padding-right: 5px;
-  padding-top: 2px;
-  cursor: pointer; 
-}
