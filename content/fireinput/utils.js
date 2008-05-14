@@ -208,8 +208,8 @@ var FireinputUtils =
        // text field. We can only insert bb code here  	
        if(element.target.setSelectionRange) 
        {
-	  var start = element.target.selectionStart; 
-	  var end   = element.target.selectionEnd; 
+	  var start = element.selectionStart; 
+	  var end   = element.selectionEnd; 
           var target = element.target; 
 
           // hack: the onfocus event will select all. We try to avoid this. 

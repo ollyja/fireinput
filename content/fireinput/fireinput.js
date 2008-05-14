@@ -1058,8 +1058,8 @@ var Fireinput =
        // FireinputLog.debug(this,"charCode string:" + String.fromCharCode(charCode)); 
 
        // the IME mode needs to be reset if the target has changed 
-       if(this.myTarget && this.myTarget.target != target)
-          this.setIMEMode(IME_MODE_ZH);
+       // if(this.myTarget && this.myTarget.target != target)
+       //   this.setIMEMode(IME_MODE_ZH);
 
        // keep the real event and target if inputfield has been focused 
        if(!this.myIMEInputFieldFocusedStatus && !this.myComposeEnabled &&(!this.myTarget || (this.myTarget.target != target)))
@@ -2086,6 +2086,12 @@ var Fireinput =
        var value = clickTarget.getAttribute("hiddenvalue");
        if(!value)
           value = clickTarget.getAttribute("value"); 
+
+       if(target.setSelectionRange)
+       {
+          inputTarget.selectionStart = target.selectionStart;
+          inputTarget.selectionEnd =  target.selectionEnd;
+       }
 
        FireinputUtils.insertCharAtCaret(inputTarget, value, sourceType); 
     },
