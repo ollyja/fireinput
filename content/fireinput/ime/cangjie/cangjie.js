@@ -358,7 +358,7 @@ Cangjie.prototype = extend(new FireinputIME(),
        if (! this.keyCangjieHash.hasItem(keyInitial))
        	  return null;
 
-       // only enable autoinsertion for 4 keys
+       // only enable autoinsertion for 5 keys
        if (key.length >= 5)
        	this.autoInsertion = true;
 
