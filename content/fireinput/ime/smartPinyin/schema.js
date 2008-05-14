@@ -285,6 +285,11 @@ PinyinSchema.prototype =
     enableAMBEng: false, 
     enableAMBIng: false, 
 
+    getSchema: function()
+    {
+       return this.pinyinSchema;
+    }, 
+
     setSchema: function(schema)
     {
        this.pinyinInitials = new FireinputHash(); 
@@ -431,12 +436,48 @@ PinyinSchema.prototype =
        if(!option || option == "fireinputAMBIng")
          this.enableAMBIng = FireinputPrefDefault.getAMBOption("fireinputAMBIng");
     },
+
+    getAMBKeys: function (ikey)
+    {
+       if(this.getSchema() != SMART_PINYIN)
+          return null; 
+
+       var ambKeys = [];
+
+       if((this.enableAMBZh && /^z/.test(ikey)) || 
+          (this.enableAMBSh && /^s/.test(ikey)) ||
+          (this.enableAMBCh && /^c/.test(ikey)))
+       {
+          if(this.pinyinAMBInitialHash.hasItem(ikey))
+          {
+             ambKeys[ambKeys.length] = this.pinyinAMBInitialHash.getItem(ikey); 
+
+             if((this.enableAMBAng && (/an$/.test(ikey) || /ang$/.test(ikey))) || 
+                (this.enableAMBEng && (/en$/.test(ikey) || /eng$/.test(ikey))) || 
+                (this.enableAMBIng && (/in$/.test(ikey) || /ing$/.test(ikey))))
+             {
+                if(this.pinyinAMBFinalHash.hasItem(ikey))
+                   ambKeys[ambKeys.length] = this.pinyinAMBFinalHash.getItem(ikey); 
+             }
+          }
+        }
  
+        return ambKeys; 
+    }, 
+
     // ikey/mkey should be: 
     //    zan => zhang: final hash
     //    zan =>zhan: initial hash 
     //
     compareAMB: function(ikey, mkey)
+    {
+       if(this.getSchema() != SMART_PINYIN)
+          return false; 
+
+       return this.compareAMBInitial(ikey, mkey) || this.compareAMBFinal(ikey, mkey);  
+    },
+ 
+    compareAMBInitial: function(ikey, mkey)
     {
        if(ikey == mkey)
           return true; 
@@ -468,7 +509,7 @@ PinyinSchema.prototype =
           }
        }
 
-       return this.compareAMBFinal(ikey, mkey);  
+       return false; 
     }, 
 
     compareAMBFinal: function(ikey, mkey)

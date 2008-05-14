@@ -82,3 +82,8 @@ const DATA_TEXT		= 2;
 const IME_BAR_BOTTOM   = "bottom";
 const IME_BAR_TOP   = "top";
 
+// pinyin input table type 
+const PINYIN_WORD_LOOKUP = 1;
+const PINYIN_PHRASE_LOOKUP = 2;
+
+

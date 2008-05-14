@@ -267,6 +267,7 @@ Wubi.prototype =  extend(new FireinputIME(),
     searchAll: function(inputChar)
     {
        this.charArray = null; 
+       this.charIndex = 0; 
 
        this.charArray = this.codeLookup(inputChar); 
        if(this.charArray != null)
@@ -295,7 +296,7 @@ Wubi.prototype =  extend(new FireinputIME(),
 
        // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
        // if the next 9 are already displayed, return null
-       if((this.charIndex+10) >= this.charArray.length)
+       if((this.charIndex+9) >= this.charArray.length)
           return null; 
 
        var i = this.charIndex; 
@@ -336,7 +337,7 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     isEnd: function()
     {
-       return (this.charIndex+10) >= this.charArray.length; 
+       return (this.charIndex+9) >= this.charArray.length; 
     }, 
 
     canAutoInsert: function()

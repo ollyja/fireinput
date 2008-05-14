@@ -208,8 +208,8 @@ var FireinputUtils =
        // text field. We can only insert bb code here  	
        if(element.target.setSelectionRange) 
        {
-	  var start = element.selectionStart; 
-	  var end   = element.selectionEnd; 
+	  var start = element.target.selectionStart; 
+	  var end   = element.target.selectionEnd; 
           var target = element.target; 
 
           // hack: the onfocus event will select all. We try to avoid this. 
@@ -224,11 +224,10 @@ var FireinputUtils =
           if(typeof(sourceType) != 'undefined' && sourceType == IMAGE_SOURCE_TYPE)
 	      text = "[img]" + text + "[/img]"; 
 
-	  target.value = target.value.substr(0, start) 
-			   + text + target.value.substr(end, target.value.length);
-
 	  if(start != null) 
 	  {
+	     target.value = target.value.substr(0, start) 
+			   + text + target.value.substr(end, target.value.length);
 	     this.setCaretTo(target, start + text.length);
 	  }
           else 
@@ -250,7 +249,7 @@ var FireinputUtils =
           // some target might have oninput event. Since the value is changed by script programmatically, 
           // this event won't fire 
           // Why do this way: the oninput won't show up as item of target. It must go to DOM tree to find 
-          // the attribute. Unfortunately it's added by addEventListener, it won't be executed 
+          // the attribute. Unfortunately if it's added by addEventListener, it won't be executed 
           if(target.id != '')
           {
              var win = target.ownerDocument.defaultView; 

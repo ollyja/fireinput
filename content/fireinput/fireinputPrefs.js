@@ -147,6 +147,8 @@ function fireinputPrefGetDefault(option)
           return 'undefined'; 
        break; 
     }
+ 
+    return undefined; 
 }
 
     

@@ -581,6 +581,7 @@ var Fireinput =
           break; 
        }
 
+       return "";
     }, 
 
     // set IME mode - not disable keyboard listening 
@@ -1462,9 +1463,9 @@ var Fireinput =
 	  var idf = document.getElementById("fireinputField");
           this.myInputChar += key; 
 	  idf.value += key; 
-	  //FireinputLog.debug(this,"idf.value:" + idf.value);
-
-	  this.findChar(); 
+	  FireinputLog.debug(this,"idf.value:" + idf.value);
+	  //The findchar will be invoked thought onfocus event 
+	  this.findChar();
 	  return; 
        }
         
@@ -1853,20 +1854,24 @@ var Fireinput =
 
        if(event.button != 0)
           return; 
-
-       this.myIMEInputFieldFocusedStatus = true; 
     },
 
     IMEInputFieldFocusEvent: function(event)
     {
-       this.myIMEInputFieldFocusedStatus = true;
+       // return if it's initially popup 
+       if(this.myIMEInputFieldFocusedStatus == false)
+       {
+          this.myIMEInputFieldFocusedStatus = true;
+          return; 
+       }
 
        // don't do anything if there is no input char 
        var idf = document.getElementById("fireinputField");
+       FireinputLog.debug(this, "idf.value: " + idf.value);
        if(idf.value.length <= 0)
           return; 
-
-       this.findCharWithDelayAndValue(); 
+       // FireinputLog.debug(this, "send findChar from IMEInputFieldFocusEvent");
+       this.findChar(); 
     },
 
     IMEInputFieldOnInputEvent: function(event)
@@ -1883,6 +1888,11 @@ var Fireinput =
           var composedLastKey = FireinputComposer.removeLastFromPanel();
           idf.value = composedLastKey;
           this.myInputChar = composedLastKey;
+          if(idf.value.length <=0)
+          {
+             this.hideAndCleanInput();
+             return; 
+          }
        }
        else
        {
@@ -1890,7 +1900,8 @@ var Fireinput =
           this.myInputChar = subInputKeys;
        }
 
-       this.findCharWithDelayAndValue(); 
+       // FireinputLog.debug(this, "send findCharWithDelay from OnInputEvent");
+       this.findCharWithDelay(); 
     }, 
        
     prevSel: function (homeFlag)
@@ -1966,39 +1977,24 @@ var Fireinput =
        return (!button.disabled); 
     },
  
-    // the function is used when inputField is focused 
-    findCharWithDelayAndValue: function()
-    {
-       if(this.myKeyTimer)
-         clearTimeout(this.myKeyTimer);
-       var idf = document.getElementById("fireinputField");
-       if(idf.value.length ==0)
-       {
-          this.hideAndCleanInput(); 
-          return;
-       }
-
-       var self = this;
-       // FireinputLog.debug(this, "this.myInputChar: " + this.myInputChar);
-       this.myKeyTimer = setTimeout(function () { self.findChar(); }, 100);
-    },
-
     findCharWithDelay: function(delayMSec)
     {
        if(typeof(delayMSec) == 'undefined')
          delayMSec = 100; 
        if(this.myKeyTimer)
          clearTimeout(this.myKeyTimer); 
+
+       FireinputLog.debug(this, "send findChar from findCharWithDelay");
        var self = this; 
        this.myKeyTimer = setTimeout(function () { self.findChar(); }, delayMSec); 
     },
-  
+ 
     findChar: function()
     {
        if(this.myInputChar.length <= 0)
           return; 
 
-       // FireinputLog.debug(this, "Send key: " + this.myInputChar + "  => IME engine");
+       FireinputLog.debug(this, "Send key: " + this.myInputChar + "  => IME engine");
        // FireinputLog.debug(this, "myIMEInputFieldFocusedStatus: " + this.myIMEInputFieldFocusedStatus); 
  
        // send to IME method to query the string 
@@ -2014,14 +2010,14 @@ var Fireinput =
        if(!this.myIME.canComposeNew())
           return; 
  
-       //  FireinputLog.debug(this, "Send key: " + this.myInputChar);
+       FireinputLog.debug(this, "validid key: " + result.validInputKey);
        if(result && result.charArray && result.charArray.length > 0 && 
           this.myInputChar.length > result.validInputKey.length)
        {
           var newvalue = this.myInputChar.substr(result.validInputKey.length, this.myInputChar.length); 
           this.insertCharToComposer(null, 1, "true");
           var idf = document.getElementById("fireinputField");
-	  //FireinputLog.debug(this,"newvalue:" + newvalue + ", idf.value: " + idf.value + ", this.myInputChar: " + this.myInputChar);
+	  FireinputLog.debug(this,"newvalue:" + newvalue + ", idf.value: " + idf.value + ", this.myInputChar: " + this.myInputChar);
           idf.value = newvalue + idf.value.replace(this.myInputChar, ""); 
           FireinputUtils.setCaretTo(idf, newvalue.length); 
           this.myInputChar = newvalue; 
