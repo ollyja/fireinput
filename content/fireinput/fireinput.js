@@ -539,7 +539,8 @@ var Fireinput =
        }
        else if(this.myIMESchema == WUBI_86 || 
                this.myIMESchema == WUBI_98 || 
-               this.myIMESchema == CANGJIE_5)
+               this.myIMESchema == CANGJIE_5 || 
+               this.myIMESchema == JAPANESE)
        {
           // we need to load table only if the current schema is not pinyin schema. Otherwise just set new schema 
           this.myIME = null; 
