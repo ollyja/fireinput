@@ -40,10 +40,17 @@ var FireinputLongTable =
 {
     debug: 0, 
 
+    // to hash based on first few words 
+    lookupHashTable: null, 
+
+    // long table hash to avoid string duplication 
     userLongTable: null, 
 
     // user current typing long table 
     typinglongTable: null, 
+
+    // is changed 
+    longTableChanged: false, 
 
     init: function()
     {
@@ -94,26 +101,40 @@ var FireinputLongTable =
 
     hashThisKey: function(key, value)
     {
-       if(this.userLongTable.hasItem(key))
+       if(this.lookupHashTable.hasItem(key))
        {
           var check = new RegExp("/^" + value + "/", "g");
-          if(!check.test(this.userLongTable.getItem(key)))
-             this.userLongTable.setItem(key, this.userLongTable.getItem(key) + "," + value);
+          if(!check.test(this.lookupHashTable.getItem(key)))
+             this.lookupHashTable.setItem(key, this.lookupHashTable.getItem(key) + "," + value);
        }
        else
-          this.userLongTable.setItem(key, value);
+          this.lookupHashTable.setItem(key, value);
          
     }, 
 
     hashLongTableLine: function(line)
     {
-       line = FireinputUnicode.getUnicodeString(line);
+       var wordArray = line.split(":"); 
+       var freq = 0; 
+       if(wordArray.length > 1)
+       {
+          line = wordArray[0]; 
+          freq = wordArray[1];
+       }
+  
+       
+       line = FireinputUnicode.getUnicodeString(line); 
+       if(this.userLongTable.hasItem(line))
+          return; 
+
+       this.userLongTable.setItem(line, freq); 
+
        if(line.length > 10)
        {
           // use first few chars as hash key 
           var key1 = line.substr(0, 1); 
           var key2 = line.substr(0, 2); 
-          var key3 = line.substr(0, 4); 
+          var key3 = line.substr(0, 3); 
           this.hashThisKey(key1, line);
           this.hashThisKey(key2, line);
           this.hashThisKey(key3, line);
@@ -134,6 +155,7 @@ var FireinputLongTable =
 
        var path = FireinputUtils.getAppRootPath();
        var datafile = fileHandler.getFileFromURLSpec(path + "/userlargetable.fireinput");
+       this.lookupHashTable = new FireinputHash();
        this.userLongTable = new FireinputHash();
 
        if(!datafile.exists())
@@ -155,21 +177,31 @@ var FireinputLongTable =
          
        this.hashLongTableLine(selectedText);
    
-       FireinputLongTableSaver.save(selectedText); 
+       this.longTableChanged = true; 
+       if(this.userLongTable.hasItem(selectedText))
+       {
+          var freq = this.userLongTable.getItem(selectedText); 
+          freq += 10; 
+          this.userLongTable.setItem(selectedText, freq); 
+       }
+       else 
+       {
+          this.userLongTable.setItem(selectedText, 10); 
+       }
 
        return true; 
     },
 
     getLongTableByKey: function(key)
     {
-       if(!this.userLongTable)
+       if(!this.lookupHashTable)
           return null; 
 
        for(var i=key.length; i>=1; i--)
        {
           var skey = key.substr(0, i); 
-          if(this.userLongTable.hasItem(skey))
-             return this.userLongTable.getItem(skey).split(","); 
+          if(this.lookupHashTable.hasItem(skey))
+             return this.lookupHashTable.getItem(skey).split(","); 
        }
 
        return null; 
@@ -242,7 +274,7 @@ var FireinputLongTable =
           hboxElement.setAttribute("id", elementId + "_hbox");
 
           var element = document.createElement("label");
-          element.setAttribute("value", "Ctrl+" + (i+1) + ".");
+          element.setAttribute("value", "Alt+" + (i+1) + ".");
           element.setAttribute("class", "largetablelabel"); 
          
           hboxElement.appendChild(element); 
@@ -276,6 +308,13 @@ var FireinputLongTable =
           return; 
        Fireinput.insertCharToTargetByValue(charstr); 
        Fireinput.hideAndCleanInput(); 
+       if(this.userLongTable.hasItem(charstr))
+       {
+          var freq = this.userLongTable.getItem(charstr); 
+          freq++; 
+          this.userLongTable.setItem(charstr, freq); 
+          this.longTableChanged = true; 
+       }
     },
 
     insertCharToTarget: function(pos)
@@ -291,6 +330,14 @@ var FireinputLongTable =
           return; 
        Fireinput.insertCharToTargetByValue(handle.getAttribute("value")); 
        Fireinput.hideAndCleanInput(); 
+       if(this.userLongTable.hasItem(handle.getAttribute("value")))
+       {
+          var freq = this.userLongTable.getItem(handle.getAttribute("value")); 
+          freq++; 
+          this.userLongTable.setItem(handle.getAttribute("value"), freq); 
+          this.longTableChanged = true; 
+       }
+          
     }, 
 
     // collect long table 
@@ -310,19 +357,19 @@ var FireinputLongTable =
              this.typinglongTable.insertTimes += 1; 
              if(this.typinglongTable.longTable.length > MaxSelectionLen)
              {
-                this.flushLongTable(); 
+                this.flush(); 
              }
 
           } 
           else 
           {
-             this.flushLongTable(); 
+             this.flush(); 
              this.typinglongTable = {target: target, insertTimes: 1, longTable: value};
           } 
        }
     }, 
  
-    flushLongTable: function()
+    flush: function()
     {
        if(!this.typinglongTable)
           return; 
@@ -330,10 +377,29 @@ var FireinputLongTable =
        if(this.typinglongTable.longTable.length > 5 && this.typinglongTable.insertTimes > 1)
        {
           this.hashLongTableLine(this.typinglongTable.longTable);
-          FireinputLongTableSaver.save(this.typinglongTable.longTable);
+          this.longTableChanged = true; 
+          if(this.userLongTable.hasItem(this.typinglongTable.longTable))
+          {
+             var freq = this.userLongTable.getItem(this.typinglongTable.longTable);       
+             freq += 1; 
+             this.userLongTable.setItem(this.typinglongTable.longTable, freq);       
+          }
+          else
+          {
+             this.userLongTable.setItem(this.typinglongTable.longTable, 1);
+          }
        }        
 
        this.typinglongTable = null; 
+    }, 
+  
+    flushLongTable: function()
+    {
+       if(!this.longTableChanged)
+          return; 
+
+       if(this.userLongTable)
+          FireinputLongTableSaver.save(this.userLongTable); 
     }
- 
+    
 }; 

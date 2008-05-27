@@ -37,6 +37,7 @@ const prefNames =
 [
     {name: "interfaceLanguage", type: "STRING"},
     {name: "defaultInputMethod", type: "STRING"},
+    {name: "defaultInputEncoding", type: "STRING"},
     {name: "saveHistory", type: "BOOL"},
     {name: "autoInsert", type: "BOOL"},
     {name: "fireinputOpenKeyBinding", type: "STRING"},
@@ -59,6 +60,7 @@ const prefInterfaceUI = [
             {id: "fireinputInterfaceLanguage", strKey: "fireinput.choose.interface.language", attribute: "label"},
             {id: "fireinputLanguageChinese", strKey: "fireinput.chinese.label", attribute: "label"},           
             {id: "fireinputLanguageEnglish", strKey: "fireinput.english.label", attribute: "label"},           
+            {id: "fireinputLanguageJapanese", strKey: "fireinput.japanese.label", attribute: "label"},           
             {id: "imePinyinQuan", strKey: "fireinput.pinyin.quan.label", attribute: "label"},           
             {id: "imePinyinShuangZiGuang", strKey: "fireinput.pinyin.shuang.ziguang.label", attribute: "label"},
             {id: "imePinyinShuangMS", strKey: "fireinput.pinyin.shuang.ms.label", attribute: "label"},
@@ -67,6 +69,7 @@ const prefInterfaceUI = [
             {id: "imeWubi86", strKey: "fireinput.wubi86.label", attribute: "label"},
             {id: "imeWubi98", strKey: "fireinput.wubi98.label", attribute: "label"},
             {id: "imeCangjie5", strKey: "fireinput.cangjie5.label", attribute: "label"},
+            {id: "imeJapanese", strKey: "fireinput.japanese.label", attribute: "label"},
             {id: "fireinputAMB", strKey: "fireinput.pref.amb.label", attribute: "label"},
             {id: "fireinputOpenKeyBinding", strKey: "fireinput.pref.open.hotkey", attribute: "label"},
             {id: "fireinputOpenKeyBinding", strKey: "fireinput.pref.open.hotkey.tooltip", attribute: "tooltiptext"},
@@ -121,6 +124,9 @@ function fireinputPrefGetDefault(option)
        break; 
        case "defaultInputMethod": 
           return FireinputPrefDefault.getSchema(); 
+       break; 
+       case "defaultInputEncoding": 
+          return FireinputPrefDefault.getInputEncoding(); 
        break; 
        case "saveHistory": 
           return FireinputPrefDefault.getSaveHistory(); 
@@ -288,6 +294,18 @@ var FireinputPrefDefault = {
        { }
 
        return defaultMethod; 
+    },
+
+    getInputEncoding: function()
+    {
+       var defaultEncoding = ENCODING_ZH; 
+       try {
+          defaultEncoding = FireinputPref.getPref("defaultInputEncoding", "STRING");
+       }
+       catch(e)
+       { }
+
+       return defaultEncoding;
     },
  
     getSaveHistory: function()

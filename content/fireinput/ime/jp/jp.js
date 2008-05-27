@@ -18,7 +18,6 @@
  *
  * Contributor(s):
  *     OllyJa <ollyja@gmail.com>
- *     Chun-Kwong Wong <chunkwong.wong@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,15 +33,15 @@
  *
  * ***** END LICENSE BLOCK *****
  */
-var Cangjie = function(){};
+var Japanese = function(){};
 
-Cangjie.prototype = extend(new FireinputIME(),
+Japanese.prototype = extend(new FireinputIME(),
 {
     // 0 to disable debug or non zero to enable debug
     debug: 0,
 
     // the name of IME
-    name: IME_CANGJIE,
+    name: IME_JAPANESE,
 
     // array to keep all matched words
     charArray: null,
@@ -53,11 +52,11 @@ Cangjie.prototype = extend(new FireinputIME(),
     // invalid input key
     validInputKey: null,
 
-    // the hash table for cangjie key=> word
-    keyCangjieHash: null,
+    // the hash table for key=> word
+    keyJapaneseHash: null,
 
-    // the hash table for cangjie word=>key for learning
-    wordCangjieHash: null,
+    // the hash table for word=>key for learning
+    wordJapaneseHash: null,
 
     // the hash table for user frequency
     userCodeHash: null,
@@ -69,7 +68,7 @@ Cangjie.prototype = extend(new FireinputIME(),
     letterConverter: null,
 
     // pinyin Schema
-    cangjieSchema: null,
+    japaneseSchema: null,
 
     // encoding mode
     encodingMode: ENCODING_ZH,
@@ -83,11 +82,9 @@ Cangjie.prototype = extend(new FireinputIME(),
     // the entrance function to load all related tables
     loadTable: function()
     {
-       letterConverter = new FullLetterConverter();
-
        // setTimeout to not block firefox start
        var self = this;
-       setTimeout(function(){return self.loadCangjieTable();}, 500);
+       setTimeout(function(){return self.loadJapaneseTable();}, 500);
 
        // init encoding table
        FireinputEncoding.init();
@@ -100,10 +97,10 @@ Cangjie.prototype = extend(new FireinputIME(),
            return;
 
        // initKey:key=>word
-       this.keyCangjieHash.setItem(strArray[0],strArray[1]);
+       this.keyJapaneseHash.setItem(strArray[0],strArray[1]);
     },
 
-    loadCangjieTable: function()
+    loadJapaneseTable: function()
     {
        var ios = IOService.getService(Components.interfaces.nsIIOService);
        var fileHandler = ios.getProtocolHandler("file")
@@ -111,9 +108,9 @@ Cangjie.prototype = extend(new FireinputIME(),
 
        var path = this.getDataPath();
        var datafile = "";
-       if (this.cangjieSchema == CANGJIE_5)
+       if (this.japaneseSchema == JAPANESE)
        {
-	  datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
+	  datafile = fileHandler.getFileFromURLSpec(path + this.getJapaneseFile());
        }
 
        if (!datafile.exists())
@@ -122,7 +119,7 @@ Cangjie.prototype = extend(new FireinputIME(),
        	  return;
        }
 
-       this.keyCangjieHash = new FireinputHash();
+       this.keyJapaneseHash = new FireinputHash();
 
        var options =
        {
@@ -175,7 +172,7 @@ Cangjie.prototype = extend(new FireinputIME(),
        var fileHandler = ios.getProtocolHandler("file")
        	.QueryInterface(Components.interfaces.nsIFileProtocolHandler);
        var path = this.getDataPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
+       var datafile = fileHandler.getFileFromURLSpec(path + this.getJapaneseFile());
 
        if (datafile.exists())
        	  return true;
@@ -192,9 +189,9 @@ Cangjie.prototype = extend(new FireinputIME(),
        	.QueryInterface(Components.interfaces.nsIFileProtocolHandler);
        var path = this.getDataPath();
 
-       if (this.cangjieSchema == CANGJIE_5)
+       if (this.japaneseSchema == JAPANESE)
        {
-       	  datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
+       	  datafile = fileHandler.getFileFromURLSpec(path + this.getJapaneseFile());
        }
 
        if (datafile.exists())
@@ -211,7 +208,7 @@ Cangjie.prototype = extend(new FireinputIME(),
     setSchema: function(schema)
     {
        //FireinputLog.debug(this, "Set schema: " + schema);
-       this.cangjieSchema = schema;
+       this.japaneseSchema = schema;
     },
 
     getAllowedInputKey: function()
@@ -355,30 +352,30 @@ Cangjie.prototype = extend(new FireinputIME(),
 
        var keyInitial = key; 
 
-       if (! this.keyCangjieHash.hasItem(keyInitial))
+       if (! this.keyJapaneseHash.hasItem(keyInitial))
        	  return null;
 
        // only enable autoinsertion for 4 keys
        if (key.length >= 5)
        	this.autoInsertion = true;
 
-       var cangjieWordList = this.keyCangjieHash.getItem(keyInitial);
+       var japaneseWordList = this.keyJapaneseHash.getItem(keyInitial);
 
-       var cangjieWordArray = cangjieWordList.split(",");
+       var japaneseWordArray = japaneseWordList.split(",");
 
        wordArray = new Array();
 
-       for (var i = 0; i < cangjieWordArray.length; i ++)
+       for (var i = 0; i < japaneseWordArray.length; i ++)
        {
-       	var cangjieWord = cangjieWordArray[i].split("=>");
+       	var japaneseWord = japaneseWordArray[i].split("=>");
 
-       	if (cangjieWord[0].search(new RegExp("^" + key)))
+       	if (japaneseWord[0].search(new RegExp("^" + key)))
        	   continue;
 
        	var word = "";
        	try
        	{
-       	   word = cangjieWord[1].match(/[\D\.]+/g)[0];
+       	   word = japaneseWord[1].match(/[\D\.]+/g)[0];
        	}
        	catch(e) { }
 
@@ -398,15 +395,15 @@ Cangjie.prototype = extend(new FireinputIME(),
        	   /* use this way other than push to have better performance
        	    * http://aymanh.com/9-javascript-tips-you-may-not-know
        	    */
-       	   userArray[userArray.length] ={key: cangjieWord[0], word: word + ufreq.freq, encodedWord: encodedWord + ufreq.freq};
+       	   userArray[userArray.length] ={key: japaneseWord[0], word: word + ufreq.freq, encodedWord: encodedWord + ufreq.freq};
        	}
        	else
        	{
-      	   var freq = cangjieWord[1].match(/[\d\.]+/g); 
+      	   var freq = japaneseWord[1].match(/[\d\.]+/g); 
            if(freq) freq = freq[0];
            else freq = 0; 
 
-       	   wordArray[wordArray.length] = {key: cangjieWord[0], word: word+freq, encodedWord: encodedWord + freq};
+       	   wordArray[wordArray.length] = {key: japaneseWord[0], word: word+freq, encodedWord: encodedWord + freq};
        	}
        }
 

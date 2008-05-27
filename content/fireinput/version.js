@@ -56,7 +56,7 @@ var FireinputVersion =
        else
        {
           // keep in EN mode but leave it open 
-          Fireinput.setInputMode(ENCODING_EN);
+          Fireinput.setIMEMode(IME_MODE_EN);
        }
     }
 }; 

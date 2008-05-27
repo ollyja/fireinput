@@ -937,19 +937,19 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           if(word.length <= 0) 
              continue; 
 
+          var encodedWord = FireinputEncoding.getEncodedString(word, this.encodingMode);
+
           // make sure the same word won't show up twice 
-          if(typeof(wordList[word]) != 'undefined')
+          if(typeof(wordList[encodedWord]) != 'undefined')
              continue; 
 
-          wordList[word] = 1; 
+          wordList[encodedWord] = 1; 
 
          //FireinputLog.debug(this,"word: " + FireinputUnicode.getUnicodeString(word));
          // FireinputLog.debug(this,"oldIndex: " + oldIndex +", currentIndex: " + currentIndex);
           oldIndex++; 
           if(oldIndex <= currentIndex)
              continue; 
-
-          var encodedWord = FireinputEncoding.getEncodedString(word, this.encodingMode);
 
           if(this.userCodeHash && this.userCodeHash.hasItem(word))
           {
@@ -1109,18 +1109,17 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           //FireinputLog.debug(this, "phraseKeyValue: " + FireinputUnicode.getUnicodeString(phraseKeyValue));
           if(shouldAdd == 1)
           { 
-
-	     if(typeof(phraseList[phrase]) == 'undefined')
+             var encodedWord = FireinputEncoding.getEncodedString(phrase, this.encodingMode);
+	     if(typeof(phraseList[encodedWord]) == 'undefined')
              {
 
-                phraseList[phrase] = ""; 
+                phraseList[encodedWord] = ""; 
 
                 oldIndex++; 
                 if(oldIndex <= currentIndex)
                    continue; 
 
                 var freq = phraseKeyValue[1].match(/[\d\.]+/g)[0];   
-                var encodedWord = FireinputEncoding.getEncodedString(phrase, this.encodingMode);
 
                 if(this.userCodeHash && this.userCodeHash.hasItem(phrase))
                 {

@@ -49,12 +49,12 @@ var FireinputLongTableSaver =
     },
 
 
-    save: function(list, mode)
+    save: function()
     {
-       var args = list; 
+       var args = arguments; 
 
        if(!args || args.length <= 0)
-          return false; 
+          return; 
  
        // FIXME: the backfile is required for safe writing 
 
@@ -64,10 +64,7 @@ var FireinputLongTableSaver =
        var file = this.init(); 
        // use 0x02 | 0x10 to open file for appending.
        // write, create, truncate
-       if(mode && mode == 'overwrite')
-          fos.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
-       else 
-          fos.init(file, 0x02 | 0x08 | 0x10, 0664, 0);
+       fos.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
 
        var charset = "UTF-8";
        var cos = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
@@ -75,15 +72,53 @@ var FireinputLongTableSaver =
 
        // This assumes that fos is the nsIOutputStream you want to write to
        cos.init(fos, charset, 0, 0x0000);
-       if(typeof(args) == "string")
-       { 
-          cos.writeString(args);
-          cos.writeString("\n");
-       }
-       cos.close();
+ 
+       var self = this; 
+  
+       // if the user saved list is growing up quickly, the filter needs to be enable to remove 
+       // the less frequent long tables 
+       for(var i=args.length-1; i>=0; i--)
+       {
+          if(!args[i])
+             continue; 
+          // the mininum list we keep is to have 500 entries 
+          var filter = parseInt(args[i].length/500) -1; 
+          filter = filter > 0 ? filter : 0; 
 
-       return true; 
-    }
+          var wStr = []; 
+          args[i].foreach(function(key, value) {
+                          var compactStr = self.getString(key, value, filter);
+                          if(compactStr)
+                             wStr[wStr.length] = compactStr; 
+
+                          if(wStr.length >= 20)
+                          {
+                              cos.writeString(wStr.join("")); 
+                              wStr.length = 0; 
+                          }
+          }); 
+          // write all that are left
+          if(wStr.length >0)
+          {
+              cos.writeString(wStr.join("")); 
+              wStr.length = 0; 
+          }
+       }
+
+       cos.close();
+    },
    
+    getString: function(key, value, filter)
+    {
+       // if the used times is smaller than filter 
+       // it will be skipped to save some memory 
+       if(value < filter)
+       {
+           return null; 
+       }
+
+       return key +":" + value + "\n"; 
+    }  
+
 }; 
 

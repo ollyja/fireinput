@@ -192,12 +192,12 @@ var FireinputHelp =
 
        element = document.getElementById("fireinputNewVersion");
        var msg = FireinputUtils.getLocaleString("fireinput.help.newrelease.text" + defaultLanguage);
-       msg.replace(/%VERSION%/, version); 
+       msg = msg.replace(/%VERSION%/, version); 
        element.setAttribute("label", msg); 
 
        
        element = document.getElementById("fireinputNewVersionPanel");
-       msg.style.display = "";
+       element.style.display = "";
     }   
 }; 
 

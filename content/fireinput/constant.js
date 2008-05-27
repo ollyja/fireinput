@@ -40,27 +40,30 @@ const prefDomain = "extensions.fireinput";
 // Language 
 const LANGUAGE_EN   = ""; // don't have to specify; match properties file  
 const LANGUAGE_ZH   = "zh"; 
+const LANGUAGE_JP   = "jp"; 
 
 // IME 
 const IME_SMART_PINYIN = "Smart Pinyin"; 
 const IME_WUBI         = "Wubi"; 
 const IME_CANGJIE      = "Cangjie"
+const IME_JAPANESE     = "Japanese"
 
 // Smart Pinyin Keyboard schema 
-const SMART_PINYIN          = "0"; 
-const ZIGUANG_SHUANGPIN     = "1"; 
-const MS_SHUANGPIN          = "2"; 
-const CHINESESTAR_SHUANGPIN = "3"; 
-const SMARTABC_SHUANGPIN    = "4"; 
-const WUBI_86               = "5"; 
-const WUBI_98               = "6"; 
-const CANGJIE_5             = "7";
+const SMART_PINYIN          = "1"; 
+const ZIGUANG_SHUANGPIN     = "2"; 
+const MS_SHUANGPIN          = "3"; 
+const CHINESESTAR_SHUANGPIN = "4"; 
+const SMARTABC_SHUANGPIN    = "5"; 
+const WUBI_86               = "6"; 
+const WUBI_98               = "7"; 
+const CANGJIE_5             = "8";
+const JAPANESE              = "9";
 
 // Pinyin key type 
-const KEY_FINAL   = 0;
-const KEY_INITIAL = 1;
-const KEY_FULL    = 2;
-const KEY_SWING   = 3;
+const KEY_FINAL   = 1;
+const KEY_INITIAL = 2;
+const KEY_FULL    = 3;
+const KEY_SWING   = 4;
 
 // encoding 
 const ENCODING_ZH   = "ZH";

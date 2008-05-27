@@ -391,12 +391,12 @@ Wubi.prototype =  extend(new FireinputIME(),
              continue; 
 
 
-          if(typeof(wordList[word]) != 'undefined')
+          var encodedWord = FireinputEncoding.getEncodedString(word, this.encodingMode);
+          if(typeof(wordList[encodedWord]) != 'undefined')
              continue; 
 
-          var encodedWord = FireinputEncoding.getEncodedString(word, this.encodingMode);
+          wordList[encodedWord] = 1; 
 
-          wordList[word] = 1; 
           if(this.userCodeHash && this.userCodeHash.hasItem(word))
           {
              var ufreq = this.userCodeHash.getItem(word);
