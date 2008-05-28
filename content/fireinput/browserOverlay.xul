@@ -30,7 +30,6 @@
 <script type="application/x-javascript" src="chrome://fireinput/content/ime/smartPinyin/smartPinyin.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/ime/wubi/wubi.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/ime/cangjie/cangjie.js"/>
-<script type="application/x-javascript" src="chrome://fireinput/content/ime/jp/jp.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/keybinding.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/fireinputPrefs.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/fireinput.js"/>
@@ -161,8 +160,6 @@
                             oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
                         <menuitem id="imeCangjie5" type="radio" label="" value="8"
                             oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
-                        <menuitem id="imeJapanese" type="radio" label="" value="9"
-                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
                       </menupopup>
                    </menu>
 
@@ -230,7 +227,6 @@
               <menuitem id="menuWubi86" label="" value="6" oncommand="fireinputPrefSave('defaultInputMethod', 6)"/>
               <menuitem id="menuWubi98" label="" value="7" oncommand="fireinputPrefSave('defaultInputMethod', 7)"/>
               <menuitem id="menuCangjie5" label="" value="8" oncommand="fireinputPrefSave('defaultInputMethod', 8)"/>
-              <menuitem id="menuJapanese" label="" value="9" oncommand="fireinputPrefSave('defaultInputMethod', 9)"/>
           </menupopup>
         </toolbarbutton>
         <toolbarbutton id="fireinputToggleIMEButton" label="" tooltiptext="" oncommand="Fireinput.toggleInputMode();"/>
@@ -304,8 +300,6 @@
                             oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
                         <menuitem id="imeCangjie5" type="radio" label="" value="8"
                             oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
-                        <menuitem id="imeJapanese" type="radio" label="" value="9"
-                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
                       </menupopup>
                    </menu>
 
@@ -373,7 +367,6 @@
               <menuitem id="menuWubi86" label="" value="6" oncommand="fireinputPrefSave('defaultInputMethod', 6)"/>
               <menuitem id="menuWubi98" label="" value="7" oncommand="fireinputPrefSave('defaultInputMethod', 7)"/>
               <menuitem id="menuCangjie5" label="" value="8" oncommand="fireinputPrefSave('defaultInputMethod', 8)"/>
-              <menuitem id="menuJapanese" label="" value="9" oncommand="fireinputPrefSave('defaultInputMethod', 9)"/>
           </menupopup>
         </toolbarbutton>
         <toolbarbutton id="fireinputToggleIMEButton" label="" tooltiptext="" oncommand="Fireinput.toggleInputMode();"/>
@@ -430,9 +423,6 @@
                    option="interfaceLanguage"/>
 
                  <menuitem id="fireinputLanguageEnglish" type="radio" label="" value=""
-                   oncommand="fireinputPrefSave(this)"
-                   option="interfaceLanguage"/>
-                 <menuitem id="fireinputLanguageJapanese" type="radio" label="" value=""
                    oncommand="fireinputPrefSave(this)"
                    option="interfaceLanguage"/>
               </menupopup>

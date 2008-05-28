@@ -77,11 +77,6 @@ FireinputIME.prototype =
        return "/chrome/data/cangjie5_table";
     },
 
-    getJapaneseFile: function()
-    {
-       return "/chrome/data/japanese_table";
-    },
-
     getUserDataFile: function()
     {
        return "/userwordtable.fireinput";
