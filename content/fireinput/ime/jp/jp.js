@@ -213,7 +213,7 @@ Japanese.prototype = extend(new FireinputIME(),
 
     getAllowedInputKey: function()
     {
-       return "abcdefghijklmnopqrstuvwxyz";
+       return "aiuveokgsztdnhfbpmyrwAIUEOKYW";
     },
 
     setEncoding: function(encoding)
@@ -350,17 +350,18 @@ Japanese.prototype = extend(new FireinputIME(),
 
        if (! key) return null;
 
-       var keyInitial = key; 
+       var keyInitial = key.substring(0, 1);
+       if(key.length >=3)
+          keyInitial = key.substring(0, 3);
 
        if (! this.keyJapaneseHash.hasItem(keyInitial))
        	  return null;
 
        // only enable autoinsertion for 4 keys
-       if (key.length >= 5)
+       if (key.length >= 4)
        	this.autoInsertion = true;
 
        var japaneseWordList = this.keyJapaneseHash.getItem(keyInitial);
-
        var japaneseWordArray = japaneseWordList.split(",");
 
        wordArray = new Array();

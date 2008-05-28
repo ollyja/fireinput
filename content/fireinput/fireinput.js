@@ -64,9 +64,10 @@ var imeInterfaceUI = [
 
 
 var imeInputModeValues = [ 
-            {name: ENCODING_ZH, label: "fireinput.method.chinese.value"},
-            {name: ENCODING_BIG5, label: "fireinput.method.big5.value"},
-            {name: ENCODING_EN, label: "fireinput.method.english.value"}
+            {name: ENCODING_ZH, enabled: true, label: "fireinput.method.chinese.value"},
+            {name: ENCODING_BIG5, enabled: true, label: "fireinput.method.big5.value"},
+            {name: ENCODING_JP, enabled: true, label: "fireinput.method.japanese.value"},
+            {name: ENCODING_EN, enabled: true, label: "fireinput.method.english.value"}
 ]; 
 
             
@@ -280,6 +281,7 @@ var Fireinput =
        var jime = new Japanese();
        if(!jime.isEnabled())
        {
+          this.disableEncodingMode(ENCODING_JP);
           var handle = document.getElementById("menuJapanese");
           if(handle) handle.style.display = "none";
           var handle = document.getElementById("imeJapanese");
@@ -317,6 +319,12 @@ var Fireinput =
           var handle = document.getElementById("imePinyinShuangSmartABC"); 
           if(handle) handle.style.display = "none"; 
        }
+       if(!wime.isEnabled() && !cime.isEnabled() && !sime.isEnabled())
+       {
+          this.disableEncodingMode(ENCODING_ZH);
+          this.disableEncodingMode(ENCODING_BIG5);
+       }
+          
     },
 
     loadIMEPrefByID: function(id, strKey, attribute)
@@ -573,9 +581,51 @@ var Fireinput =
        }
 
        // otherwise return first one 
-       return imeInputModeValues[0].label; 
+       return imeInputModeValues[imeInputModeValues.length-1].label; 
 
     },
+
+    getNextEncodingMode: function(mode)
+    {
+       var foundit = 0; 
+       var bmodelist = []; 
+       var amodelist = []; 
+
+       for(var i=0; i < imeInputModeValues.length; i++)
+       {
+          if(mode == imeInputModeValues[i].name)
+          {
+             foundit = 1; 
+             continue; 
+          }
+           
+          if(imeInputModeValues[i].enabled == false)
+             continue; 
+
+          if(!foundit)
+          {
+             bmodelist[bmodelist.length] = imeInputModeValues[i]; 
+          }
+          else
+          {
+             amodelist[amodelist.length] = imeInputModeValues[i]; 
+          }
+       }
+
+       return amodelist.length ? amodelist[0].name : (bmodelist.length ? bmodelist[0].name : ENCODING_EN); 
+    },
+
+    disableEncodingMode: function(mode)
+    {
+       for(var i=0; i < imeInputModeValues.length; i++)
+       {
+          if(mode == imeInputModeValues[i].name)
+          {
+             imeInputModeValues[i].enabled = false; 
+             break; 
+          }
+       }
+    }, 
 
     getIMENameString: function(value)
     {
@@ -654,6 +704,7 @@ var Fireinput =
        {
           case ENCODING_ZH:
           case ENCODING_BIG5:
+          case ENCODING_JP:
              this.myInputMode = mode; 
              this.myIMEMode = IME_MODE_ZH; 
              this.myIME.setEncoding(mode);
@@ -672,10 +723,16 @@ var Fireinput =
     {
        if(this.myIMEMode == IME_MODE_EN)
        { 
-          this.setInputMode(ENCODING_ZH);
-          fireinputPrefSave("defaultInputEncoding", ENCODING_ZH);
+          var encodingMode = this.getNextEncodingMode(this.myIMEMode); 
+          this.setInputMode(encodingMode);
+          fireinputPrefSave("defaultInputEncoding", encodingMode);
           return; 
        }
+ 
+       var nextMode = this.getNextEncodingMode(this.myInputMode); 
+       this.setInputMode(nextMode); 
+       fireinputPrefSave("defaultInputEncoding", nextMode); 
+       return; 
 
        switch(this.myInputMode)
        {
@@ -686,6 +743,10 @@ var Fireinput =
           break; 
 
           case ENCODING_BIG5:
+              this.setInputMode(ENCODING_JP); 
+              fireinputPrefSave("defaultInputEncoding", ENCODING_JP);
+          break; 
+          case ENCODING_JP:
               this.setInputMode(ENCODING_EN); 
           break; 
           default: 
@@ -1366,8 +1427,8 @@ var Fireinput =
           }
 	}
 
-       // small case a-z 
-       if(this.myAllowInputKey.indexOf(key) >= 0 && !event.shiftKey)
+       // check whether the key is allowed for input 
+       if(this.myAllowInputKey.indexOf(key) >= 0)
        { 
           // don't relay on input event. It's slow. 
           // return if compose is enabled 

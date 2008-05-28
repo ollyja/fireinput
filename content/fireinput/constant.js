@@ -69,6 +69,7 @@ const KEY_SWING   = 4;
 const ENCODING_ZH   = "ZH";
 const ENCODING_BIG5 = "BIG5";
 const ENCODING_EN   = "EN";
+const ENCODING_JP   = "JP"; 
 
 // IME mode 
 const IME_MODE_ZH   = "ZH";
