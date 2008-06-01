@@ -142,8 +142,16 @@ Cangjie.prototype = extend(new FireinputIME(),
        if (strArray.length < 4) return;
 
        // user data format: word: freq key initKey
+       // new user data format: schema: word: freq key initKey  
+       if(isNaN(parseInt(strArray[0])))
+       {
+          this.userCodeHash.setItem(strArray[0], {freq: strArray[1], key: strArray[2], initKey: strArray[3], schema: this.cangjieSchema});
+       }
+       else if(strArray[0] == this.wubiSchema)
+       {
+          this.userCodeHash.setItem(strArray[1], {freq: strArray[2], key: strArray[3], initKey: strArray[4], schema: this.cangjieSchema});
+       }
 
-       this.userCodeHash.setItem(strArray[0], {freq: strArray[1], key: strArray[2], initKey: strArray[3]});
     },
 
     loadUserTable: function()
@@ -480,7 +488,7 @@ Cangjie.prototype = extend(new FireinputIME(),
 
        freq = Math.round(newfreq) + parseInt(freq);
 
-       this.userCodeHash.setItem(chars, {freq: freq, key: key, initKey: initKey});
+       this.userCodeHash.setItem(chars, {freq: freq, key: key, initKey: initKey, schema: this.cangjieSchema});
 
        this.userTableChanged = true;
 

@@ -1465,8 +1465,19 @@ var Fireinput =
              // only one is allowed
              if(idf.value.length > 0 && idf.value.substr(idf.value.length-1, 1) != "'")
 	     {  
-                this.myInputChar += key; 
-                idf.value += key;
+                if(idf.selectionEnd < idf.value.length)
+                {
+                   var selectionEnd = idf.selectionEnd;
+                   var fvalue = idf.value.substring(0, selectionEnd) + key;
+                   idf.value = fvalue + idf.value.substring(selectionEnd, idf.value.length);
+                   this.myInputChar = fvalue;
+                   FireinputUtils.setCaretTo(idf, selectionEnd+1);
+                }
+                else
+                {
+                   this.myInputChar += key; 
+                   idf.value += key;
+                }
                 return; 
              }
           }

@@ -120,7 +120,8 @@ var FireinputSaver =
            return null; 
        }
 
-       var str = key; 
+       var str = value.schema; 
+       str += ":" + key; 
        str += ":" + value.freq; 
        str += ":" + value.key; 
        str += ":" + value.initKey; 

@@ -239,22 +239,42 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           return;
 
        // user data format: word: freq key initKey 
-
-       var word = strArray[0]; 
-       var freq = strArray[1]; 
-       var key = strArray[2].replace(/^\s+|\s+$/g, ''); 
-       var initKey = strArray[3].replace(/^\s+|\s+$/g, ''); 
+       // new user data format: schema: word: freq key initKey
+       var word = ""; 
+       var freq = ""; 
+       var key = ""; 
+       var initKey = ""; 
        var newPhrase = false; 
-       if(strArray.length > 4 && strArray[4] == "1")
-           newPhrase = true; 
+      
+       var schema = parseInt(strArray[0]); 
+       if(isNaN(schema))
+       {
+          word = strArray[0]; 
+          freq = strArray[1]; 
+          key = strArray[2].replace(/^\s+|\s+$/g, ''); 
+          initKey = strArray[3].replace(/^\s+|\s+$/g, ''); 
+          if(strArray.length > 4 && strArray[4] == "1")
+             newPhrase = true; 
+       }
+       else if(schema <= 5) // everything for pinyin, no matter full or shuang 
+       {
+          word = strArray[1]; 
+          freq = strArray[2]; 
+          key = strArray[3].replace(/^\s+|\s+$/g, ''); 
+          initKey = strArray[4].replace(/^\s+|\s+$/g, ''); 
+          if(strArray.length > 5 && strArray[5] == "1")
+             newPhrase = true; 
+       }
+       else
+          return; 
 
        //FIXME: We want to update the codeHash and phraseHash instead of keep it in user hash 
        if(newPhrase)
        {
-          this.userCodeHash.setItem(word, {freq: freq, key: key, initKey: initKey, newPhrase: newPhrase});
+          this.userCodeHash.setItem(word, {freq: freq, key: key, initKey: initKey, schema: this.pinyinSchema.getSchema(), newPhrase: newPhrase});
        }
        else  
-          this.userCodeHash.setItem(word, {freq: freq, key: key, initKey: initKey});
+          this.userCodeHash.setItem(word, {freq: freq, key: key, initKey: initKey, schema: this.pinyinSchema.getSchema()});
 
 
        this.updateUserCodeValue(key, initKey, word, freq);
@@ -1226,9 +1246,9 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        freq = Math.round(newfreq) + parseInt(freq); 
 
        if(newPhrase)
-          this.userCodeHash.setItem(chars, {freq: freq, key: key, initKey: initKey, newPhrase: newPhrase});
+          this.userCodeHash.setItem(chars, {freq: freq, key: key, initKey: initKey, schema: this.pinyinSchema.getSchema(), newPhrase: newPhrase});
        else 
-          this.userCodeHash.setItem(chars, {freq: freq, key: key, initKey: initKey});
+          this.userCodeHash.setItem(chars, {freq: freq, key: key, initKey: initKey, schema: this.pinyinSchema.getSchema()});
 
        // update phrase hash or code hash. Always to add it at the beginning 
        // ignore if it's new Phrase since it's always handled by storeUserPhrase 
