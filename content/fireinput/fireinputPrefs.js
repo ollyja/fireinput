@@ -44,7 +44,8 @@ const prefNames =
     {name: "firstrun",type: "STRING"},
     {name: "IMEBarPosition", type: "STRING"},
     {name: "themeID", type: "STRING"},
-    {name: "updateFreq", type: "BOOL"}
+    {name: "updateFreq", type: "BOOL"},
+    {name: "autoLoad", type: "BOOL"}
 ];
 
 const prefInterfaceUI = [ 
@@ -57,6 +58,7 @@ const prefInterfaceUI = [
             {id: "fireinputDefaultInputMethod", strKey: "fireinput.pref.input.method", attribute: "label"},           
             {id: "saveHistory", strKey: "fireinput.pref.save.history", attribute: "label"},           
             {id: "updateFreq", strKey: "fireinput.pref.update.freq", attribute: "label"},           
+            {id: "autoLoad", strKey: "fireinput.pref.auto.load", attribute: "label"},           
             {id: "fireinputInterfaceLanguage", strKey: "fireinput.choose.interface.language", attribute: "label"},
             {id: "fireinputLanguageChinese", strKey: "fireinput.chinese.label", attribute: "label"},           
             {id: "fireinputLanguageEnglish", strKey: "fireinput.english.label", attribute: "label"},           
@@ -146,6 +148,9 @@ function fireinputPrefGetDefault(option)
        break; 
        case "updateFreq": 
           return FireinputPrefDefault.getUpdateFreq(); 
+       break; 
+       case "autoLoad": 
+          return FireinputPrefDefault.getAutoLoad(); 
        break; 
        default: 
           return 'undefined'; 
@@ -352,6 +357,22 @@ var FireinputPrefDefault = {
        { };
 
        return autoInsert;
+    },
+
+    getAutoLoad: function()
+    {
+       var autoLoad = true;
+       try {
+          var value = FireinputPref.getPref("autoLoad", "BOOL");
+          if(value == true)
+             autoLoad = true;
+          else
+             autoLoad = false;
+       }
+       catch(e)
+       { };
+
+       return autoLoad;
     },
 
     getOpenKeyBinding: function()

@@ -189,6 +189,9 @@
 
                    <menuitem id="saveHistory" label="" type="checkbox" checked="true"
                            oncommand="fireinputPrefSave(this)" option="saveHistory"/>
+
+                   <menuitem id="autoLoad" label="" type="checkbox" checked="true"
+                           oncommand="fireinputPrefSave(this)" option="autoLoad"/>
                 </menupopup>
               </menu>
 
@@ -329,6 +332,9 @@
 
                    <menuitem id="saveHistory" label="" type="checkbox" checked="true"
                            oncommand="fireinputPrefSave(this)" option="saveHistory"/>
+
+                   <menuitem id="autoLoad" label="" type="checkbox" checked="true"
+                           oncommand="fireinputPrefSave(this)" option="autoLoad"/>
                 </menupopup>
               </menu>
 
