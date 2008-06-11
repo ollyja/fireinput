@@ -105,7 +105,7 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     loadWubiTable: function()
     {
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
@@ -155,7 +155,7 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     loadUserTable: function()
     {
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
@@ -176,7 +176,7 @@ Wubi.prototype =  extend(new FireinputIME(),
     {
        if(this.engineDisabled)
           return false; 
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
@@ -197,7 +197,7 @@ Wubi.prototype =  extend(new FireinputIME(),
     {
        if(this.engineDisabled)
           return false;
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 

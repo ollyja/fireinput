@@ -105,7 +105,7 @@ Cangjie.prototype = extend(new FireinputIME(),
 
     loadCangjieTable: function()
     {
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
            .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
@@ -156,7 +156,7 @@ Cangjie.prototype = extend(new FireinputIME(),
 
     loadUserTable: function()
     {
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
        	.QueryInterface(Components.interfaces.nsIFileProtocolHandler);
        var path = FireinputUtils.getAppRootPath();
@@ -179,7 +179,7 @@ Cangjie.prototype = extend(new FireinputIME(),
     {
        if (this.engineDisabled) return false;
 
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
        	.QueryInterface(Components.interfaces.nsIFileProtocolHandler);
        var path = this.getDataPath();
@@ -195,7 +195,7 @@ Cangjie.prototype = extend(new FireinputIME(),
     {
        if (this.engineDisabled) return false;
 
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
        	.QueryInterface(Components.interfaces.nsIFileProtocolHandler);
        var path = this.getDataPath();

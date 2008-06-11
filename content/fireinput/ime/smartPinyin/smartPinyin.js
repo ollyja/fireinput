@@ -120,7 +120,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     loadPinyinTable: function()
     {
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
@@ -156,7 +156,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     loadPinyinPhrase: function()
     {
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
@@ -282,7 +282,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     loadUserTable: function()
     {
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
@@ -303,7 +303,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     {
        if(this.engineDisabled)
           return false; 
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
@@ -667,7 +667,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        {
           for(var i=0; i<this.currLookupEnv.keyArray.length; i++)
           {
-               var tmpCharArray = this.codeLookup(keyArray[i], keyMatch, charArray.length);
+               var tmpCharArray = this.codeLookup(this.currLookupEnv.keyArray[i], this.currLookupEnv.keyMatch, charArray.length);
                if(nextCharArray == null)
                {
                    nextCharArray = tmpCharArray;
@@ -685,7 +685,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
            arrayInsert(charArray, charArray.length, nextCharArray);
        }
    
-       FireinputLog.debug(this,"charArray: " + this.getKeyWord(charArray));
+       // FireinputLog.debug(this,"charArray: " + this.getKeyWord(charArray));
 
     }, 
 

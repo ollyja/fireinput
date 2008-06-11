@@ -36,10 +36,6 @@
 
 // Constants
 
-const IOService = Components.classes["@mozilla.org/network/io-service;1"];
-const StreamLoader = Components.classes["@mozilla.org/network/stream-loader;1"];
-const ScriptableInputStream = Components.classes["@mozilla.org/scriptableinputstream;1"];
-
 var FireinputStream = 
 {
     loadData: function(url)
@@ -50,7 +46,7 @@ var FireinputStream =
 
     readLine: function(url)
     {
-       var ioService = IOService.getService(Components.interfaces.nsIIOService);
+       var ioService = FireinputXPC.getIOService(); 
 
        var channel;
        var stream;
@@ -67,7 +63,7 @@ var FireinputStream =
 
        try
        {
-          var sis = ScriptableInputStream.getService(Components.interfaces.nsIScriptableInputStream); 
+          var sis = FireinputXPC.getService("@mozilla.org/scriptableinputstream;1", "nsIScriptableInputStream");
           sis.init(stream);
 
           var segments = [];
@@ -93,7 +89,7 @@ var FireinputStream =
 
     loadDataAsync: function(url, user)
     {
-       var ioService = IOService.getService(Components.interfaces.nsIIOService);
+       var ioService = FireinputXPC.getIOService(); 
 
        var uri = ioService.newFileURI(url);
        var channel = ioService.newChannelFromURI(uri);
@@ -117,7 +113,7 @@ var FireinputStream =
 
     loadXHTMLDataAsync: function(url, user)
     {
-       var ioService = IOService.getService(Components.interfaces.nsIIOService);
+       var ioService = FireinputXPC.getIOService(); 
 
        var uri = ioService.newFileURI(url);
        var channel = ioService.newChannelFromURI(uri);
@@ -185,7 +181,7 @@ StreamObserver.prototype =
 
     onDataAvailable: function(request, context, inStr, sourceOffset, count)
     {
-       var sis = ScriptableInputStream.createInstance(Components.interfaces.nsIScriptableInputStream);
+       var sis = FireinputXPC.createInstance("@mozilla.org/scriptableinputstream;1", "nsIScriptableInputStream");
        sis.init(inStr);
        if(this.dataType == DATA_XML)
           this.processXMLData(this.data.join("") + sis.read(count));

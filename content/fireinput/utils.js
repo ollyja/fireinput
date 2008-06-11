@@ -34,35 +34,53 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-// Preference handling 
-const CC = Components.classes;
-const CR = Components.results;
+var FireinputXPC = 
+{
+    CC: function(cName)
+    {
+       return Components.classes[cName];
+    },
 
-const PrefService = CC["@mozilla.org/preferences-service;1"];
-const EnvService = CC["@mozilla.org/process/environment;1"];
-const UnicodeService = CC["@mozilla.org/intl/scriptableunicodeconverter"]; 
+    CI: function(ifaceName)
+    {
+       return Components.interfaces[ifaceName];
+    },
 
-const LocaleService = CC["@mozilla.org/intl/nslocaleservice;1"]; 
-const StringBundleService = CC["@mozilla.org/intl/stringbundle;1"]; 
-const OSService = CC["@mozilla.org/network/protocol;1?name=http"]; 
+    getService: function(cName, ifaceName)
+    {
+       return this.CC(cName).getService(this.CI(ifaceName));
+    },
 
-const nsISelectionPrivate = Components.interfaces.nsISelectionPrivate;
-const nsISelectionController = Components.interfaces.nsISelectionController;
+    createInstance: function(cName, ifaceName)
+    {
+       return this.CC(cName).createInstance(this.CI(ifaceName));
+    },
 
-var   gPref = PrefService.getService(Components.interfaces.nsIPrefBranch);
-var   gEnv = EnvService.getService(Components.interfaces.nsIEnvironment);
-var   gUnicode = UnicodeService.getService(Components.interfaces.nsIScriptableUnicodeConverter); 
-var   gOS = OSService.getService(Components.interfaces.nsIHttpProtocolHandler);
+    QueryInterface: function(obj, iface)
+    {
+       return obj.QueryInterface(iface);
+    },
+ 
+    getIOService: function()
+    {
+       return this.getService("@mozilla.org/network/io-service;1", "nsIIOService");
+    } 
+ 
+    
+}; 
+
 
 var FireinputEnv = 
 {
     getEnv: function(name)
     {
+       var gEnv = FireinputXPC.getService("@mozilla.org/process/environment;1", "nsIEnvironment");
        return gEnv.get(name);
     },
 
     getOS: function()
     {
+       var gOS = FireinputXPC.getService("@mozilla.org/network/protocol;1?name=http", "nsIHttpProtocolHandler");
        var oscpu = gOS.oscpu; 
        if(/linux/i.test(oscpu))
           return "Linux"; 
@@ -97,6 +115,7 @@ var FireinputPref =
     
     getPref: function(name, type)
     {
+       var gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
        var prefName = prefDomain + "." + name;
 
        if(type == 'undefined')
@@ -114,6 +133,7 @@ var FireinputPref =
 
     setPref: function(name, type,  value)
     {
+       var gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
        var prefName = prefDomain + "." + name;
 
        if(type == 'undefined')
@@ -129,6 +149,7 @@ var FireinputPref =
 
     addObserver: function(aTopic, aOwnsWeak)
     {
+       var gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
        var pbi =  gPref.QueryInterface(Components.interfaces.nsIPrefBranch2);
        pbi.addObserver(prefDomain, aTopic, aOwnsWeak);
     }
@@ -137,8 +158,10 @@ var FireinputPref =
 
 var FireinputUnicode = 
 {
+
     getUnicodeString: function(text, charset)
     {
+       var gUnicode = FireinputXPC.getService("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter"); 
        gUnicode.charset = charset ? charset : "UTF-8";
        try
        {
@@ -154,6 +177,7 @@ var FireinputUnicode =
     {
        try 
        {
+          var gUnicode = FireinputXPC.getService("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter"); 
           gUnicode.charset = charset ? charset : "UTF-8";
           text = gUnicode.ConvertFromUnicode(text);
           return text + gUnicode.Finish();
@@ -466,10 +490,8 @@ var FireinputUtils =
     {
        try 
        {
-          var chromeRegistry = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
-                               .getService(Components.interfaces.nsIChromeRegistry);
-          var uri = Components.classes["@mozilla.org/network/standard-url;1"]
-		    .createInstance(Components.interfaces.nsIURI);
+          var chromeRegistry = FireinputXPC.getService("@mozilla.org/chrome/chrome-registry;1", "nsIChromeRegistry");
+          var uri = FireinputXPC.createInstance("@mozilla.org/network/standard-url;1", "nsIURI");
 					
           uri.spec = "chrome://fireinput/content/";
 			
@@ -505,7 +527,7 @@ var FireinputUtils =
 
     getLocaleString: function (stringKey)
     {
-       var stringBundle = StringBundleService.getService(Components.interfaces.nsIStringBundleService);
+       var stringBundle = FireinputXPC.getService("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
        var propertyBundle  = "chrome://fireinput/locale/fireinput.properties";
        var bundle = stringBundle.createBundle(propertyBundle);
        var str = ""; 

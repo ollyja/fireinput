@@ -39,7 +39,7 @@ var FireinputLongTableSaver =
 
     init: function()
     {
-       var ios = IOService.getService(Components.interfaces.nsIIOService);
+       var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
