@@ -42,18 +42,18 @@ var FireinputVersion =
 {
     checkFirstRun: function()
     {
-       var firstrun =  FireinputPrefDefault.getFirstRun(); 
+       var firstrun =  fireinputPrefGetDefault("firstRun");
        if(firstrun != FIREINPUT_VERSION)
        {
           Fireinput.toggleFireinput(); 
           // enable it in first run 
-          fireinputPrefSave("firstrun", FIREINPUT_VERSION); 
+          fireinputPrefSave("firstRun", FIREINPUT_VERSION); 
           var versionArray = FIREINPUT_VERSION.split('.');
           versionArray[versionArray.length-1] = versionArray[versionArray.length-1].match(/^[\d\.]+/g)[0];
           var url  = "http://www.fireinput.com/releases/?version=" + versionArray.join("."); 
           setTimeout(function() { window.openUILinkIn(url, "tab") }, 500);
        }
-       else if(FireinputPrefDefault.getAutoLoad())
+       else if(fireinputPrefGetDefault("autoLoad"))
        {
           Fireinput.toggleFireinput(); 
           // keep in EN mode but leave it open 

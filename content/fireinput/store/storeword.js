@@ -36,6 +36,7 @@
 
 var FireinputSaver = 
 {
+    debug: 1, 
 
     init: function()
     {
@@ -121,15 +122,15 @@ var FireinputSaver =
        }
 
        var str = value.schema; 
-       str += ":" + key; 
+       var wordKey = key.split(":"); 
+       str += ":" + wordKey[0]; 
        str += ":" + value.freq; 
-       str += ":" + value.key; 
+       str += ":" + wordKey[1]; 
        str += ":" + value.initKey; 
        if(typeof(value.newPhrase) != 'undefined')
          str += ":1"
 
        str += "\n";
-
        return FireinputUnicode.getUnicodeString(str); 
     }  
 

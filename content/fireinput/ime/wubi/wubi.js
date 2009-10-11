@@ -39,7 +39,7 @@ var Wubi = function()  {};
 Wubi.prototype =  extend(new FireinputIME(), 
 {
     // 0 to disable debug or non zero to enable debug 
-    debug: 0, 
+    debug: 1, 
 
     // the name of IME 
     name: IME_WUBI,
@@ -62,6 +62,9 @@ Wubi.prototype =  extend(new FireinputIME(),
     // the hash table for user frequency 
     userCodeHash: null, 
 
+    // the wubi key map in format of z 
+    keyMapTable: null, 
+
     // use code hash table event 
     userTableChanged: false, 
 
@@ -80,6 +83,9 @@ Wubi.prototype =  extend(new FireinputIME(),
     // can auto insertion 
     autoInsertion: false, 
 
+    // number of selection word/phrase that will be sent back to IME panel for display
+    numSelection: 9,
+
     // the entrance function to load all related tables 
     loadTable: function()
     {
@@ -93,15 +99,67 @@ Wubi.prototype =  extend(new FireinputIME(),
        FireinputEncoding.init(); 
     },
 
+    insertKey: function(keyList, key)
+    {
+       if(typeof(keyList) == 'undefined')
+       {
+          keyList = new Array();
+          keyList.push(key);
+       }
+       else
+          keyList.push(key);
+       return keyList;
+    },
+
+    getKeyMapList: function(length)
+    {
+       var str = ""; 
+       for(var i=0; i<length; i++)
+       {
+          str += "z"; 
+       }
+       return str; 
+    }, 
+
+    insert: function(keyTable, key)
+    {
+       var itemStr = this.getKeyMapList(key.length); 
+       var keyList = keyTable[itemStr]; 
+       keyTable[itemStr] = this.insertKey(keyList, key); 
+       return; 
+    },
+
     getCodeLine: function(str)
     {
        var strArray = str.split(':');
        if(strArray.length < 2)
           return;
 
-       // initKey:key=>word 
+       // key=>word1, word2 
        this.keyWubiHash.setItem(strArray[0],strArray[1]);
+
+       // build key map table in a format as: 
+       // a => { "z" => array(), "zz" => array(), "zzz"=> array(), "zzzz"=> array()}
+       
+       var initialChar = strArray[0].substring(0,1);
+       if(this.keyMapTable.hasItem(initialChar))
+       {
+          var keyTable = this.keyMapTable.getItem(initialChar); 
+          this.insert(keyTable, strArray[0]); 
+       }
+       else
+       {
+          var keyTable = new Object(); 
+          this.insert(keyTable, strArray[0]); 
+          this.keyMapTable.setItem(initialChar, keyTable);
+       }
+       
     },
+
+    sortKeyMapTable: function()
+    {
+       this.keyMapTable.foreach(function(k, v) { for(var s in v) { v[s] = v[s].sort(); } }); 
+    }, 
 
     loadWubiTable: function()
     {
@@ -123,17 +181,40 @@ Wubi.prototype =  extend(new FireinputIME(),
        }
 
        this.keyWubiHash = new FireinputHash();
+       this.keyMapTable = new FireinputHash(); 
 
        var options = {
           caller: this, 
-          oncomplete: this.loadUserTable, 
+          oncomplete: bind(function() { this.sortKeyMapTable(); this.loadUserTable(); }, this), 
           onavailable: this.getCodeLine
        }; 
 
        FireinputStream.loadDataAsync(datafile, options);
     },
 
+    updateUserCodeValue: function(key, word, freq)
+    {
+       if(this.keyWubiHash.hasItem(key))
+       {
 
+          var phrase = this.keyWubiHash.getItem(key);
+          var regex = new RegExp(word + "\\d+", "g");
+          var oldWordFreq = phrase.match(regex);
+          if(oldWordFreq)
+          {
+             phrase = phrase.replace(oldWordFreq, "");
+          }
+
+          phrase = word+freq + "," + phrase;
+          this.keyWubiHash.setItem(key, phrase);
+
+          return;
+       }
+
+       //the initKey is not in hash. Add it in  
+       this.keyWubiHash.setItem(key, word+freq);
+    },
+     
     getUserCodeLine: function(str)
     {
        var strArray = str.split(':');
@@ -144,11 +225,14 @@ Wubi.prototype =  extend(new FireinputIME(),
        // new user data format: schema: word: freq key initKey 
        if(isNaN(parseInt(strArray[0])))
        {
-          this.userCodeHash.setItem(strArray[0], {freq: strArray[1], key: strArray[2], initKey: strArray[3], schema: this.wubiSchema});
+          this.userCodeHash.setItem(strArray[0]+":"+strArray[2], {freq: strArray[1], initKey: strArray[3], schema: this.wubiSchema});
+          this.updateUserCodeValue(strArray[2], strArray[0], strArray[1]);
        }
-       else if(strArray[0] == this.wubiSchema)
+       else
        {
-          this.userCodeHash.setItem(strArray[1], {freq: strArray[2], key: strArray[3], initKey: strArray[4], schema: this.wubiSchema});
+          this.userCodeHash.setItem(strArray[1]+":"+strArray[3], {freq: strArray[2], initKey: strArray[4], schema: strArray[0]});
+          if(strArray[0] == this.wubiSchema)
+             this.updateUserCodeValue(strArray[3], strArray[1], strArray[2]);
        }      
 
     },
@@ -219,6 +303,16 @@ Wubi.prototype =  extend(new FireinputIME(),
        return false; 
     },
 
+    setNumWordSelection: function(num)
+    {
+       this.numSelection = num > 9 ? 9 : (num < 1 ? 1: num);
+    },
+
+    getIMEType: function()
+    {
+       return  this.wubiSchema;
+    },
+
     setSchema: function(schema)
     {
        //FireinputLog.debug(this, "Set schema: " + schema);
@@ -227,7 +321,7 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     getAllowedInputKey: function()
     {
-       return "abcdefghijklmnopqrstuvwxy"; 
+       return "abcdefghijklmnopqrstuvwxyz"; 
     },
 
     setEncoding: function(encoding)
@@ -278,7 +372,7 @@ Wubi.prototype =  extend(new FireinputIME(),
 
        this.charArray = this.codeLookup(inputChar); 
        if(this.charArray != null)
-          return this.charArray.slice(0, 9);
+          return this.charArray.slice(0, this.numSelection);
        return null; 
     },
 
@@ -302,21 +396,21 @@ Wubi.prototype =  extend(new FireinputIME(),
           return null; 
 
        // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
-       // if the next 9 are already displayed, return null
-       if((this.charIndex+9) >= this.charArray.length)
+       // if the next this.numSelection are already displayed, return null
+       if((this.charIndex+this.numSelection) >= this.charArray.length)
           return null; 
 
        var i = this.charIndex; 
        if(!endFlag)
-           this.charIndex += 9; 
+           this.charIndex += this.numSelection; 
        else 
        {
-           i = this.charArray.length-9; 
-           i -= 9; 
+           i = this.charArray.length-this.numSelection; 
+           i -= this.numSelection; 
            this.charIndex = i>0 ? i:0; 
        }
        // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
-       return {charArray:this.charArray.slice(this.charIndex, this.charIndex+9), validInputKey: this.validInputKey};
+       return {charArray:this.charArray.slice(this.charIndex, this.charIndex+this.numSelection), validInputKey: this.validInputKey};
     }, 
 
     prev: function (homeFlag)
@@ -324,17 +418,17 @@ Wubi.prototype =  extend(new FireinputIME(),
        if(!this.charArray)
           return null; 
        // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
-       // if the previous 9 are already displayed, return null
-       if((this.charIndex-9) < 0)
+       // if the previous this.numSelection are already displayed, return null
+       if((this.charIndex-this.numSelection) < 0)
           return null; 
 
        if(!homeFlag)
-          this.charIndex -= 9; 
+          this.charIndex -= this.numSelection; 
        else
           this.charIndex = 0; 
        
        // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
-       return {charArray: this.charArray.slice(this.charIndex, this.charIndex+9), validInputKey: this.validInputKey};
+       return {charArray: this.charArray.slice(this.charIndex, this.charIndex+this.numSelection), validInputKey: this.validInputKey};
     }, 
 
     isBeginning: function()
@@ -344,7 +438,7 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     isEnd: function()
     {
-       return (this.charIndex+9) >= this.charArray.length; 
+       return (this.charIndex+this.numSelection) >= this.charArray.length; 
     }, 
 
     canAutoInsert: function()
@@ -352,26 +446,57 @@ Wubi.prototype =  extend(new FireinputIME(),
        return this.autoInsertion;       
     }, 
 
+
     getValidWord: function(key)
+    {
+       if(key.indexOf('z') < 0)
+       {
+          return this.getValidWordWithKey(key); 
+       }
+
+       var initialChar = key.substr(0, 1); 
+       if(!this.keyMapTable.hasItem(initialChar))
+       {
+         // just return none if initial key is z or sth. else 
+         return null; 
+       }
+
+       var keyTable = this.keyMapTable.getItem(initialChar); 
+       var itemStr = this.getKeyMapList(key.length);  
+       var keyList = keyTable[itemStr]; 
+
+       var regexpStr = key.replace(/z/g, "\\S"); 
+       var validWord = new Array(); 
+
+       // let check whether there are "z"s
+       for(var i=0; i<keyList.length; i++)
+       {
+          if(new RegExp(regexpStr).test(keyList[i]))
+          {
+              arrayInsert(validWord, validWord.length, this.getValidWordWithKey(keyList[i])); 
+          }
+       }
+//       validWord.sort(this.sortCodeArray); 
+
+       return validWord; 
+    }, 
+
+    getValidWordWithKey: function(key)
     {
        var wordArray = null; 
        var userArray = new Array(); 
-       var wordList = new Array(); 
-
+       var wordList = new Array();
        if(!key)
           return null; 
 
-       var keyInitial = key.substring(0, 1); 
-       if(key.length >= 3)
-          keyInitial = key.substring(0, 3); 
-       if(!this.keyWubiHash.hasItem(keyInitial))
-             return null; 
+       if(!this.keyWubiHash.hasItem(key))
+          return null; 
  
        // only enable autoinsertion for 4 keys 
        if(key.length >= 4)
           this.autoInsertion = true; 
 
-       var wubiWordList = this.keyWubiHash.getItem(keyInitial); 
+       var wubiWordList = this.keyWubiHash.getItem(key); 
 
        var wubiWordArray = wubiWordList.split(","); 
 
@@ -379,17 +504,10 @@ Wubi.prototype =  extend(new FireinputIME(),
 
        for(var i=0; i < wubiWordArray.length; i++)
        {
-          var wubiWord = wubiWordArray[i].split("=>"); 
-          
-          if(wubiWord[0].search(new RegExp("^" + key)))
-             continue; 
-
-          // FireinputLog.debug(this,"wubiWordArray[i]: " + FireinputUnicode.getUnicodeString(wubiWordArray[i]));
-
           var word = ""; 
           try 
           {
-             word = wubiWord[1].match(/[\D\.]+/g)[0];
+             word = wubiWordArray[i].match(/[\D\.]+/g)[0];
           }        
           catch(e) {}
 
@@ -397,41 +515,39 @@ Wubi.prototype =  extend(new FireinputIME(),
           if(word.length <= 0) 
              continue; 
 
-
           var encodedWord = FireinputEncoding.getEncodedString(word, this.encodingMode);
           if(typeof(wordList[encodedWord]) != 'undefined')
-             continue; 
+             continue;
 
           wordList[encodedWord] = 1; 
-
-          if(this.userCodeHash && this.userCodeHash.hasItem(word))
+ 
+          if(this.userCodeHash && this.userCodeHash.hasItem(word + ":" + key))
           {
-             var ufreq = this.userCodeHash.getItem(word);
+             var ufreq = this.userCodeHash.getItem(word + ":" + key);
              /* use this way other than push to have better performance 
               * http://aymanh.com/9-javascript-tips-you-may-not-know
               */
-             userArray[userArray.length] = {key: wubiWord[0], word:word+ufreq.freq, encodedWord:encodedWord+ufreq.freq}; 
+             userArray[userArray.length] = {key: key, word:word+ufreq.freq, encodedWord:encodedWord+ufreq.freq}; 
           }
           else
           {
-             var freq = wubiWord[1].match(/[\d\.]+/g)[0];
-             wordArray[wordArray.length] = {key:wubiWord[0], word:wubiWord[1], encodedWord:encodedWord+freq};
+             var freq = wubiWordArray[i].match(/[\d\.]+/g)[0];
+             wordArray[wordArray.length] = {key:key, word:wubiWordArray[i], encodedWord:encodedWord+freq};
           }
        }
 
        // free it 
-       wordList = null; 
-
+       wordList = null;
        //FireinputLog.debug(this,"wordArray: " + this.getKeyWord(wordArray));
        if(userArray.length <= 0)         
           return wordArray; 
 
-       // sort the first 10 items 
-       if(userArray.length < 10)
+       // sort the first (this.numSelection+1) items 
+       if(userArray.length < (this.numSelection+1))
        {
-          arrayInsert(userArray, userArray.length, wordArray.slice(0, 9)); 
+          arrayInsert(userArray, userArray.length, wordArray.slice(0, this.numSelection)); 
           userArray.sort(this.sortCodeArray); 
-          arrayInsert(userArray, userArray.length, wordArray.slice(10, wordArray.length)); 
+          arrayInsert(userArray, userArray.length, wordArray.slice((this.numSelection+1), wordArray.length)); 
        }
        else
        {
@@ -459,9 +575,9 @@ Wubi.prototype =  extend(new FireinputIME(),
           this.userCodeHash = new FireinputHash();
 
        var newfreq = 0; 
-       if(this.userCodeHash.hasItem(chars))
+       if(this.userCodeHash.hasItem(chars + ":" + key))
        {
-          var charopt = this.userCodeHash.getItem(chars); 
+          var charopt = this.userCodeHash.getItem(chars + ":" + key); 
           var freq1 = charopt.freq; 
           newfreq = parseInt("0xFFFFFFFF", 16) - freq1; 
 
@@ -487,7 +603,7 @@ Wubi.prototype =  extend(new FireinputIME(),
        }
        freq = Math.round(newfreq) + parseInt(freq); 
 
-       this.userCodeHash.setItem(chars, {freq: freq, key: key, initKey: initKey, schema: this.wubiSchema});
+       this.userCodeHash.setItem(chars+":"+key , {freq: freq, initKey: initKey, schema: this.wubiSchema});
 
        this.userTableChanged = true; 
 
@@ -497,11 +613,15 @@ Wubi.prototype =  extend(new FireinputIME(),
        return freq; 
     },
 
-    storeUserPhrase: function(userPhrase)
+    storeUserPhrases: function(userPhrases)
     {
        return; 
-    }
-    
+    },
+ 
+    storeOneUpdatePhrase: function(updatePhrase)
+    {
+       return; 
+    }   
 });
 
 

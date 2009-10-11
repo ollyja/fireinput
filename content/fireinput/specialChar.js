@@ -167,7 +167,7 @@ var FireinputSpecialChar =
     {
        if(!this.initialized || forceLoad)
        {
-          var defaultLanguage = FireinputPrefDefault.getInterfaceLanguage();
+          var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
           var element = document.getElementById("fireinputSpecialCharMenu"); 
           var label = FireinputUtils.getLocaleString("fireinput.special.char.label" + defaultLanguage);
           element.setAttribute("label", label);
@@ -180,7 +180,11 @@ var FireinputSpecialChar =
     refreshMenu: function()
     {
        // get default language first 
-       var defaultLanguage = FireinputPrefDefault.getInterfaceLanguage();
+       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
+
+       var element = document.getElementById("fireinputSpecialCharMenu");
+       var label = FireinputUtils.getLocaleString("fireinput.special.char.label" + defaultLanguage);
+       element.setAttribute("label", label);
 
        for(var i=allSymbols.length-1; i>=0; i--)
        {
@@ -210,7 +214,7 @@ var FireinputSpecialChar =
        var menuElement = document.getElementById("fireinputSpecialCharMenuItems");
 
        // get default language first 
-       var defaultLanguage = FireinputPrefDefault.getInterfaceLanguage();
+       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
 
        // add date/time 
        var label = FireinputUtils.getLocaleString("fireinput.datetime.label" + defaultLanguage);
@@ -435,7 +439,8 @@ var FireinputSpecialChar =
           {
               var list = []; 
               if((iMode[i].word).fn)
-                 list = eval((iMode[i].word).fn + "(" + ")"); 
+//                 list = eval((iMode[i].word).fn + "(" + ")"); 
+                 list = (iMode[i].word).fn.apply(); 
               else 
                  list = iMode[i].word; 
 

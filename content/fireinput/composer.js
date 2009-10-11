@@ -64,7 +64,7 @@ var FireinputComposer =
        }
 
        this.composedNumber = 0; 
-       Fireinput.enableComposeEditor(false);
+       FireinputIMEPanel.enableComposeEditor(false);
        this.composeEditorId = 0; 
     }, 
 
@@ -250,9 +250,9 @@ var FireinputComposer =
        this.composeEditorId = cfindex; 
      
        // enable compose mode 
-       Fireinput.enableComposeEditor(true); 
+       FireinputIMEPanel.enableComposeEditor(true); 
 
-       Fireinput.findCharWithKey(target.value); 
+       FireinputIMEPanel.findCharWithKey(target.value); 
 
     },
 
@@ -261,7 +261,7 @@ var FireinputComposer =
        var target = e.target; 
        FireinputLog.debug(this, "update target.value: " + target.value);
        target.style.width = (13 * target.value.length < 20 ? 20 : 13 * target.value.length) + "px";
-       Fireinput.findCharWithKey(target.value); 
+       FireinputIMEPanel.findCharWithKey(target.value); 
     }, 
 
     hideWordEditor: function(e)
@@ -277,7 +277,7 @@ var FireinputComposer =
 
        target.setAttribute("composeopened", "false");
        FireinputLog.debug(this, "hide word editor"); 
-       Fireinput.enableComposeEditor(false); 
+       FireinputIMEPanel.enableComposeEditor(false); 
 
        this.composeEditorId = 0; 
 
@@ -299,7 +299,7 @@ var FireinputComposer =
           return;
        }
  
-       var charResult = Fireinput.getCharByPos(1); 
+       var charResult = FireinputIMEPanel.getCharByPos(1); 
        if(!charResult)
        {
           target.value = target.getAttribute("hiddenvalue"); 
@@ -333,7 +333,7 @@ var FireinputComposer =
        editorBox.setAttribute("hiddenword", charResult.word);
        editorBox.setAttribute("autoselected", autoselected);
 
-       Fireinput.enableComposeEditor(false);
+       FireinputIMEPanel.enableComposeEditor(false);
        this.composeEditorId = 0;
     }, 
  
@@ -344,8 +344,9 @@ var FireinputComposer =
        var words = "";
        var value = "";
        var keys = ""; 
+       var ikeys = ""; 
        if(this.composedNumber <= 0)
-          return {key: keys, value:value, word: words}; 
+          return {key: keys, ikey: ikeys, value:value, word: words}; 
          
        for(var i=0; i < wlist.length; i++)
        {
@@ -361,8 +362,13 @@ var FireinputComposer =
              keys = editorBox.getAttribute("hiddenkey"); 
           else
              keys += " " + editorBox.getAttribute("hiddenkey");
+
+          if(ikeys.length <= 0)
+             ikeys = editorBox.getAttribute("hiddeninputkey"); 
+          else
+             ikeys += "" + editorBox.getAttribute("hiddeninputkey");
        }
-       return {key: keys, value: value, word: words}; 
+       return {key: keys, ikey: ikeys, value: value, word: words}; 
     }   
 
 

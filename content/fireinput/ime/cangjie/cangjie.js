@@ -80,6 +80,9 @@ Cangjie.prototype = extend(new FireinputIME(),
     // can auto insertion
     autoInsertion: false,
 
+    // number of selection word/phrase that will be sent back to IME panel for display
+    numSelection: 9,
+
     // the entrance function to load all related tables
     loadTable: function()
     {
@@ -134,6 +137,28 @@ Cangjie.prototype = extend(new FireinputIME(),
        FireinputStream.loadDataAsync(datafile, options);
     },
 
+    updateUserCodeValue: function(key, word, freq)
+    {
+       if(this.keyCangjieHash.hasItem(key))
+       {
+
+          var phrase = this.keyCangjieHash.getItem(key);
+          var regex = new RegExp(word + "\\d+", "g");
+          var oldWordFreq = phrase.match(regex);
+          if(oldWordFreq)
+          {
+             phrase = phrase.replace(key + "=>" + oldWordFreq, "");
+          }
+
+          phrase = key+"=>"+word + freq + "," + phrase;
+          this.keyCangjieHash.setItem(key, phrase);
+
+          return;
+       }
+
+       //the initKey is not in hash. Add it in  
+       this.keyCangjieHash.setItem(key, key+"=>"+word+freq);
+    }, 
 
     getUserCodeLine: function(str)
     {
@@ -142,16 +167,19 @@ Cangjie.prototype = extend(new FireinputIME(),
        if (strArray.length < 4) return;
 
        // user data format: word: freq key initKey
-       // new user data format: schema: word: freq key initKey  
+       // new user data format: schema: word: freq initKey  
        if(isNaN(parseInt(strArray[0])))
        {
-          this.userCodeHash.setItem(strArray[0], {freq: strArray[1], key: strArray[2], initKey: strArray[3], schema: this.cangjieSchema});
+          // hash as word:key 
+          this.userCodeHash.setItem(strArray[0]+":"+strArray[2], {freq: strArray[1], initKey: strArray[3], schema: this.cangjieSchema});
+          this.updateUserCodeValue(strArray[2], strArray[0], strArray[1]);
        }
-       else if(strArray[0] == this.wubiSchema)
+       else
        {
-          this.userCodeHash.setItem(strArray[1], {freq: strArray[2], key: strArray[3], initKey: strArray[4], schema: this.cangjieSchema});
+          this.userCodeHash.setItem(strArray[1]+":"+strArray[3], {freq: strArray[2], initKey: strArray[4], schema: strArray[0]}); 
+          if(strArray[0] == this.cangjieSchema)
+             this.updateUserCodeValue(strArray[3], strArray[1], strArray[2]); 
        }
-
     },
 
     loadUserTable: function()
@@ -216,6 +244,16 @@ Cangjie.prototype = extend(new FireinputIME(),
        return false;
     },
 
+    setNumWordSelection: function(num)
+    {
+       this.numSelection = num > 9 ? 9 : (num < 1 ? 1: num);
+    },
+
+    getIMEType: function()
+    {
+       return  this.cangjieSchema; 
+    },
+
     setSchema: function(schema)
     {
        //FireinputLog.debug(this, "Set schema: " + schema);
@@ -275,7 +313,7 @@ Cangjie.prototype = extend(new FireinputIME(),
 
        this.charArray = this.codeLookup(inputChar);
        if (this.charArray != null)
-       	return this.charArray.slice(0, 9);
+       	return this.charArray.slice(0, this.numSelection);
 
        return null;
     },
@@ -301,23 +339,23 @@ Cangjie.prototype = extend(new FireinputIME(),
        	return null;
 
        // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
-       // if the next 9 are already displayed, return null
-       if ((this.charIndex+9) >= this.charArray.length)
+       // if the next this.numSelection are already displayed, return null
+       if ((this.charIndex+this.numSelection) >= this.charArray.length)
        	return null;
 
        var i = this.charIndex;
        if (! endFlag)
        {
-       	  this.charIndex += 9;
+       	  this.charIndex += this.numSelection;
        }
        else
        {
-       	i = this.charArray.length-9;
-       	i -= 9;
+       	i = this.charArray.length-this.numSelection;
+       	i -= this.numSelection;
        	this.charIndex = (i > 0) ? i : 0;
        }
        // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
-       return {charArray:this.charArray.slice(this.charIndex, this.charIndex+9), validInputKey: this.validInputKey};
+       return {charArray:this.charArray.slice(this.charIndex, this.charIndex+this.numSelection), validInputKey: this.validInputKey};
     },
 
     prev: function (homeFlag)
@@ -325,17 +363,17 @@ Cangjie.prototype = extend(new FireinputIME(),
        if (! this.charArray)
        	  return null;
        // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
-       // if the previous 9 are already displayed, return null
-       if ((this.charIndex - 9) < 0)
+       // if the previous this.numSelection are already displayed, return null
+       if ((this.charIndex - this.numSelection) < 0)
        	  return null;
 
        if (! homeFlag)
-       	  this.charIndex -= 9;
+       	  this.charIndex -= this.numSelection;
        else
        	  this.charIndex = 0;
 
        // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
-       return {charArray: this.charArray.slice(this.charIndex, this.charIndex+9), validInputKey: this.validInputKey};
+       return {charArray: this.charArray.slice(this.charIndex, this.charIndex+this.numSelection), validInputKey: this.validInputKey};
     },
 
     isBeginning: function()
@@ -345,7 +383,7 @@ Cangjie.prototype = extend(new FireinputIME(),
 
     isEnd: function()
     {
-       return (this.charIndex + 9) >= this.charArray.length;
+       return (this.charIndex + this.numSelection) >= this.charArray.length;
     },
 
     canAutoInsert: function()
@@ -400,9 +438,9 @@ Cangjie.prototype = extend(new FireinputIME(),
 
        	wordList[encodedWord] = 1;
 
-       	if (this.userCodeHash && this.userCodeHash.hasItem(word))
+       	if (this.userCodeHash && this.userCodeHash.hasItem(word+":"+cangjieWord[0]))
        	{
-       	   var ufreq = this.userCodeHash.getItem(word);
+       	   var ufreq = this.userCodeHash.getItem(word+":"+cangjieWord[0]);
        	   /* use this way other than push to have better performance
        	    * http://aymanh.com/9-javascript-tips-you-may-not-know
        	    */
@@ -426,12 +464,12 @@ Cangjie.prototype = extend(new FireinputIME(),
        if (userArray.length <= 0)
        	  return wordArray;
 
-       // sort the first 10 items
-       if (userArray.length < 10)
+       // sort the first this.numSelection items
+       if (userArray.length < (this.numSelection+1))
        {
-       	  arrayInsert(userArray, userArray.length, wordArray.slice(0, 9));
+       	  arrayInsert(userArray, userArray.length, wordArray.slice(0, this.numSelection));
        	  userArray.sort(this.sortCodeArray);
-       	  arrayInsert(userArray, userArray.length, wordArray.slice(10, wordArray.length));
+       	  arrayInsert(userArray, userArray.length, wordArray.slice(this.numSelection+1, wordArray.length));
        }
        else
        {
@@ -459,9 +497,9 @@ Cangjie.prototype = extend(new FireinputIME(),
        	  this.userCodeHash = new FireinputHash();
 
        var newfreq = 0;
-       if (this.userCodeHash.hasItem(chars))
+       if (this.userCodeHash.hasItem(chars + ":" + key))
        {
-       	  var charopt = this.userCodeHash.getItem(chars);
+       	  var charopt = this.userCodeHash.getItem(chars + ":" + key);
        	  var freq1 = charopt.freq;
        	  newfreq = parseInt("0xFFFFFFFF", 16) - freq1;
 
@@ -488,7 +526,7 @@ Cangjie.prototype = extend(new FireinputIME(),
 
        freq = Math.round(newfreq) + parseInt(freq);
 
-       this.userCodeHash.setItem(chars, {freq: freq, key: key, initKey: initKey, schema: this.cangjieSchema});
+       this.userCodeHash.setItem(chars+":"+key, {freq: freq, initKey: initKey, schema: this.cangjieSchema});
 
        this.userTableChanged = true;
 
@@ -498,7 +536,12 @@ Cangjie.prototype = extend(new FireinputIME(),
        return freq;
     },
 
-    storeUserPhrase: function(userPhrase)
+    storeUserPhrases: function(userPhrases)
+    {
+       return;
+    },
+
+    storeOneUserPhrase: function(userPhrase)
     {
        return;
     }

@@ -15,16 +15,18 @@
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/md5.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/constant.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/stream.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib/json2.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib/jquery.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib/jquery.tabs.pack.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/store/storeemotion.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/emotion.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/fireinputPrefs.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/server/login.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/emotionmgr/pagination.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/emotionmgr/emotionmgr.js"></script>
 <script type="text/javascript">
 $(function() {
-   EmotionMgr.checkUserLogon(); 
+   FireinputServerLogin.checkUserLogon(); 
    EmotionMgr.loadCurrentEmotions();
    $('#topTabMenu').tabs({
 	fxSpeed: 'fast',
@@ -57,7 +59,7 @@ $(function() {
           <span id="showMyUpload">|<span class="textLink logonLink" onclick="EmotionMgr.showMimeOrAll(true)">我的上传</span></span>
         </span>
         </span>
-        <span id="logonLink">|<span class="textLink logonLink" onclick="EmotionMgr.toggleLogonForm(event)">登录</span></span>
+        <span id="logonLink">|<span class="textLink logonLink" onclick="FireinputServerLogin.toggleLogonForm(event)">登录</span></span>
       </div>
  
       <!-- logon form -->
@@ -67,9 +69,10 @@ $(function() {
           <form onsubmit="javascript:return false;">
             <table>
                  <tr><td style="vertical-align:top">注册邮箱:</td><td><input id="logonEmail" type="text" /></td></tr>
-                 <tr><td style="text-align:right">密码:</td><td><input id="logonPasswd" type="password" onkeypress="EmotionMgr.logon(event)"/></td></tr>
+                 <tr><td style="text-align:right">密码:</td><td><input id="logonPasswd" type="password" onkeypress="FireinputServerLogin.logon(event)"/></td></tr>
                  <tr><td><input id="logonSeed" type="hidden" value=""/></td></tr>
-                 <tr><td></td><td><input type="button" id="logonButton" value="登录" onclick="EmotionMgr.logon()"/></td></tr>
+                 <tr><td></td><td><input type="button" id="logonButton" value="登录" onclick="FireinputServerLogin.logon()"/>&nbsp;&nbsp;
+                 <input type="button" id="cancelLogonButton" value="取消" onclick="FireinputServerLogin.toggleLogonForm(event)"/></td></tr>
            </table>
           </form>
         </div>

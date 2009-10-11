@@ -222,16 +222,17 @@ var FireinputUtils =
        }
     }, 
 
-    insertCharAtCaret: function (element, text, sourceType) 
+    insertCharAtCaret: function (element, text, sourceType, insertMode) 
     {
        if(!element)
           return; 
 
-       // setFocus before set any values to avoid being reset by target onfocus event 
-       this.setFocus(element.target); 
        // text field. We can only insert bb code here  	
        if(element.target.setSelectionRange) 
        {
+          // setFocus before set any values to avoid being reset by target onfocus event -  normally happens to textfield or textarea  
+          this.setFocus(element.target); 
+
 	  var start = element.selectionStart; 
 	  var end   = element.selectionEnd; 
           var target = element.target; 
@@ -246,7 +247,10 @@ var FireinputUtils =
           var scrollLeft = target.scrollLeft; 
           var isBottom = (scrollTop + target.clientHeight) == target.scrollHeight;
           if(typeof(sourceType) != 'undefined' && sourceType == IMAGE_SOURCE_TYPE)
-	      text = "[img]" + text + "[/img]"; 
+          {
+             if(insertMode == IMAGE_INSERT_BBCODE_URL) 
+      	        text = "[img]" + text + "[/img]"; 
+          }
 
 	  if(start != null) 
 	  {
@@ -274,6 +278,8 @@ var FireinputUtils =
           // this event won't fire 
           // Why do this way: the oninput won't show up as item of target. It must go to DOM tree to find 
           // the attribute. Unfortunately if it's added by addEventListener, it won't be executed 
+          // The following code has security issue 
+          /* 
           if(target.id != '')
           {
              var win = target.ownerDocument.defaultView; 
@@ -292,6 +298,7 @@ var FireinputUtils =
                  }
              }
           }
+          */
        }
        else if(element.documentTarget)
        {
@@ -310,12 +317,11 @@ var FireinputUtils =
           // get the first range of the selection
           // delete content if the collpase is not true 
           var range = selection.getRangeAt(0);
-          range.deleteContents();
+          if(!range.collapsed)
+              range.deleteContents();
 
           if (selection.focusNode.nodeType == Node.TEXT_NODE)
           {
-             var endOffset = selection.focusOffset;
-             var nodeValue = selection.focusNode.nodeValue; 
 
              if(typeof(sourceType) != 'undefined' && sourceType == IMAGE_SOURCE_TYPE)
              {
@@ -331,6 +337,9 @@ var FireinputUtils =
              }
              else 
              {
+                var endOffset = selection.focusOffset;
+                var nodeValue = selection.focusNode.nodeValue; 
+
                 nodeValue = nodeValue.substr(0,endOffset) + text + 
                           nodeValue.substr(endOffset, nodeValue.length); 
                 selection.focusNode.nodeValue = nodeValue; 
@@ -469,21 +478,21 @@ var FireinputUtils =
        return curtop;
     },
 
-    getDocumentScrollTop: function(window)
+    getDocumentScrollTop: function(document)
     {
-       if(!window) 
+       if(!document) 
           return 0; 
-       return window.top.document.documentElement.scrollTop || 
-       (window.top.document.body ? window.top.document.body.scrollTop : 0); 
+       return document.documentElement.scrollTop || 
+       (document.body ? document.body.scrollTop : 0); 
     }, 
 
-    getDocumentScrollLeft: function(window)
+    getDocumentScrollLeft: function(document)
     {
-       if(!window) 
+       if(!document) 
           return 0; 
 
-       return window.top.document.documentElement.scrollLeft || 
-       (window.top.document.body ? window.top.document.body.scrollLeft : 0); 
+       return document.documentElement.scrollLeft || 
+       (document.body ? document.body.scrollLeft : 0); 
     }, 
 
     getExtensionPath : function() 
@@ -542,6 +551,41 @@ var FireinputUtils =
        return str; 
     },
 
+    getIMENameString: function(value)
+    {
+       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage"); 
+       switch(value)
+       {
+          case SMART_PINYIN:
+          default:
+             return this.getLocaleString('fireinput.pinyin.quan.label' + defaultLanguage);
+          break;
+          case ZIGUANG_SHUANGPIN:
+             return this.getLocaleString('fireinput.pinyin.shuang.ziguang.label' + defaultLanguage);
+          break;
+          case MS_SHUANGPIN:
+             return this.getLocaleString('fireinput.pinyin.shuang.ms.label' + defaultLanguage);
+          break;
+          case CHINESESTAR_SHUANGPIN:
+             return this.getLocaleString('fireinput.pinyin.shuang.chinesestar.label' + defaultLanguage);
+          break;
+          case SMARTABC_SHUANGPIN:
+             return this.getLocaleString('fireinput.pinyin.shuang.smartabc.label' + defaultLanguage);
+          break;
+          case WUBI_86:
+             return this.getLocaleString('fireinput.wubi86.label' + defaultLanguage);
+          break;
+          case WUBI_98:
+             return this.getLocaleString('fireinput.wubi98.label' + defaultLanguage);
+          break;
+          case CANGJIE_5:
+             return this.getLocaleString('fireinput.cangjie5.label' + defaultLanguage);
+          break;
+       }
+
+       return "";
+    },
+
     isValidForDirectInput: function(str)
     {
        if(!str) 
@@ -552,11 +596,18 @@ var FireinputUtils =
    
        // check whether it's url 
        var reg = new RegExp("^[A-Za-z]+://[A-Za-z0-9-]+\.[A-Za-z0-9]+"); 
-       if(str.test(reg))
+       if(reg.test(str))
           return true; 
 
        return false; 
-    } 
+    }, 
+
+    notify: function(aSubject, aTopic, aData)
+    {
+      var os = FireinputXPC.getService("@mozilla.org/observer-service;1", "nsIObserverService");
+      os.notifyObservers(aSubject, aTopic, aData); 
+      return true;
+    }
 }; 
 
 var FireinputHash = function() 
@@ -720,52 +771,27 @@ Ajax.prototype =
        return null; 
     },
 
-    evalJSON: function() 
-    {
-       try {
-          return eval('(' + this.header('X-JSON') + ')');
-       } catch (e) {}
-
-       return null; 
-    },
-
-    evalResponse: function() 
-    {
-       try {
-          return eval(this.transport.responseText);
-       }
-       catch (e) 
-       {
-          this.dispatchException(e);
-       }
-
-       return null; 
-    },
-
-
     respondToReadyState: function(readyState) 
     {
        var event = Ajax.Events[readyState];
-       var transport = this.transport, json = this.evalJSON();
+       var transport = this.transport; 
 
        if (event == 'Complete') 
        {
           try {
              (this.options['on' + this.transport.status]
              || this.options['on' + (this.responseIsSuccess() ? 'Success' : 'Failure')]
-             )(transport, json);
+             )(transport);
           } 
           catch (e) 
           {
              this.dispatchException(e);
           }
-          if ((this.header('Content-type') || '').match(/^text\/javascript/i))
-             this.evalResponse();
        }
 
        try {
           if(typeof(this.options['on' + event]) != "undefined")
-             (this.options['on' + event])(transport, json);
+             (this.options['on' + event])(transport);
        }
        catch (e) {
           this.dispatchException(e);

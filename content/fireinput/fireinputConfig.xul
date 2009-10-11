@@ -1,0 +1,283 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://fireinput/skin/fireinput.css" type="text/css"?>
+
+<window
+  id="fireinputConfigWindow"
+  title="Fireinput Config"
+  orient="horizontal"
+  persist="screenX screenY"
+  onload="FireinputConfig.loadWindow();"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+  <stringbundleset id="stringbundleset">
+        <stringbundle id="strings_fireinput" src="chrome://fireinput/locale/fireinput.properties"/>
+  </stringbundleset>
+
+  <script type="application/x-javascript" src="chrome://fireinput/content/version.js"/>
+  <script type="application/x-javascript" src="chrome://fireinput/content/debug.js"/>
+  <script type="application/x-javascript" src="chrome://fireinput/content/constant.js"/>
+  <script type="application/x-javascript" src="chrome://fireinput/content/utils.js"/>
+  <script type="application/x-javascript" src="chrome://fireinput/content/lib.js"/>
+  <script type="application/x-javascript" src="chrome://fireinput/content/fireinputPrefs.js"/>
+  <script type="application/x-javascript" src="chrome://fireinput/content/keybinding.js"/>
+  <script type="application/x-javascript" src="chrome://fireinput/content/fireinputConfig.js" />
+
+<vbox flex="1">
+
+<tabbox id="fireinputConfigTabbox">
+  <tabs>
+    <tab id="inputwindow" label="输入窗口设置"/>
+    <tab id="inputmethod" label="输入法管理"/>
+    <tab id="keyconfig" label="热键管理"/>
+  </tabs>
+
+  <tabpanels>
+   <tabpanel id="interfacepanel" orient="vertical">
+
+  <description>
+    修改输入框的大小，颜色和候选词的数量
+  </description>
+
+  <spacer style="height: 10px"/>
+
+  <groupbox orient="horizontal">
+    <caption label="输入框外观"/>
+    <grid id="fontsGrid">
+        <columns>
+           <column flex="1"/>
+           <column/>
+        </columns>
+        <rows id="fontsRows">
+            <row id="fontRow">
+                <hbox align="center">
+                  <label control="fireinput.inputbox.fontsize" value="字体大小"/>
+                  <menulist id="fireinput.inputbox.fontsize" option="inputboxFontsize">
+                    <menupopup onpopuphidden=''>
+                      <menuitem value="9" label="9"/>
+                      <menuitem value="10" label="10"/>
+                      <menuitem value="11" label="11"/>
+                      <menuitem value="12" label="12"/>
+                      <menuitem value="13" label="13"/>
+                      <menuitem value="14" label="14"/>
+                      <menuitem value="15" label="15"/>
+                      <menuitem value="16" label="16"/>
+                      <menuitem value="17" label="17"/>
+                      <menuitem value="18" label="18"/>
+                      <menuitem value="19" label="19"/>
+                      <menuitem value="20" label="20"/>
+                      <menuitem value="21" label="21"/>
+                    </menupopup>
+                   </menulist> 
+                   <label value="颜色" control="fireinput.inputbox.fontcolor"/>
+                   <spacer flex="1"/>
+                   <colorpicker type="button" id="fireinput.inputbox.fontcolor" palettename="standard" color="#999999" 
+                                 option="inputboxFontcolor"/>
+                 </hbox>                
+              </row>
+          </rows>
+      </grid>         
+  </groupbox>
+
+  <groupbox orient="horizontal">
+    <caption label="候选词的字体大小和颜色"/>
+    <grid id="fontsGrid">
+        <columns>
+           <column flex="1"/>
+           <column/>
+        </columns>
+        <rows id="fontsRows">
+            <row id="fontRow">
+                <hbox align="center">
+                  <label control="fireinput.wordselection.fontsize" value="字体大小"/>
+                  <menulist id="fireinput.wordselection.fontsize" option="wordselectionFontsize">
+                    <menupopup onpopuphidden=''>
+                      <menuitem value="9" label="9"/>
+                      <menuitem value="10" label="10"/>
+                      <menuitem value="11" label="11"/>
+                      <menuitem value="12" label="12"/>
+                      <menuitem value="13" label="13"/>
+                      <menuitem value="14" label="14"/>
+                      <menuitem value="15" label="15"/>
+                      <menuitem value="16" label="16"/>
+                      <menuitem value="17" label="17"/>
+                      <menuitem value="18" label="18"/>
+                      <menuitem value="19" label="19"/>
+                      <menuitem value="20" label="20"/>
+                      <menuitem value="21" label="21"/>
+                    </menupopup>
+                   </menulist> 
+                   <label value="颜色" control="fireinput.wordselection.fontcolor"/>
+                   <spacer flex="1"/>
+                   <colorpicker type="button" id="fireinput.wordselection.fontcolor" palettename="standard" color="#999999" 
+                                 option="wordselectionFontcolor"/>
+                 </hbox>                
+              </row>
+          </rows>
+      </grid>         
+  </groupbox>
+
+  <groupbox orient="horizontal">
+    <caption label="候选词数量"/>
+        <rows id="fontsRows">
+            <row id="fontRow">
+                <hbox>
+                  <label control="fireinput.wordselection.num" value="显示个数"/>
+                  <menulist id="fireinput.wordselection.num" option="wordselectionNum">
+                    <menupopup>
+                       <menuitem value="3" label="3"/>
+                       <menuitem value="4" label="4"/>
+                       <menuitem value="5" label="5"/>
+                       <menuitem value="6" label="6"/>
+                       <menuitem value="7" label="7"/>
+                       <menuitem value="8" label="8"/>
+                       <menuitem value="9" label="9"/>
+                    </menupopup>   
+                  </menulist>
+                </hbox>
+            </row>
+        </rows>
+   </groupbox>
+  </tabpanel>
+
+   <tabpanel id="inputpanel" orient="vertical">
+
+  <description>
+    如不想使用某一中输入法，在下列框中点击此输入法使其不被选中。
+  </description>
+
+  <spacer style="height: 10px"/>
+
+  <groupbox orient="horizontal">
+    <caption label="输入法列表"/>
+         <listbox id="inputMethodList" flex="1">
+              <listhead>
+                <listheader label="输入法" style="min-width: 120px"/>
+                <listheader label="显示?" style="min-width: 50px"/>
+              </listhead>
+              <listcols>
+                <listcol/>
+                <listcol flex="1"/>
+              </listcols>
+          </listbox>
+
+          <spacer style="width: 10px;"/>
+  </groupbox>
+
+  <groupbox orient="horizontal" id="customizeShuangping" style="display: none">
+    <caption label="自定义双拼"/>
+        <rows id="customizeShuangpingList">
+            <row>
+                <hbox>
+                  <label control="shuangpingList" value="Select Shuangping template"/>
+                  <menulist>
+                    <menupopup id="shuangpingList">
+                    </menupopup>   
+                  </menulist>
+                </hbox>
+            </row>
+        </rows>
+        <rows id="customizeShuangpingList">
+            <row></row>
+	</rows>
+
+  </groupbox>
+  </tabpanel>
+
+
+  <tabpanel id="shortkey" orient="vertical">
+    <description>
+      要想选择不同的热键设置，到该输入框按下想要用的热键。
+    </description>
+
+    <spacer style="height: 10px"/>
+
+    <groupbox orient="horizontal">
+      <caption label="热键列表"/>
+       <grid>
+         <columns>
+            <column flex="1"/>
+            <column flex="2"/>
+         </columns>
+         <rows id="fireinputShortKeyList">
+            <row align="center">
+               <label value="打开或关闭火输输入法："/>
+               <keyinputbox id="shortcut.openKey" option="openKey" defaultValue="1970" maxlength="1" size="20" allowmodifiers="true"/>
+            </row>
+            <row align="center">
+               <label value="打开或关闭中文输入："/>
+               <keyinputbox id="shortcut.toggleIMEKey" option="toggleIMEKey" maxlength="1" size="20" allowmodifiers="true"/>
+            </row>
+            <row align="center">
+               <label value="快速打开或关闭中文输入："/>
+               <keyinputbox id="shortcut.quickToggleIMEKey" option="quickToggleIMEKey" maxlength="1" size="20" allowmodifiers="false"/>
+               <description>(只支持单键)</description>
+            </row>
+            <row align="center">
+               <label value="转换中文输入法："/>
+               <keyinputbox id="shortcut.switchInputMethodKey" option="switchInputMethodKey" maxlength="1" size="20" allowmodifiers="true"/>
+            </row>
+            <row align="center">
+               <label value="切换全/半角："/>
+               <keyinputbox id="shortcut.toggleHalfKey" option="toggleHalfKey" maxlength="1" size="20" allowmodifiers="true"/>
+            </row>
+            <row align="center">
+               <label value="切换标点符号："/>
+               <keyinputbox id="shortcut.togglePuncKey" option="togglePuncKey" maxlength="1" size="20" allowmodifiers="true"/>
+            </row>
+            <row align="center">
+               <label value="切换输入模式(简/繁)："/>
+               <keyinputbox id="shortcut.toggleEncodingKey" option="toggleEncodingKey" maxlength="1" size="20" allowmodifiers="true"/>
+            </row>
+            <row align="center">
+               <label value="打开火输离线编辑器："/>
+               <keyinputbox id="shortcut.openEditorKey" option="openEditorKey" maxlength="1" size="20" allowmodifiers="true"/>
+            </row>
+            <row align="center">
+               <label value="可选词上翻页："/>
+               <keyinputbox id="shortcut.pageUpKey" option="pageUpKey" maxlength="1" size="20" allowmodifiers="false"/>
+               <description>(只支持单键)</description>
+            </row>
+            <row align="center">
+               <label value="可选词下翻页："/>
+               <keyinputbox id="shortcut.pageDownKey" option="pageDownKey" maxlength="1" size="20" allowmodifiers="false"/>
+               <description>(只支持单键)</description>
+            </row>
+            <row align="center">
+               <label value="选中第一个字词："/>
+               <keyinputbox id="shortcut.selectFirstKey" option="selectFirstKey" maxlength="1" size="20" allowmodifiers="false"/>
+               <description>(只支持单键)</description>
+            </row>
+            <row align="center">
+               <label value="选中第二个字词："/>
+               <keyinputbox id="shortcut.selectSecondKey" option="selectSecondKey" maxlength="1" size="20" allowmodifiers="false"/>
+               <description>(只支持单键)</description>
+            </row>
+            <row align="center">
+               <label value="选中第三个字词："/>
+               <keyinputbox id="shortcut.selectThirdKey" option="selectThirdKey" maxlength="1" size="20" allowmodifiers="false"/>
+               <description>(只支持单键)</description>
+            </row>
+
+        </rows>
+      </grid>
+ 
+      <spacer style="width: 10px;"/>
+    </groupbox>
+  </tabpanel>
+ </tabpanels>
+</tabbox>
+
+  <spacer style="height: 10px"/>
+
+  <hbox>
+    <spacer flex="1"/>
+    <button id="saveButton" label="保存" default="true" oncommand="FireinputConfig.save()"/>
+    <button id="cancelButton" label="取消" oncommand="window.close();"/>
+  </hbox>
+
+</vbox>
+
+</window>
+
+

@@ -33,7 +33,7 @@
  *
  * ***** END LICENSE BLOCK ***** 
  */
-const EMOTION_URL = "http://www.fireinput.com/emotions/emotion.html"; 
+const EMOTION_URL = SERVER_URL + "/emotions/emotion.html"; 
 
 var FireinputEmotions = 
 {
@@ -58,7 +58,7 @@ var FireinputEmotions =
        if(!this.initialized || forceLoad) 
        {
           // get default language first 
-          var defaultLanguage = FireinputPrefDefault.getInterfaceLanguage();
+          var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage"); 
           this.mouseTooltip = FireinputUtils.getLocaleString("fireinput.emotion.mouse.tooltips" + defaultLanguage); 
 
           var element = document.getElementById("fireinputEmotionMenu"); 
@@ -74,16 +74,15 @@ var FireinputEmotions =
              return;
 
           // register an observer 
-          var os = Components.classes["@mozilla.org/observer-service;1"]
-                       .getService(Components.interfaces.nsIObserverService);
-          os.addObserver(this, "user-emotion-changed", false);
+          var os = FireinputXPC.getService("@mozilla.org/observer-service;1", "nsIObserverService");
+          os.addObserver(this, "fireinput-user-emotion-changed", false);
        }
 
     },
 
     addUserEmotionMenu: function()
     {
-       var defaultLanguage = FireinputPrefDefault.getInterfaceLanguage();
+       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
        var menuElement = document.getElementById("fireinputEmotionMenuItems");
 
        // user action menu 
@@ -201,7 +200,7 @@ var FireinputEmotions =
 
        var jsonArray; 
        try {
-          jsonArray = eval('(' + p.responseText + ')'); 
+          jsonArray = JSON.parse(p.responseText); 
        }
        catch(e) { }; 
 
@@ -217,7 +216,7 @@ var FireinputEmotions =
        if(!this.initialized)
           return; 
 
-       var defaultLanguage = FireinputPrefDefault.getInterfaceLanguage();
+       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
 
        this.mouseTooltip = FireinputUtils.getLocaleString("fireinput.emotion.mouse.tooltips" + defaultLanguage); 
 
@@ -261,15 +260,15 @@ var FireinputEmotions =
     addGroup: function(jsonArray)
     {
        // get default language first 
-       var defaultLanguage = FireinputPrefDefault.getLanguage();
+       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
        var menuElement = document.getElementById("fireinputEmotionMenuItems");
 
        for(var i=0; i < jsonArray.length; i++)
        {
           var data = jsonArray[i]; 
           var groupName = data.name; 
- 
-          if(defaultLanguage != LANGUAGE_ZH)
+
+          if(defaultLanguage.indexOf(LANGUAGE_ZH) < 0)
              groupName = data.category; 
 
           var id = "fireinput.emotion." + data.category; 
@@ -319,9 +318,9 @@ var FireinputEmotions =
                   
              label.onclick=bind(function(event) 
                                 { if(event.button == 2) 
-                                    this.copyIntoClipboard(event); 
+                                    Fireinput.insertSpecialCharAt(event, IMAGE_SOURCE_TYPE, IMAGE_INSERT_BBCODE_URL); 
                                   else 
-                                    Fireinput.insertSpecialCharAt(event, IMAGE_SOURCE_TYPE); 
+                                    Fireinput.insertSpecialCharAt(event, IMAGE_SOURCE_TYPE, IMAGE_INSERT_URL); 
                                 }, this); 
              var img = document.createElement("image");
              img.setAttribute("src", urllist[i-j]);
@@ -356,7 +355,7 @@ var FireinputEmotions =
 
     observe: function(subject, topic, data)
     {
-       if(topic != 'user-emotion-changed')
+       if(topic != 'fireinput-user-emotion-changed')
           return; 
 
        this.loadUserEmotionURL(); 

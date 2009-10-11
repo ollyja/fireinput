@@ -34,7 +34,6 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-const SERVER_URL = "http://www.fireinput.com/"; 
 var EmotionMgr = 
 {
     imageFileValid: false, 
@@ -68,9 +67,8 @@ var EmotionMgr =
 
     notify: function()
     {
-       var os = Components.classes["@mozilla.org/observer-service;1"]
-                       .getService(Components.interfaces.nsIObserverService);
-       os.notifyObservers(null, "user-emotion-changed", null);
+       var os = FireinputXPC.getService("@mozilla.org/observer-service;1", "nsIObserverService");
+       os.notifyObservers(null, "fireinput-user-emotion-changed", null);
        return true;
     },
    
@@ -146,78 +144,6 @@ var EmotionMgr =
           this.showAddFileMessage(false, "图案加入失败－不应该发生，请到火输网站报告错误");
     },
 
-    checkUserLogon: function()
-    {
-       var ajax = new Ajax();
-       if(!ajax)
-          return;
-       var self = this;
-         
-       ajax.setOptions(
-          {
-             method: 'get',
-             onSuccess: function(p) { self.checkUserLogonSuccess(p); },
-             onFailure: function(p) { self.checkUserLogonFailure(p); }
-          });
-       ajax.request(SERVER_URL + "/account/logon_info.php"); 
-    },
-      
-    checkUserLogonSuccess: function(p)
-    {
-       if(!p || p.responseText.length <= 0)
-       {
-          this.checkUserLogonFailure(p); 
-          return;
-       }
-
-       var jsonResp;
-       try {
-          jsonResp = eval('(' + p.responseText + ')');
-       }
-       catch(e) 
-       {
-          this.checkUserLogonFailure(p); 
-          return;
-       };
-
-       if(typeof(jsonResp) == 'undefined')
-       {
-          this.checkUserLogonFailure(p); 
-          return;
-       } 
-       
-       var handle = document.getElementById("logonUser");
-       handle.innerHTML = "您好! " + jsonResp.name; 
-       handle = document.getElementById("logonUserBox");
-       handle.style.display = ""; 
-
-       handle = document.getElementById("logonForm"); 
-       handle.style.display = "none";
-
-       handle = document.getElementById("logonButton");
-       handle.setAttribute("image", "");
-
-       handle = document.getElementById("logonLink");
-       handle.style.display = "none";
-
-       // my upload 
-       handle = document.getElementById("showMyUpload");
-       handle.style.display = ""; 
-    },
-
-    checkUserLogonFailure: function(p)
-    {
-
-       var handle = document.getElementById("logonUser");
-       handle.innerHTML = "";
-
-       handle = document.getElementById("logonUserBox");
-       handle.style.display = "none";
-
-       handle = document.getElementById("showMyUpload");
-       handle.style.display = "none"; 
-    }, 
-
     showAddFileForm: function(nothidden)
     {
        var handle = document.getElementById("addFileHelp"); 
@@ -230,19 +156,6 @@ var EmotionMgr =
           handle.style.display = ""; 
        else 
           handle.style.display = "none"; 
-    }, 
-
-    cleanUploadForm: function()
-    {
-       this.imageFileValid = false; 
-       var handle = document.getElementById("uploadFileValue"); 
-       handle.value = "";
-
-       this.clearAddFileMessage(); 
-
-       var imgHandle = document.getElementById("addFileShowImage");
-       imgHandle.style.display = "none";
-       imgHandle.setAttribute("src", "");
     }, 
 
     toggleUploadForm: function()
@@ -274,107 +187,17 @@ var EmotionMgr =
        this.showAddFileForm(false);     
     },
 
-
-    toggleLogonForm: function(event)
+    cleanUploadForm: function()
     {
-       var handle = document.getElementById("logonForm"); 
-       if(handle.style.display != "none")
-       {
-         handle.style.display = "none";
-         return; 
-       }
-       var ajax = new Ajax();
-       if(!ajax)
-          return;
+       this.imageFileValid = false; 
+       var handle = document.getElementById("uploadFileValue"); 
+       handle.value = "";
 
-       var self = this;
-       var px = event.pageX - 400; 
-       var py = event.pageY+1; 
-       ajax.setOptions(
-          {
-             method: 'get',
-             onSuccess: function(p) { self.showLogonFormSuccess(p, px, py); },
-             onFailure: function(p) { self.showLogonFormFailure(p, px, py); }
-          });
-       ajax.request(SERVER_URL + "/account/logon_form_simple.php");
-    },
- 
-    showLogonFormSuccess: function(p, px, py)
-    {
-       var handle = document.getElementById("logonSeed");
-       handle.value =  p.responseText; 
-       $("#logonForm").css("left", px);
-       $("#logonForm").css("top", py);
-       $("#logonForm").css("height", 150);
-       $("#logonForm").show(); 
-    }, 
+       this.clearAddFileMessage(); 
 
-    showLogonFormFailure: function(p, px, py)
-    {
-       $("#logonForm").css("left", px);
-       $("#logonForm").css("top", py);
-       $("#logonForm").css("height", 50);
-       $("#logonForm").html("<div style='margin: 10px; color:red'>无法显示登录网页，连接火输网站失败</div>"); 
-       $("#logonForm").show(); 
-    },
-
-    logon: function(event)
-    {
-       // check enter key 
-       if(event && event.keyCode!=13)
-             return true; 
-       var handle = document.getElementById("logonMessage"); 
-       handle.value=""; 
-
-       handle = document.getElementById("logonButton");
-       handle.type = "image";
-       handle.src = "chrome://fireinput/skin/loading.gif"; 
-       var self = this; 
-       setTimeout(function(){self.logonServer(); }, 1000); 
-       return false; 
-    },
-
-    logonServer: function()
-    {
-
-       var email = document.getElementById("logonEmail").value; 
-       var password = document.getElementById("logonPasswd").value; 
-       var seed = document.getElementById("logonSeed").value; 
-       var salt = password.substr(Math.floor(password.length/2),password.length);
-       var md5hex1 = hex_hmac_md5(password, salt);
-       var md5hex2 = hex_hmac_md5(md5hex1, seed);
-       var url = "/account/logon_user.php";
-       var params = "email="+email + "&password="+md5hex2;
-
-       var ajax = new Ajax();
-       var self = this; 
-       ajax.setOptions(
-        {
-          method: 'post',
-          postBody: params,
-          contentType: 'application/x-www-form-urlencoded',
-          onSuccess: function(p) { self.logonServerSuccess(p); },
-          onFailure: function(p) { self.logonServerFailure(p); }
-        });
-       ajax.request(SERVER_URL + url);
-    },
-
-    logonServerSuccess: function(p)
-    {
-       var handle = document.getElementById("logonButton");
-       handle.type = "button";
-       handle.src = ""; 
-       this.checkUserLogon(); 
-    }, 
-
-    logonServerFailure: function(p)
-    {
-       var handle = document.getElementById("logonMessage"); 
-       handle.innerHTML="登录失败，您输入的邮箱或密码不正确"; 
-
-       handle = document.getElementById("logonButton");
-       handle.type = "button";
-       handle.src = ""; 
+       var imgHandle = document.getElementById("addFileShowImage");
+       imgHandle.style.display = "none";
+       imgHandle.setAttribute("src", "");
     }, 
 
     goToPage: function(url)
@@ -620,7 +443,7 @@ var EmotionMgr =
 
        var jsonArray;
        try {
-          jsonArray = eval('(' + p.responseText + ')');
+          jsonArray = JSON.parse(p.responseText);
        }
        catch(e) { };
 

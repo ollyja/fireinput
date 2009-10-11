@@ -71,7 +71,26 @@ var FireinputLog =
        this.msg = "";
        var id = document.getElementById("fireinputDebugger"); 
        id.value = "";
+    },
+
+    closeDebug: function()
+    {
+       var id = document.getElementById("fireinputDebuggerPanel"); 
+       id.setAttribute("hidden", true); 
+
+       id = document.getElementById("fireinputDebuggerSplitter"); 
+       id.setAttribute("hidden", true); 
+    },
+
+    showDebug: function()
+    {
+       var id = document.getElementById("fireinputDebuggerPanel"); 
+       id.setAttribute("hidden", false); 
+
+       id = document.getElementById("fireinputDebuggerSplitter"); 
+       id.setAttribute("hidden", false); 
     }
+
    
 }; 
 

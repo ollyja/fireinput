@@ -152,7 +152,7 @@ const MSShuangPinFinals = [
        { key: "v", finals: "v,ui"      },
        { key: "w", finals: "ia,ua"     },
        { key: "x", finals: "ie"        },
-       { key: "y", finals: "uai"       },
+       { key: "y", finals: "ing,uai"       },
        { key: "z", finals: "ei"        },
        { key: ";", finals: "ing"       }
     ]; 
@@ -562,6 +562,14 @@ PinyinSchema.prototype =
  
                 // if keyArray has saved a list of keys, append the new key to each of them
                 // otherwise just add to keySet only 
+                
+                // check second key whether it's y or s 
+                var c2 = keys.substr(i+1,1);
+                if(ykey == 's' && !this.pinyinInitials.hasItem(c2))
+                    ykey = 'y'; 
+                if(ykey == 'y' && !this.pinyinFinals.hasItem(c2))
+                    ykey = 's'; 
+                
                 if(ykey != "y")
                 {
                    if(keyArray.length > 0)
@@ -577,8 +585,6 @@ PinyinSchema.prototype =
                 else if(ykey == "y")
                 {
                   
-                   // it's final 
-                   var c2 = keys.substr(i+1,1);
                    if(firstKey == "o")
                       firstKey = ""; 
 
@@ -621,7 +627,7 @@ PinyinSchema.prototype =
                       }
                    } /* if in finals */   
                 } /* else */
-             } 
+             }
           } /* first has to be s */
 
           // save format 
@@ -639,6 +645,7 @@ PinyinSchema.prototype =
        }
 
        // FireinputLog.debug(this, "format: " + format + ", Return format: " + useFormat); 
+       // mkey: a flag to show if the return has multiple set 
        return {format: useFormat, keyset: keyArray.length > 0 ? keyArray: keySet, mkey: keyArray.length > 0 ? 1:0}; 
     }, 
 
@@ -694,19 +701,27 @@ PinyinSchema.prototype =
                 if(useFormat != "ssy")
                 {
                    keySet = this.getKeyByFormat(keys, "ssy"); 
-                   if(keySet.mkey)
-                      arrayInsert(keyArray, keyArray.length, keySet.keyset); 
-                   else
-                      keyArray.push(keySet.keyset); 
+                   // ignore the keys if the returned format is not same as we expected: such as syy or sys 
+                   if(keySet.format == 'ssy')
+                   {
+                      if(keySet.mkey)
+                         arrayInsert(keyArray, keyArray.length, keySet.keyset); 
+                      else
+                         keyArray.push(keySet.keyset); 
+                   }
                 }
 
                 if(useFormat != "sys")
                 {
                    keySet = this.getKeyByFormat(keys, "sys"); 
-                   if(keySet.mkey)
-                      arrayInsert(keyArray, keyArray.length, keySet.keyset); 
-                   else
-                      keyArray.push(keySet.keyset); 
+                   // ignore the keys if the returned format is not same as we expected: such as syy  
+                   if(keySet.format == 'sys')
+                   {
+                      if(keySet.mkey)
+                         arrayInsert(keyArray, keyArray.length, keySet.keyset); 
+                      else
+                         keyArray.push(keySet.keyset); 
+                   }
                 }
 
                 return keyArray; 

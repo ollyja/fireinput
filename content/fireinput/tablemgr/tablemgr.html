@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>火输(Fireinput) - 基于火狐(Firefox)浏览器的中文输入</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="description" content="Fireinput, IME, chinese, input method">
+<meta name="keywords" content="Fireinput, IME, chinese, input method">
+<link href="chrome://fireinput/skin/jquery.tabs.css" rel="stylesheet" type="text/css" media="print, projection, screen">
+<link href="chrome://fireinput/skin/emotionmgr.css" rel="stylesheet" type="text/css">
+<link href="chrome://fireinput/skin/common.css" rel="stylesheet" type="text/css">
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/utils.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/md5.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/constant.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/stream.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib/jquery.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib/json2.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib/jquery.tabs.pack.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/table.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/fireinputPrefs.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/server/login.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/tablemgr/tablemgr.js"></script>
+<style>
+.errorMsg { font-size: 15px; color: red; }
+#toggleKeySuggestion {font-size:13px; color:#CC8B14;cursor: pointer;display: none;}
+#keySuggestion {font-size: 13px; color: #CC8B14;}
+#keySuggestion .keySuggestionNote {margin: 5px 0px;padding: 0px;font-size: 11px;color: #6F706C;}
+#keySuggestionData span { padding: 0; margin: 0 5px 0 5px; font-size: 15px;}
+#keySuggestionData input { padding: 0px; margin: 0px;height: 12px;width: 12px;}
+</style>
+
+<script type="text/javascript">
+$(function() {
+   FireinputTableMgr.init(); 
+   $('#topTabMenu').tabs({
+	fxSpeed: 'fast',
+        onShow: function (){
+          FireinputTableMgr.initTab($(this).activeTab()); 
+        }
+   });
+});
+</script>
+</head>
+
+<body>
+
+<div id="main">
+      <div style="float: right; margin-right: 3px;">
+        <span id="logonUserBox" style="margin-left:25px">
+          <span id="logonUser" style="color: blue;margin-right: 10px;"></span>
+        </span>
+        <span id='logonLink' class="textLink logonLink" onclick="FireinputServerLogin.toggleLogonForm(event)">登录</span>
+      </div>
+ 
+      <!-- logon form -->
+      <div id="logonForm" class="logonForm" style="display: none">
+        <div style="margin: 10px 10px 10px 5px">
+          <div id="logonMessage" style="color: red; margin-bottom: 5px;"></div>
+          <form onsubmit="javascript:return false;">
+            <table>
+                 <tr><td style="vertical-align:top">注册邮箱:</td><td><input id="logonEmail" type="text" /></td></tr>
+                 <tr><td style="text-align:right">密码:</td><td><input id="logonPasswd" type="password" onkeypress="FireinputServerLogin.logon(event)"/></td></tr>
+                 <tr><td><input id="logonSeed" type="hidden" value=""/></td></tr>
+                 <tr><td></td><td><input type="button" id="logonButton" value="登录" onclick="FireinputServerLogin.logon()"/>&nbsp;&nbsp;
+                 <input type="button" id="cancelLogonButton" value="取消" onclick="FireinputServerLogin.toggleLogonForm(event)"/></td></tr>
+
+           </table>
+          </form>
+        </div>
+      </div>
+
+     <div id="topTabMenu">
+       <ul>
+        <li><a href="#updateTable">
+                <img class="tabs-cornerTopLeft" src="chrome://fireinput/skin/tab-topleft.png"/>
+                <img class="tabs-cornerTopRight" src="chrome://fireinput/skin/tab-topright.png"/>
+        <span>更新词库</span></a>
+         </li>
+        <li><a href="#addNewWord">
+                <img class="tabs-cornerTopLeft" src="chrome://fireinput/skin/tab-topleft.png"/>
+                <img class="tabs-cornerTopRight" src="chrome://fireinput/skin/tab-topright.png"/>
+         <span>增加新词</span></a>
+        </li>
+        <li><a href="#importWord">
+                <img class="tabs-cornerTopLeft" src="chrome://fireinput/skin/tab-topleft.png"/>
+                <img class="tabs-cornerTopRight" src="chrome://fireinput/skin/tab-topright.png"/>
+           <span>导入词库</span></a>
+        </li>
+        <li style='display: none'><a href="#exportWord">
+                <img class="tabs-cornerTopLeft" src="chrome://fireinput/skin/tab-topleft.png"/>
+                <img class="tabs-cornerTopRight" src="chrome://fireinput/skin/tab-topright.png"/>
+           <span>导出词库</span></a>
+        </li>
+    </ul>
+
+    <div id="updateTable">
+     <div id="updateTableHelp" style="text-align:left;padding-left: 5px;">
+       火输支持词库自动更新。当火输启动自动更新程序时，它需要连接 <a href="http://www.fireinput.com">www.fireinput.com</a> 去下载最新的网络词汇。下载的词库能立刻被当前的默认输入法所使用。 你也可以点击“立即更新”去手动下载，或者更改自动更新的频率来满足你的需求。
+     </div>
+     <div style="margin: 5px 3px 0">
+            <span>自动更新频率:</span>  
+            <select id="tableUpdateInterval" onchange='FireinputTableMgr.changeAutomaticUpdateInterval(this.value)'>
+               <option value="6">6 小时</option>
+               <option value="12">12 小时</option>
+               <option value="18">18 小时</option>
+               <option value="24">24 小时</option>
+               <option value="48">2 天</option>
+               <option value="72">3 天</option>
+               <option value="120">5 天</option>
+               <option value="2400">10 天</option>
+               <option value="0">不更新</option>
+            </select> 
+     </div>
+
+      <br/>
+     <div style="margin-right: 3px">
+        <div id="updateForm" style="padding-left: 3px">
+            <span>最近一次更新发生在：</span><span id='lastTableUpdate' style="font-style: italic; font-size: 80%; color: green"></span>
+            <input id='updateNowButton' class="textInputButton" style="margin-left: 10px" type="button" onclick='FireinputTableMgr.updateTableNow(this)' value="立即更新"/><img id="updateNowImg" style='display: none' src="chrome://fireinput/skin/loading.gif"/>
+        </div>
+     </div>
+
+    </div>
+ 
+    <div id="addNewWord">
+       <div id="newWordError" style="display: none">你现在使用的火输输入法还不支持添加这一功能</div>
+       <div id="newWordForm" style="margin-right: 3px; font-size: 14px">
+         <div style="font-weight: bold; margin-left: 7px">请把你想加入的词组和其输入键放入下面的框中</div>
+         <form name="newWordForm" style="margin: 7px 5px 0px 7px" method="post" onsubmit="javascript:return false">
+           <table cellspacing=0 cellpadding=7 border=0>
+             <tr><td></td><td><div id="formError" class="errorMsg">&nbsp;</div></td></tr>
+             <tr>
+                <td valign="middle">输入法: </td>
+                <td style="background-color: #eee;">
+                  <select id="imetype" name="imetype" onchange="imeChange(this)">
+                   <option value="1" selected>全拼</option>
+                   <option value="6" disabled>五笔86</option>
+                   <option value="7" disabled>五笔98</option>
+                   <option value="8" disabled>仓颉5</option>
+                  </select>
+               </td>
+             </tr>
+        <tr/>
+        <tr>
+            <td width=120 valign="top">词组: </td>
+            <td style="background-color: #eee; border-top: 1px solid #FFFFF0">
+                 <input type="text" id="inputword" name="inputword" onblur="FireinputTableMgr.showKeySuggestion()" size="60" maxlength="10"/>
+                 <p class="exampleHint">至少两个字. 例如: 火输很好</p>
+            </td>
+       </tr>
+        <tr>
+            <td valign="top">输入键: </td>
+            <td style="background-color: #eee; border-top: 1px solid #FFFFF0">
+               <div id="toggleKeySuggestion" onclick="javascript:$('#keySuggestion').toggle()">这个词组含有多音字,选择一个不同的？</div>
+               <div id="keySuggestion" style="display: none">
+                 <table cellspacing=0 cellpadding=0>
+                 <tr>
+                   <td valign="middle">火输建议:</td>
+                   <td>
+                     <div id="keySuggestionData">
+                     </div>
+                   </td>
+                 </tr>
+                 </table>
+                 <p class="keySuggestionNote">&nbsp;</p>
+               </div>
+               <div id="keyConfirm" style="display: none">
+                 <table cellspacing=0 cellpadding=0 border=0>
+                 <tr>
+                   <td valign="middle"><span id="confirmChoose"></span></td>
+                   <td style="text-align: left">
+                     <div id="keyConfirmData">
+                     </div>
+                   </td>
+                  <tr>
+                  <tr><td colspan=2 height=10></td></tr>
+                  <tr>
+                   <td colspan=2>
+                     <div id="userInfoData" style="background-color: #E3CB9A; padding: 2px 0px 5px; font-size: 12px; display: none">
+                      <table cellspacing=0 cellpadding=0>
+                      <tr><td colspan=2style="text-align:left">你还没有登录,在用游客的身份加新词: </td></tr>
+                      <tr><td style="text-align:right">游客笔名:</td><td><input name="realname" defvalue="" value="" /></td></tr>
+                      <tr><td style="text-align:right">游客邮箱:</td><td><input _no_cjk_input="true" name="email" defvalue="" value=""/>(不会公开)</td></tr>
+                     </table>
+                     </div>
+                   </td>
+                 </tr>
+                 </table>
+               </div>
+               <div id="inputkey">
+                 <input type="text" _no_cjk_input="true" name="inputkey" size="60" maxlength="700" onfocus="FireinputTableMgr.showKeySuggestion()" maxlength="700" />
+                 <input type="hidden" name="hiddennumtoneinputkey"/>
+                 <input type="hidden" name="hiddenchartoneinputkey"/>
+                 <p class="exampleHint">例如: hua shu hen hao</p>
+               </div>
+            </td>
+         </tr>
+         <tr>
+              <td></td>
+              <td>
+                <input id="addNewLocal" type="submit" name="submit" value="加入本地火输" onclick="return FireinputTableMgr.addToLocal()"/>
+                <input id="addNewServer" type="submit" name="submit" value="加入网络共享" onclick="return FireinputTableMgr.addToServer()"/>
+              </td>
+          </tr>
+         </table>
+       </form>
+      </div>
+
+    <!-- end of add new --> 
+    </div>
+
+    <div id="importWord">
+       <div id="importWordForm" style="margin: 0px 3px 0px 7px; font-size: 14px">
+         <div style="">Select import file and click import to start importing your personal word table. The file must be text in one of following format: 
+           <ul>
+             <li> phrase </li>
+             <li> phrase=input key </li>
+             <li> freq phrase=input key </li>
+             <li> freq phrase</li>
+           </ul>
+         </div>
+         <div style="margin-top: 0px">
+           <table cellspacing=0 cellpadding=7 border=0>
+              <tr><td></td><td><div id="formError" class="errorMsg">&nbsp;</div></td></tr>
+              <tr>
+                  <td valign="middle">Load from local file: </td>
+                  <td style="background-color: #eee;">
+                    <input id="importFile" type="file" name="NewFile" size="40">
+                  </td>   
+              </tr>
+              <tr>    
+                  <td valign="middle">Load from website: </td>
+                  <td style="background-color: #eee;">
+                     <input id="webLink" name="webLink" size="40">
+                  </td>
+              </tr>
+              <tr>
+                  <td></td>
+                  <td><input type="button" value="Import" onclick="return FireinputTableMgr.importToLocal()"></td>
+              </tr>
+           </table>
+         </div>
+         <div id="downloadLinkArea" style="margin:10px 0 0 7px">
+           <div style="font-size: 120%; font-weight: 700">Available for download</div>
+           <div id="downloadLinks" style="margin: 10px 0px 20px 150px">
+             <table cellspacing=0 cellpadding=0 border=0 width="70%">
+               <tr style="font-weight: 700"><td>Name</td><td>Update time</td><td></td></tr>
+               <tr>
+                 <td><a href="http://www.fireinput.com/tables/download/mill">Millitory</a></td>
+                 <td>2008-10-9</td>
+                 <td><input type="button" value="Install" onlick="installme()"></td>
+               </tr>
+             </table>      
+           </div>  
+         </div> <!-- downloadLinkArea -->
+       </div>            
+    </div>
+
+    <div id="exportWord" style='display: none'>
+       <div id="importWordForm" style="margin: 0px 3px 0px 7px; font-size: 14px">
+         <div style="">Click the export button to start export your files</div>
+         <input type="button" value="Export">
+       </div>
+    </div>
+
+   </div>
+</div>
+</body>
+</html>

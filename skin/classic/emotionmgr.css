@@ -24,7 +24,7 @@ body {
 	cursor: pointer; 
 }
 
-.textLinkHighlight: {
+.textLinkHighlight {
 	color: #AAC2DD; 
 }
        
@@ -44,8 +44,8 @@ body {
 
 .logonForm {
 	position: absolute; 
-	width: 300px; 
-	height: 120px; 
+	width: 320px; 
+	height: 7em; 
 	margin: 5px; 
 	padding-bottom: 5px; 
 	background-color: #E5ECF5; 
@@ -161,3 +161,16 @@ body {
 	text-align: right; 
 	clear: both; 
 }
+
+.exampleHint {
+        font-style: italic;
+        font-size: 11px;
+        margin: 0;
+        padding: 0;
+}
+
+.errorMsg {
+        font-size: 15px;
+        color: red;
+}
+

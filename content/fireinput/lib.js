@@ -112,3 +112,11 @@ function readCookie(name)
     return null;
 }
 
+function inArray(array, value) {
+   for (var i = 0; i < array.length; i++) {
+      if (array[i] == value) return true;
+   }
+   return false;
+};
+
+

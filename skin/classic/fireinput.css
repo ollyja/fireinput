@@ -4,6 +4,14 @@
     -moz-binding: url("chrome://global/content/bindings/menu.xml#menubutton-item");
 }
 
+keyinputbox {
+    -moz-binding: url("chrome://fireinput/content/bindings.xml#keyinputbox") !important; 
+}
+
+textbox.keyinputbox { 
+    background-color:#660000; 
+}
+
 #fireinputMenu {
     -moz-appearance: none;
     margin: 0; 
@@ -281,6 +289,32 @@
     font-size: 12px; 
 }
 
+#fireinputNewVersion {
+    cursor: pointer; 
+    color: #DAACA5; 
+    -moz-appearance: none;
+    border:none !important;
+    font-size: 90%;
+}
+
+#fireinputNewVersion:hover {
+    color: red;
+}
+
+
+#fireinputTableUpdate {
+    cursor: pointer; 
+    color: #95BA9A; 
+    -moz-appearance: none;
+    border:none !important;
+    font-size: 90%;
+    list-style-image: url("chrome://fireinput/skin/blue-loading.gif");  
+}
+
+#fireinputTableUpdate:hover {
+    color: green; 
+}
+	
 /* all for theme */
 #fireinputIMEContainerBox[fireinputtheme] {
     -moz-appearance: none !important;

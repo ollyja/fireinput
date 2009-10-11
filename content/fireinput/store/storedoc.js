@@ -138,7 +138,7 @@ var FireinputDocSaver =
           fileChooser.appendFilters(nsIFilePicker.filterHTML | nsIFilePicker.filterText);
           fileChooser.appendFilter('XHTML files', "*.xhtml");
           fileChooser.defaultExtension = 'html'; 
-          fileChooser.defaultString = path ? path : 'untitled.html' ;
+          fileChooser.defaultString = path ? path : '文件名.html' ;
 
           var ret = fileChooser.show();
           if (ret != nsIFilePicker.returnCancel) 

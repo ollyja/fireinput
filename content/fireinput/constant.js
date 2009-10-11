@@ -34,6 +34,9 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
+// fireinput service url 
+const SERVER_URL = "http://website.com"; // "http://www.fireinput.com/";
+
 // Perference domain 
 const prefDomain = "extensions.fireinput";
 
@@ -74,6 +77,10 @@ const IME_MODE_EN   = "EN";
 // insert source type 
 const IMAGE_SOURCE_TYPE = 1;
 
+// insert image mode 
+const IMAGE_INSERT_BBCODE_URL = 1; 
+const IMAGE_INSERT_URL        = 2; 
+
 // Save data format 
 const DATA_XML		= 1; 
 const DATA_TEXT		= 2; 
@@ -86,4 +93,6 @@ const IME_BAR_TOP   = "top";
 const PINYIN_WORD_LOOKUP = 1;
 const PINYIN_PHRASE_LOOKUP = 2;
 
-
+// fireinput event list 
+const FIREINPUT_IME_CHANGED = 1; 
+const FIREINPUT_TABLE_UPDATED = 2; 

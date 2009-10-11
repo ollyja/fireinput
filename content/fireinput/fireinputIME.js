@@ -155,6 +155,17 @@ FireinputIME.prototype =
     setFullPunctMode: function()
     {
        this.punctMode = FULL_PUNCT_MODE;    
+    },
+
+    storeOneUpdatePhrase: function(string)
+    {
+
+    },
+
+    storeUpdatePhrases: function(array)
+    {
+
     }
+    
 };
 

@@ -209,7 +209,7 @@ var FireinputLongTable =
 
     addToPanel: function()
     {
-       var result = Fireinput.getCharByPos(1); 
+       var result = FireinputIMEPanel.getCharByPos(1); 
        if(!result)
        { 
           this.hidePanel(); 
@@ -254,6 +254,9 @@ var FireinputLongTable =
           return;
        }
 
+       // get font size 
+       var fontsize = fireinputPrefGetDefault("wordselectionFontsize");
+
        var inputPanelElement = document.getElementById('fireinputLongPanel');
 
        for (var i = 0; i < codeArray.length && i < 5; i++)
@@ -265,6 +268,7 @@ var FireinputLongTable =
               element.setAttribute("value",  codeArray[i]);
               element.setAttribute("tooltiptext", "右点搜索“"+codeArray[i]+"”");
               element.setAttribute("class", "charinputlabel");
+              elsement.style.fontSize = fontsize + "pt"; 
               document.getElementById(elementId + "_hbox").style.display = "";
               continue;
 
@@ -283,6 +287,7 @@ var FireinputLongTable =
           element.setAttribute("value",  codeArray[i]);
           element.setAttribute("tooltiptext", "右点搜索“"+codeArray[i]+"”");
           element.setAttribute("class", "charinputlabel");
+          elsement.style.fontSize = fontsize + "pt"; 
           element.setAttribute("id", elementId);
           var self = this;
           element.onclick = function(event) { self.insertCharToTargetByMouse(event);};
@@ -306,8 +311,8 @@ var FireinputLongTable =
 
        if(!charstr)
           return; 
-       Fireinput.insertCharToTargetByValue(charstr); 
-       Fireinput.hideAndCleanInput(); 
+       FireinputIMEPanel.insertCharToTargetByValue(charstr); 
+       FireinputIMEPanel.hideAndCleanInput(); 
        if(this.userLongTable.hasItem(charstr))
        {
           var freq = this.userLongTable.getItem(charstr); 
@@ -328,8 +333,8 @@ var FireinputLongTable =
        handle = document.getElementById(elementId); 
        if(!handle)
           return; 
-       Fireinput.insertCharToTargetByValue(handle.getAttribute("value")); 
-       Fireinput.hideAndCleanInput(); 
+       FireinputIMEPanel.insertCharToTargetByValue(handle.getAttribute("value")); 
+       FireinputIMEPanel.hideAndCleanInput(); 
        if(this.userLongTable.hasItem(handle.getAttribute("value")))
        {
           var freq = this.userLongTable.getItem(handle.getAttribute("value")); 

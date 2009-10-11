@@ -35,17 +35,46 @@
  */
 const prefNames =
 [
-    {name: "interfaceLanguage", type: "STRING"},
-    {name: "defaultInputMethod", type: "STRING"},
-    {name: "defaultInputEncoding", type: "STRING"},
-    {name: "saveHistory", type: "BOOL"},
-    {name: "autoInsert", type: "BOOL"},
-    {name: "fireinputOpenKeyBinding", type: "STRING"},
-    {name: "firstrun",type: "STRING"},
-    {name: "IMEBarPosition", type: "STRING"},
-    {name: "themeID", type: "STRING"},
-    {name: "updateFreq", type: "BOOL"},
-    {name: "autoLoad", type: "BOOL"}
+    {name: "interfaceLanguage", type: "STRING", value: LANGUAGE_ZH},
+    {name: "defaultInputMethod", type: "STRING", value: SMART_PINYIN},
+    {name: "defaultInputEncoding", type: "STRING", value: ENCODING_ZH},
+    {name: "saveHistory", type: "BOOL", value: true},
+    {name: "autoInsert", type: "BOOL", value: true},
+    {name: "firstRun",type: "STRING", value: ""},
+    {name: "IMEBarPosition", type: "STRING", value: IME_BAR_TOP},
+    {name: "themeID", type: "STRING", value: "default"},
+    {name: "updateFreq", type: "BOOL", value: true},
+    {name: "autoLoad", type: "BOOL", value: true},
+    {name: "hiddenInputMethod", type: "STRING", value: null},
+    {name: "lastTableUpdate", type: "STRING", value: ''},
+    {name: "tableUpdateInterval", type: "INT", value: 12},
+    {name: "inputKeyExactMatch", type: "BOOL", value: false},
+
+    /* guest email/name for accessing server resouces */
+    {name: "serverGuestName", type: "STRING", value: ''}, 
+    {name: "serverGuestId", type: "STRING", value: ''}, 
+
+    /* popup gui css */
+    {name: "inputboxFontcolor", type: "STRING", value: "#123456"},
+    {name: "inputboxFontsize", type: "INT", value: 9},
+    {name: "wordselectionFontcolor", type: "STRING", value: "#080D13"},
+    {name: "wordselectionFontsize", type: "INT", value: 10},
+    {name: "wordselectionNum", type: "INT", value: 9},
+
+    /* key setup */
+    {name: "openKey", type: "STRING", value: "1970"},
+    {name: "openEditorKey", type: "STRING", value: "1107"},
+    {name: "toggleIMEKey", type: "STRING", value: "514"},
+    {name: "quickToggleIMEKey", type: "STRING", value: "256"},
+    {name: "switchInputMethodKey", type: "STRING", value: "1107"},
+    {name: "toggleHalfKey", type: "STRING", value: "1235"},
+    {name: "togglePuncKey", type: "STRING", value: "1283"},
+    {name: "toggleEncodingKey", type: "STRING", value: "1251"},
+    {name: "pageUpKey", type: "STRING", value: "3008"},
+    {name: "pageDownKey", type: "STRING", value: "3040"},
+    {name: "selectFirstKey", type: "STRING", value: "512"},
+    {name: "selectSecondKey", type: "STRING", value: "944"},
+    {name: "selectThirdKey", type: "STRING", value: "3056"}
 ];
 
 const prefInterfaceUI = [ 
@@ -55,6 +84,7 @@ const prefInterfaceUI = [
             {id: "fireinputIMEBarPosBottom", strKey: "fireinput.pref.imebar.position.bottom", attribute: "label"},           
             {id: "autoInsert", strKey: "fireinput.pref.auto.insert", attribute: "label"},           
             {id: "autoInsert", strKey: "fireinput.pref.auto.insert.tooltip", attribute: "tooltiptext"},           
+            {id: "fireinputConfigInputWindow", strKey: "fireinput.pref.inputwindow.setting", attribute: "label"},           
             {id: "fireinputDefaultInputMethod", strKey: "fireinput.pref.input.method", attribute: "label"},           
             {id: "saveHistory", strKey: "fireinput.pref.save.history", attribute: "label"},           
             {id: "updateFreq", strKey: "fireinput.pref.update.freq", attribute: "label"},           
@@ -71,19 +101,16 @@ const prefInterfaceUI = [
             {id: "imeWubi98", strKey: "fireinput.wubi98.label", attribute: "label"},
             {id: "imeCangjie5", strKey: "fireinput.cangjie5.label", attribute: "label"},
             {id: "fireinputAMB", strKey: "fireinput.pref.amb.label", attribute: "label"},
-            {id: "fireinputOpenKeyBinding", strKey: "fireinput.pref.open.hotkey", attribute: "label"},
-            {id: "fireinputOpenKeyBinding", strKey: "fireinput.pref.open.hotkey.tooltip", attribute: "tooltiptext"},
-            {id: "fireinputOpenKeyBindingCtrlF12", strKey: "fireinput.pref.open.hotkey.tooltip", attribute: "tooltiptext"},
-            {id: "fireinputOpenKeyBindingCtrlF11", strKey: "fireinput.pref.open.hotkey.tooltip", attribute: "tooltiptext"},
-            {id: "fireinputOpenKeyBindingAltF12", strKey: "fireinput.pref.open.hotkey.tooltip", attribute: "tooltiptext"},
-            {id: "fireinputOpenKeyBindingAltF11", strKey: "fireinput.pref.open.hotkey.tooltip", attribute: "tooltiptext"}
+            {id: "imeAdvancedConfig", strKey: "fireinput.pref.ime.advanced.label", attribute: "label"},
+            {id: "configHotKey", strKey: "fireinput.pref.hotkey.config.label", attribute: "label"},
+            {id: "fireinputKeyExactMatch", strKey: "fireinput.pref.amb.inputkey.match", attribute: "label"}
       ]; 
 
 
 function fireinputPrefInit()
 {
     // get default language first 
-    var defaultLanguage = FireinputPrefDefault.getInterfaceLanguage(); 
+    var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage"); 
 
     // update UI 
     for(var i =prefInterfaceUI.length-1; i>=0; i--)
@@ -115,49 +142,45 @@ function fireinputPrefGetType(option)
     return 'STRING'; 
 }
 
+function fireinputPrefGetDefValue(option)
+{
+   for(var i =prefNames.length-1; i>=0; i--)
+    {
+       if(option == prefNames[i].name)
+       {
+          return prefNames[i].value;
+       }
+    }
+
+    return null; 
+}
+
 function fireinputPrefGetDefault(option)
 {
-    switch(option)
-    {
-       case "interfaceLanguage": 
-          return FireinputPrefDefault.getLanguage(); 
-       break; 
-       case "defaultInputMethod": 
-          return FireinputPrefDefault.getSchema(); 
-       break; 
-       case "defaultInputEncoding": 
-          return FireinputPrefDefault.getInputEncoding(); 
-       break; 
-       case "saveHistory": 
-          return FireinputPrefDefault.getSaveHistory(); 
-       break; 
-       case "autoInsert": 
-          return FireinputPrefDefault.getAutoInsert(); 
-       break; 
-       case "fireinputOpenKeyBinding": 
-          return FireinputPrefDefault.getOpenKeyBinding(); 
-       break; 
-       case "firstrun": 
-          return FireinputPrefDefault.getFirstRun(); 
-       break; 
-       case "IMEBarPosition": 
-          return FireinputPrefDefault.getIMEBarPosition(); 
-       break; 
-       case "themeID": 
-          return FireinputPrefDefault.getThemeID(); 
-       break; 
-       case "updateFreq": 
-          return FireinputPrefDefault.getUpdateFreq(); 
-       break; 
-       case "autoLoad": 
-          return FireinputPrefDefault.getAutoLoad(); 
-       break; 
-       default: 
-          return 'undefined'; 
-       break; 
-    }
+    var type = fireinputPrefGetType(option); 
+    var value = fireinputPrefGetDefValue(option); 
+    try {
+        var getvalue = FireinputPref.getPref(option, type); 
+        if(type == "BOOL")
+        {
+          if(getvalue == true)
+             value = true;
+          else
+             value = false; 
+        }
+        else 
+          value = getvalue; 
+
+    } catch(e) {}
  
-    return undefined; 
+    // special handling for certain options   
+    if(option == "interfaceLanguage")
+    {
+        if(value.length > 0)
+          value  = "." + value; 
+    }
+
+    return value; 
 }
 
     
@@ -255,138 +278,6 @@ function fireinputPrefSave(menuitem, ovalue)
 }
 
 var FireinputPrefDefault = {
-    
-    getInterfaceLanguage: function()
-    {
-       // get default language first 
-       var defaultLanguage = LANGUAGE_ZH; 
-
-       try {
-          defaultLanguage = FireinputPref.getPref("interfaceLanguage", "STRING");
-       }
-       catch(e) 
-       { };
-
-       if(defaultLanguage.length > 0)
-          defaultLanguage = "." + defaultLanguage; 
-
-       return defaultLanguage; 
-    },
-
-    getLanguage: function()
-    {
-       // get default language first 
-       var defaultLanguage = LANGUAGE_ZH; 
-
-       try {
-          defaultLanguage = FireinputPref.getPref("interfaceLanguage", "STRING");
-       }
-       catch(e) 
-       { };
-
-       return defaultLanguage; 
-    },
-
-    getSchema: function()
-    {
-       var defaultMethod = SMART_PINYIN; 
-       try {
-          defaultMethod = FireinputPref.getPref("defaultInputMethod", "STRING");
-       }
-       catch(e)
-       { }
-
-       return defaultMethod; 
-    },
-
-    getInputEncoding: function()
-    {
-       var defaultEncoding = ENCODING_ZH; 
-       try {
-          defaultEncoding = FireinputPref.getPref("defaultInputEncoding", "STRING");
-       }
-       catch(e)
-       { }
-
-       return defaultEncoding;
-    },
- 
-    getSaveHistory: function()
-    {
-       var saveHistory = true; 
-       try {
-          var value = FireinputPref.getPref("saveHistory", "BOOL");
-          if(value == true)
-             saveHistory = true; 
-          else
-             saveHistory = false;
-       }
-       catch(e) 
-       { };
-
-       return saveHistory; 
-    },
-
-    getUpdateFreq: function()
-    {
-       var updateFreq = true; 
-       try {
-          var value = FireinputPref.getPref("updateFreq", "BOOL");
-          if(value == true)
-             updateFreq = true; 
-          else
-             updateFreq = false;
-       }
-       catch(e) 
-       { };
-
-       return updateFreq; 
-    }, 
-
-    getAutoInsert: function()
-    {
-       var autoInsert = true;
-       try {
-          var value = FireinputPref.getPref("autoInsert", "BOOL");
-          if(value == true)
-             autoInsert = true;
-          else
-             autoInsert = false;
-       }
-       catch(e)
-       { };
-
-       return autoInsert;
-    },
-
-    getAutoLoad: function()
-    {
-       var autoLoad = true;
-       try {
-          var value = FireinputPref.getPref("autoLoad", "BOOL");
-          if(value == true)
-             autoLoad = true;
-          else
-             autoLoad = false;
-       }
-       catch(e)
-       { };
-
-       return autoLoad;
-    },
-
-    getOpenKeyBinding: function()
-    {
-       var defaultOpenKeyBinding = "control,VK_F12"; 
-       try {
-          defaultOpenKeyBinding = FireinputPref.getPref("fireinputOpenKeyBinding", "STRING");
-       }
-       catch(e)
-       { }
-
-       return defaultOpenKeyBinding; 
-    },
-
     getAMBOption: function(option)
     {
        var ambEnabled = false; 
@@ -402,41 +293,5 @@ var FireinputPrefDefault = {
 
        return ambEnabled;
     },
- 
-    getFirstRun: function()
-    {
-       var value = ""; 
-       try {
-          value = FireinputPref.getPref("firstrun", "STRING");
-       }
-       catch(e) { }; 
-
-       return value; 
-    },
-
-    getIMEBarPosition: function()
-    {
-       var defaultPos = IME_BAR_BOTTOM; 
-       try {
-          defaultPos = FireinputPref.getPref("IMEBarPosition", "STRING");
-       }
-       catch(e)
-       { }
-
-       return defaultPos; 
-    },
-
-    getThemeID: function()
-    {
-       var themeID = 'default'; 
-       try {
-          themeID = FireinputPref.getPref("themeID", "STRING");
-       }
-       catch(e)
-       { }
-
-       return themeID; 
-    }
-         
 
 }; 

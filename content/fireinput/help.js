@@ -64,26 +64,42 @@ var FireinputHelp =
        if(this.initialized && !forceLoad)
           return;
 
+       this.refreshMenu(); 
+
+       // check new releases
+       this.checkNewRelease(); 
+
+       this.initialized = true; 
+    },
+
+    refreshMenu: function()
+    {
        // get default language first 
-       var defaultLanguage = FireinputPrefDefault.getInterfaceLanguage();
+       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
        // update UI 
        for(var i =0; i<helpUI.length; i++)
        {
           var id = helpUI[i].id;
+          var handle = document.getElementById(id);
+          if(!handle)
+             continue;
+
           var strKey = helpUI[i].strKey;
           var attr = helpUI[i].attribute;
 
           var value = FireinputUtils.getLocaleString(strKey + defaultLanguage);
-          var handle = document.getElementById(id);
-          if(!handle)
-             continue;
+          // to check whether the shortcut keystring exists 
+          var found =value.match(/%(.+)%/i);
+          if(found)
+          {
+             var keystring = FireinputKeyBinding.getKeyString(found[1]);
+             value = value.replace(found[0], keystring);
+          }
+
           handle.setAttribute(attr, value);
        }
+    }, 
 
-       // check new releases
-       this.checkNewRelease(); 
-       this.initialized = true; 
-    },
 
     showSite: function(site)
     {
@@ -188,7 +204,7 @@ var FireinputHelp =
        element = document.getElementById("fireinputHelp"); 
        element.style.color = "red"; 
 
-       var defaultLanguage = FireinputPrefDefault.getInterfaceLanguage();
+       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
 
        element = document.getElementById("fireinputNewVersion");
        var msg = FireinputUtils.getLocaleString("fireinput.help.newrelease.text" + defaultLanguage);
@@ -198,7 +214,7 @@ var FireinputHelp =
        
        element = document.getElementById("fireinputNewVersionPanel");
        element.style.display = "";
-    }   
+    }
 }; 
 
 

@@ -70,7 +70,7 @@ var EmotionMgr =
     {
        var os = Components.classes["@mozilla.org/observer-service;1"]
                        .getService(Components.interfaces.nsIObserverService);
-       os.notifyObservers(null, "user-emotion-changed", null);
+       os.notifyObservers(null, "fireinput-user-emotion-changed", null);
        return true;
     },
    
@@ -172,7 +172,7 @@ var EmotionMgr =
 
        var jsonResp;
        try {
-          jsonResp = eval('(' + p.responseText + ')');
+          jsonResp = JSON.parse(p.responseText);
        }
        catch(e) 
        {
@@ -615,12 +615,13 @@ var EmotionMgr =
     {
        if(!p)
           return;
+
        if(p.responseText.length <= 0)
           return;
 
        var jsonArray;
        try {
-          jsonArray = eval('(' + p.responseText + ')');
+          jsonArray = JSON.parse(p.responseText);
        }
        catch(e) { };
 

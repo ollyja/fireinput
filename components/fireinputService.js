@@ -47,46 +47,30 @@ const CC = Components.classes;
 const CI = Components.interfaces;
 const CR = Components.results;
 
-const loader = CC['@mozilla.org/moz/jssubscript-loader;1'].getService(CI.mozIJSSubScriptLoader);
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cr = Components.results;
+
+var observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+var categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
+
+var _currentFireinputWindow = null; 
 
 function FireinputService() 
 {
-    this.wrappedJSObject = this;
-    this.objectList = new Array(); 
+//    this.wrappedJSObject = this;	
 }
 
 FireinputService.prototype = 
 {
-    reload: function() 
+    register: function(win)
     {
-       loader.loadSubScript(SOURCE, this.__proto__);
-    },
-
-    disableIME: function(handle, of)
-    {
-       if(typeof(this.objectList[handle]) != 'undefined')
-       {
-          var l = this.objectList[handle]; 
-          if(typeof(l[of]) == 'undefined')
-             l[of] = true; 
-       }
-       else 
-       {
-          this.objectList[handle] = new Array(); 
-          this.objectList[handle][of]= true; 
-       }
+       _currentFireinputWindow = win; 
     }, 
 
-    enableIME: function(handle, of)
+    getChromeWindow: function()
     {
-       if(typeof(this.objectList[handle]) != 'undefined')
-       {
-          var l = this.objectList[handle]; 
-          if(typeof(l[of]) != 'undefined')
-             delete l[of]; 
-          if(l.length <= 0)
-            this.objectList[handle] = null; 
-       }
+       return _currentFireinputWindow; 
     }, 
 
     QueryInterface: function(aIID) 

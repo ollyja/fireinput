@@ -41,7 +41,6 @@ var FireinputWebSearch =
     {
        var idf = document.getElementById("fireinputField");
 
-       //var result = Fireinput.getCharByPos(1); 
        var composeWord = FireinputComposer.getComposeWord(); 
        this.loadWebSearch(composeWord.word + " " + idf.value);
     }, 
@@ -58,7 +57,7 @@ var FireinputWebSearch =
        params += "&sa=Search";
        url = "http://www.google.com/cse?" + params;
        FireinputLog.debug(this, url);
-       Fireinput.hideAndCleanInput();
+       FireinputIMEPanel.hideAndCleanInput();
        FireinputUtils.loadURI(url); 
     },
 

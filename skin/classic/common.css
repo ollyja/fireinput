@@ -1,0 +1,19 @@
+.textInputButton {
+    font-size: 15px; 
+    font-family: Arial, Tahoma;
+    opacity: 0.7; 
+    border: none; 
+    border: 1px solid #A3A9B0; 
+    margin: 2px; 
+    padding: 0px; 
+    cursor: pointer; 
+}
+.textInputButton:hover {
+    opacity:1.0;
+    border-right:1px solid #316AC5;
+    background-color: #EFF6FF; 
+    border: 1px solid #A3A9B0; 
+}
+
+    
+    

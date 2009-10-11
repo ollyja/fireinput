@@ -1,3 +1,6 @@
+Development Env setup: 
+http://developer.mozilla.org/en/docs/Setting_up_extension_development_environment
+
 Smoke testing steps 
 1. open javascript console to make sure no error will be displayed 
 2. Check all menus load correctly 
