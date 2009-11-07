@@ -59,7 +59,6 @@ var FireinputServerLogin =
           this.checkUserLogonFailure(p); 
           return;
        }
-
        var jsonResp;
        try {
           jsonResp = JSON.parse(p.responseText);

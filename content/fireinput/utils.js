@@ -805,4 +805,64 @@ Ajax.prototype =
     }
 };
 
+var FireinputTime  =
+{
+    starttime: 0,
+
+    setStartTime:function (){
+       var d = new Date();
+       this.starttime  = d.getTime();
+    },
+
+    getDiff:function (){
+       var d = new Date();
+       return (d.getTime()-this.starttime);
+    },
+
+    prettyDate: function(date_str)
+    {
+       var time_formats = [
+                [60, '几秒钟'],
+                [90, '1分钟'], // 60*1.5
+                [3600, '分钟', 60], // 60*60, 60
+                [5400, '1小时'], // 60*60*1.5
+                [86400, '小时', 3600], // 60*60*24, 60*60
+                [129600, '1天'], // 60*60*24*1.5
+                [604800, '天', 86400], // 60*60*24*7, 60*60*24
+                [907200, '1星期'], // 60*60*24*7*1.5
+                [2628000, '星期', 604800], // 60*60*24*(365/12), 60*60*24*7
+                [3942000, '1月'], // 60*60*24*(365/12)*1.5
+                [31536000, '月', 2628000], // 60*60*24*365, 60*60*24*(365/12)
+                [47304000, '1年'], // 60*60*24*365*1.5
+                [3153600000, '几年', 31536000], // 60*60*24*365*100, 60*60*24*365
+                [4730400000, '1世纪'], // 60*60*24*365*100*1.5
+        ];
+
+        var time = ('' + date_str).replace(/-/g,"/").replace(/[TZ]/g," "),
+                dt = new Date,
+                seconds = ((dt - new Date(time) + (dt.getTimezoneOffset() * 60000)) / 1000),
+                token = '前',
+                i = 0,
+                format;
+
+        if (seconds < 0) {
+                seconds = Math.abs(seconds);
+                token = '';
+        }
+
+        while (format = time_formats[i++]) {
+                if (seconds < format[0]) {
+                        if (format.length == 2) {
+                                return format[1] + (i > 1 ? token : ''); // Conditional so we don't return Just Now Ago
+                        } else {
+                                return Math.round(seconds / format[2]) + ' ' + format[1] + (i > 1 ? token : '');
+                        }
+                }
+        }
+        if(seconds > 4730400000)
+                return Math.round(seconds / 4730400000) + ' Centuries' + token;
+
+        return date_str;
+    }
+};
  

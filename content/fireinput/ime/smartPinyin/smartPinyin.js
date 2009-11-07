@@ -39,7 +39,7 @@ var SmartPinyin = function()  {};
 SmartPinyin.prototype =  extend(new FireinputIME(), 
 {
     // 0 to disable debug or non zero to enable debug 
-    debug: 1, 
+    debug: 0, 
 
     // the name of IME 
     name: IME_SMART_PINYIN, 
@@ -118,7 +118,69 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           return;
 
        // initKey:key=>word 
-       this.codePinyinHash.setItem(strArray[0],strArray[1]);
+       if(/=>/.test(strArray[1]))
+       {
+          this.codePinyinHash.setItem(strArray[0],strArray[1]);
+       }
+       else
+       {
+          var codeList = strArray[0].split(",");
+
+          for(var i=0; i<codeList.length; i++)
+          {
+             var item = this.codePinyinHash.getItem(codeList[i]);
+             if(!item)
+             {
+                this.codePinyinHash.setItem(codeList[i], strArray[1]); 
+             }
+             else if(typeof(item) == 'object' && item instanceof Array)
+             {
+                item[item.length++] = strArray[1]; 
+             }
+             else
+             {
+                var itemArray = [];
+                itemArray[itemArray.length++] = item;
+                itemArray[itemArray.length++] = strArray[1]; 
+                this.codePinyinHash.setItem(codeList[i], itemArray);
+             }
+          }
+       }
+
+       /* create word:ping list
+       var codePinyinList = strArray[1].split(",");
+       for(var i=0; i<codePinyinList.length; i++)
+       {
+           var codePinyin  = codePinyinList[i].split("=>"); 
+           codePinyin[1] = codePinyin[1].replace(/\d+/, ''); 
+           var tmpArray = this.tmpHash.getItem(codePinyin[0]); 
+           if(!tmpArray)
+           {
+              tmpArray = []; 
+           }
+           tmpArray[tmpArray.length++] = codePinyin[1]; 
+           this.tmpHash.setItem(codePinyin[0], tmpArray); 
+
+           var item = this.codePinyinHash.getItem(codePinyin[1]);
+	   if(!item)
+           {
+              this.codePinyinHash.setItem(codePinyin[1], codePinyin[0]); 
+           }
+           else if(typeof(item) == 'object' && item instanceof Array)
+           {
+              item[item.length++] = codePinyin[0]; 
+           }
+           else
+           {
+              var itemArray = [];
+              itemArray[itemArray.length++] = item;
+              itemArray[itemArray.length++] = codePinyin[0]; 
+              this.codePinyinHash.setItem(codePinyin[1], itemArray);
+           }
+//           dump(FireinputUnicode.getUnicodeString(codePinyin[1]) + ":" + codePinyin[0] + "\n");
+       }
+       */
+
     },
 
     loadPinyinTable: function()
@@ -136,7 +198,6 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        }
 
        this.codePinyinHash = new FireinputHash();
-
        var options = {
           caller: this, 
           oncomplete: this.loadPinyinPhrase, 
@@ -574,7 +635,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(keys == null || keys.length <= 0)
           return null; 
 
-       // FireinputLog.debug(this, "coodLookup keys.length=" + keys.length);
+       //FireinputLog.debug(this, "coodLookup keys.length=" + keys.length);
        // a valid charArray consist of {key:key, word: word}
        if(keys.length <= 1)
        { 
@@ -1176,7 +1237,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           // from userword table 
           if(keyList.length != 1 && (keyList.length < keys.length || (keyMatch && keyList.length != keys.length)))
              continue; 
- FireinputLog.debug(this,"word: " + FireinputUnicode.getUnicodeString(phrase) + ", keyList.length: " + keyList.length); 
+          FireinputLog.debug(this,"word: " + FireinputUnicode.getUnicodeString(phrase) + ", keyList.length: " + keyList.length); 
 
           // assume it's a exact Match with input char. Don't be confused with keyMatch here. 
           // the keyMatch is to make sure a selection has to be matched for inputkey length and key string.
@@ -1497,20 +1558,257 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           var keys = phraseKey[1]; //.replace(/\d+/g, ''); 
           var freq = phraseKey[0].match(/[\d\.]+/g)[0];
 
-          var validInitialKey = this.getPhraseInitKey(keys); 
-          FireinputLog.debug(this, "phrase: " + phrase + ", validInitialKey: " + validInitialKey); 
-       
-          if(!this.userCodeHash)
-            this.userCodeHash = new FireinputHash();
-
-          if(this.userCodeHash.hasItem(phrase + ":" + keys))
-            return; 
-
-          this.updateFrequency(phrase+freq, keys, validInitialKey, true, true); 
-          FireinputLog.debug(this, "phrase: " + phrase + ", freq: " + freq); 
-          this.updatePhraseTable(phrase, keys, freq, validInitialKey); 
+          this.storeOneUpdatePhrasewithFreq(phrase, keys, freq); 
        }
-    } 
+    },
+
+    storeOneUpdatePhrasewithFreq: function(phrase, keys, freq, validInitialKey)
+    {
+       if(!validInitialKey)
+          validInitialKey = this.getPhraseInitKey(keys);
+
+       FireinputLog.debug(this, "phrase: " + phrase + ", validInitialKey: " + validInitialKey);
+
+       if(!this.userCodeHash)
+          this.userCodeHash = new FireinputHash();
+
+       // if the usercode hash has this item, just return. The freq update is from being used  
+       if(this.userCodeHash.hasItem(phrase + ":" + keys))
+          return;
+
+       this.updateFrequency(phrase+freq, keys, validInitialKey, true, true);
+       FireinputLog.debug(this, "phrase: " + phrase + ", freq: " + freq);
+       this.updatePhraseTable(phrase, keys, freq, validInitialKey);
+    }, 
+
+    buildPhraseKeyMap: function(word, keyArray)
+    {
+       var pinyin = this.codePinyinHash.getItem(word); 
+       FireinputLog.debug(this, "pinyin: " + pinyin);
+       if(!pinyin)
+          return keyArray; 
+
+       //FIXME: we need to control how many different items in keyArray. As we need to maintain 
+       // a new entry for every word which might more than pinyin key. If there are too many 
+       // items, it's unlikely people will make a hit 
+       if(typeof(pinyin) == "string")
+       {
+          // there no key yet, just put it in as a single item 
+          if(keyArray.length <= 0)
+              keyArray[keyArray.length++] = pinyin; 
+          else
+          { 
+             // there are multiple entires in the list, append it to each of them 
+             for(var i=0; i<keyArray.length; i++)
+             {
+               keyArray[i] = keyArray[i] + ' ' + pinyin; 
+             }
+          }
+       }
+       else if(typeof(pinyin) == "object")
+       {
+          // since the pinyin is multiple set, we need to create an exact multiple entries too 
+          if(keyArray.length <= 0)
+          { 
+              for(var i=0; i<pinyin.length; i++)
+              {
+                 keyArray[keyArray.length++] = pinyin[i]; 
+              }
+          }
+          else 
+          {
+             // okay. Here is the complicated thing: the keyArray might be multiple entries, so as same as pinyin list
+             // as such we need to extend keyArray by M (number of pinyin list) times of entries. We need to put limit here 
+             var result = cloneArray(keyArray);
+             for(var i=0; i<pinyin.length; i++)
+             {
+                // attach pinyin to first N entries 
+                for(var j=i*result.length; j<keyArray.length; j++)
+                {
+                   keyArray[j] = keyArray[j] + ' ' + pinyin[i]; 
+                }
+                // we need to put a break to protect a too long list 
+                if(keyArray.length >= 8) 
+                {
+                   // ignore the reset pingyin keys 
+                   break; 
+                }
+                // extend with original N entries as long as the pinyin list has more than 1 entry left  
+                for(var j=0; j<result.length && i<(pinyin.length-1); j++)
+                {
+                   keyArray[keyArray.length++] = result[j]; 
+                }
+             }
+          }
+
+       }
+       FireinputLog.debug(this, "build keyArray: " + keyArray.join(",")); 
+
+    }, 
+
+    getPhrasePinyinKey: function(phrase, keyArray)
+    {
+       if(!keyArray)
+           keyArray=[]; 
+
+       var uword = phrase.substr(0, 1); 
+       var word = FireinputUnicode.convertFromUnicode(uword);
+       
+       if(!this.codePinyinHash.hasItem(word) || uword == word)
+       {
+          // if first one is not valid word, ignore it 
+          return null; 
+       }
+
+       FireinputLog.debug(this, "word: " + FireinputUnicode.getUnicodeString(word));
+       if(word)
+       {
+          phrase = phrase.substr(1, phrase.length);
+          this.buildPhraseKeyMap(word, keyArray);
+          this.getPhrasePinyinKey(phrase, keyArray);
+       }
+
+       FireinputLog.debug(this, "return keyArray: " + keyArray.join(",")); 
+       FireinputLog.debug(this, "return keyArray.length: " + keyArray.length); 
+       return keyArray; 
+    }, 
+
+   
+    getPhraseWordLine: function(line)
+    {
+       if(!line || line.length <= 1)
+          return; 
+
+       line = FireinputUnicode.getUnicodeString(line); 
+       FireinputLog.debug(this, "line: " + line); 
+       var pinyinkey = null; 
+       var phraseFreq = null; 
+
+       // supported format: 
+       // phrase
+       // phrase=input key 
+       // freq phrase=input key 
+       // freq phrase
+
+       // first chech whether the key is given 
+       var phraseKeyList = line.match(/=/); 
+       if(phraseKeyList && phraseKeyList.length >= 2)
+       { 
+          // we have key given 
+          pinyinkey = phraseKeyList[1]; 
+          phraseFreq = phraseKeyList[0]; 
+       }
+       else 
+       {
+          // must be freq phrase or phrase only 
+          phraseFreq = line; 
+       }
+
+       if(phraseFreq)
+       {
+          var freq = 0; 
+          var phrase = null; 
+
+          // check whether the freq is given 
+          var phraseFreqItems = phraseFreq.match(/\s+/); 
+          if(!phraseFreqItems || phraseFreqItems.length < 2)
+          {
+             // just phrase only 
+             phrase = phraseFreq; 
+          }
+          else
+          {
+             // ignore if it's singal word 
+             if(phraseFreqItems[1].length <= 1)
+                  return; 
+
+             phrase = phraseFreqItems[1]; 
+             freq = parseInt(phraseFreqItems[0]); 
+          }
+
+          if(!pinyinkey)
+          {
+              var keys = this.getPhrasePinyinKey(phrase);
+              if(!keys || keys.length <= 0)
+                 return; 
+              FireinputLog.debug(this, "Got keys: " + keys.join(",")); 
+
+              phrase = FireinputUnicode.convertFromUnicode(phrase); 
+              for(var i=0; i<keys.length; i++)
+              {
+                 this.storeOneUpdatePhrasewithFreq(phrase, keys[i], freq);         
+              }
+
+           }
+           else
+           {
+              this.storeOneUpdatePhrasewithFreq(FireinputUnicode.convertFromUnicode(phrase), pinyinkey, freq);         
+           }
+       }
+    }, 
+
+    storePhraseFromLocal: function(localfile)
+    {
+       var ios = FireinputXPC.getIOService();
+       var fileHandler = ios.getProtocolHandler("file")
+                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+
+       var datafile = fileHandler.getFileFromURLSpec("file://" + localfile);
+       if(!datafile.exists())
+       {
+           this.storePhrasePercent = -1; 
+           return;
+       }
+
+
+       var istream = FireinputXPC.createInstance("@mozilla.org/network/file-input-stream;1", "nsIFileInputStream");
+       istream.init(datafile,  0x01, 0444, 0);
+       istream.QueryInterface(Components.interfaces.nsILineInputStream);
+
+       FireinputLog.debug(this, "datafile.fileSize: " + datafile.fileSize);
+       var line = {}, lines = [], hasmore;
+       do {
+           hasmore = istream.readLine(line);
+           lines.push(line.value);
+       } while(hasmore);
+
+       istream.close();
+
+       this.processPhraseFromLocal(lines, 0, datafile.fileSize);
+    }, 
+ 
+    processPhraseFromLocal: function(lines, totalread, totalsize)
+    {
+       var linenum =0;
+       if(totalread <= 0)
+          this.storePhrasePercent = 0; 
+
+       while(lines.length > 0)
+       {
+           var l = lines.shift();
+           this.getPhraseWordLine(l);
+           linenum++;
+           totalread += l.length;
+           this.storePhrasePercent = parseInt((totalread * 100)/totalsize);
+           if(linenum >= 500)
+           {
+              // give it a short break;
+              var self = this; 
+              setTimeout(function() { self.processPhraseFromLocal(lines, totalread, totalsize); }, 500);
+              break;
+           }
+
+       }
+
+       if(lines.length <= 0)
+          this.storePhrasePercent = 100; 
+    },
+  
+    getStorePhrasePercent: function()
+    {
+       return this.storePhrasePercent; 
+    }
+     
 });
 
 

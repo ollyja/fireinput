@@ -151,13 +151,6 @@ const allSymbols = [
                 ]; 
 
 
-// short key for date, week, time 
-const iMode = [
-                {key: 'rq', word: { fn: 'FireinputSpecialChar.getMonth'} },
-                {key: 'sj', word: { fn: 'FireinputSpecialChar.getTime' } },
-                {key: 'xq', word: { fn: 'FireinputSpecialChar.getWeek'} }
-]; 
-
 
 var FireinputSpecialChar = 
 {
@@ -435,16 +428,15 @@ var FireinputSpecialChar =
        for(var i = iMode.length-1; i>=0; i--)
        {
           var ikey = 'i' + iMode[i].key; 
-          if(('i' + iMode[i].key).indexOf(key) == 0)
+          if(ikey.indexOf(key) == 0)
           {
               var list = []; 
               if((iMode[i].word).fn)
-//                 list = eval((iMode[i].word).fn + "(" + ")"); 
-                 list = (iMode[i].word).fn.apply(); 
+                 list = (iMode[i].word).fn(); 
               else 
                  list = iMode[i].word; 
 
-              for(var j = 0; j<list.length; j++)
+              for(var j = 0; list && j<list.length; j++)
               {
                  // put it in a format which the display engine can recognize 
                  ivalue[ivalue.length] = {key: ikey, word: FireinputUnicode.convertFromUnicode(list[j]), ufreq: 'false'}; 
@@ -456,4 +448,11 @@ var FireinputSpecialChar =
     }
 
 };              
+
+// short key for date, week, time 
+const iMode = [
+                {key: 'rq', word: { fn: FireinputSpecialChar.getMonth} },
+                {key: 'sj', word: { fn: FireinputSpecialChar.getTime} },
+                {key: 'xq', word: { fn: FireinputSpecialChar.getWeek} }
+]; 
 

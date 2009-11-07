@@ -20,12 +20,15 @@ copy_common_package_files()
 {
   mkdir -p xpi/chrome/content
   mkdir -p xpi/chrome/data
+  mkdir -p xpi/components
   cp ../chrome.manifest.real xpi/chrome.manifest
   cp ../install.rdf xpi/
   cp -r ../content/fireinput xpi/chrome/content
   cp -r ../locale xpi/chrome/
   cp -r ../skin xpi/chrome/
   cp -r ../platform xpi/
+  cp -r ../components/nsIFireinput.xpt xpi/components/
+  cp -r ../components/fireinputService.js xpi/components/
   cp  ../data/pinyin_transform  xpi/chrome/data
 }
 
@@ -102,7 +105,7 @@ create_package()
   rm -rf xpi/chrome/skin; 
 
   # create xpi 
-  (cd xpi; zip -r $package_name chrome.manifest install.rdf platform chrome/data chrome/fireinput.jar); 
+  (cd xpi; zip -r $package_name chrome.manifest install.rdf platform components chrome/data chrome/fireinput.jar); 
   cp xpi/$package_name . 
 }
 

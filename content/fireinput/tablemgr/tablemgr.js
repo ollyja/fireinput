@@ -288,6 +288,12 @@ var FireinputTableMgr =
 
     initTab: function(tabid)
     {
+       // importWord 
+       if(tabid == 3)
+       {
+          // load the available tables for download to install 
+          this.loadDownloadTableList(); 
+       }
 
     }, 
 
@@ -609,8 +615,10 @@ var FireinputTableMgr =
            catch(e)
            {
               this.showError("Fail to add: " + e);
+              return false;
            }   
         }
+        return true; 
     }, 
 
 
@@ -641,7 +649,7 @@ var FireinputTableMgr =
            if(guestname.length <= 0 || email.length <= 0)
            {
               this.showError("你还没有登录, 请提供笔名和邮箱"); 
-              return; 
+              return false; 
            }
 
            var guestdefname = document.newWordForm.realname.defvalue; 
@@ -654,7 +662,7 @@ var FireinputTableMgr =
              fireinputPrefSave("serverGuestId", email); 
 
            this.addWordServer(inputword, imetype, result, guestname, email);
-           return; 
+           return true; 
        }
 
        // send to server 
@@ -800,7 +808,7 @@ var FireinputTableMgr =
 
        // only do key suggestion for pinyin 
        if(imetype != SMART_PINYIN)
-          return false; 
+          return; 
  
        if($("#inputword").attr("defvalue") == inputword)
           return; 
@@ -826,7 +834,7 @@ var FireinputTableMgr =
        if(!inputword || inputword.length < 2)
        {
           this.ischecking = false; 
-          return false; 
+          return; 
        }
 
        // query the key suggestion 
@@ -841,7 +849,7 @@ var FireinputTableMgr =
           postBody: params,
           contentType: 'application/x-www-form-urlencoded',
           onSuccess: function(p) { FireinputTableMgr.addKeySuggestion(p); self.ischecking = false;},
-          onFailure: function(p) { alert(p.responseText);  $("#inputword").attr("defvalue", ""); self.ischecking = false;},
+          onFailure: function(p) { $("#inputword").attr("defvalue", ""); self.ischecking = false;}
         });
 
        ajax.request(SERVER_URL + url);
@@ -926,40 +934,158 @@ var FireinputTableMgr =
        }
    },
  
+   loadDownloadTableList: function()
+   {
+      var ajax = new Ajax();
+       if(!ajax)
+          return;
+
+       var self = this;
+
+       var url = SERVER_URL + "/table/getspt.php?";
+       ajax.setOptions(
+          {
+             method: 'get',
+             onSuccess: function(p) { self.loadDownloadTableListSuccess(p); }
+          });
+       ajax.request(url);
+   }, 
+
+   loadDownloadTableListSuccess: function(p)
+   {
+       if(!p)
+          return;
+       if(p.responseText.length <= 0)
+          return;
+
+       var jsonArray;
+       try {
+          jsonArray = JSON.parse(p.responseText);
+       }
+       catch(e) { };
+
+       if(typeof(jsonArray) == 'undefined')
+          return;
+
+       if(jsonArray.length <= 0)
+          return; 
+
+       var html =  '<table cellspacing=0 cellpadding=0 border=0 width="70%">'; 
+       html +=  '<tr style="font-weight: 700"><td width="50%">火输字库</td><td width="20%">最后更新</td><td></td></tr>'; 
+
+       for(var i=0; i<jsonArray.length; i++)
+       {
+          var link = SERVER_URL + jsonArray[i][1]; 
+          html += "<tr><td><a target='_blank' href='" + link + "'>" + jsonArray[i][0] + "</a></td>"; 
+          html += "<td>" + FireinputTime.prettyDate(jsonArray[i][2]) + "</td>"; 
+          html += "<td><input type='button' value='安装' onclick='return FireinputTableMgr.importRemoteTableFile(event,\"" + link + "\")'>";
+          html += "<span id='installError' class='errorMsg' style='margin-left: 10px'></span></td>";
+          html += "</tr>"; 
+       }
+       html +=  "</table>"; 
+ 
+       $("#downloadLinks").html(html); 
+       $("#downloadLinkArea").show(); 
+   }, 
+
    importToLocal: function()
    {
        var localfile = $("#importFile").val(); 
-       var remotefile  = $("#webLink").val(); 
-       if(localfile.length <= 0 && remotefile.length <= 0)
+       if(localfile.length <= 0)
        {
-          $("#formError").html("Nothing to be imported"); 
-          $("#formError").show(); 
+          $("#importFormError").html("Nothing to be imported").show(); 
           return false; 
        }
 
-       if(localfile.length> 0)
-       {
-          this.importLocalTableFile(localfile); 
-       }
-
-       if(remotefile.length > 0)
-       {
-          this.importRemoteTableFile(remotefile); 
-       }
+       this.importLocalTableFile(localfile); 
 
        return true; 
    }, 
 
    importLocalTableFile: function(localfile)
    {
-       alert(Fireinput.getCurrentIME()); 
+
+       var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+       var ime = gs.getChromeWindow().getFireinput().getCurrentIME();
+       setTimeout(function() { ime.storePhraseFromLocal(localfile)}, 500);
+       $("#importFile").hide(); 
+       $("#importLoading").show(); 
+       this.importTimer = setInterval(function() { 
+                                var percent = ime.getStorePhrasePercent();  
+                                if(percent >0)
+                                {  
+                                   $("#importPercent").html("<span style='margin-right: 8px; color: green'>" + percent+"%</span>"); 
+                                   $("#importPercent").show();
+                                }
+                                else {
+                                   clearInterval(FireinputTableMgr.importTimer);
+                                   $("#importFile").show(); 
+                                   $("#importLoading").hide(); 
+                                   $("#importFormError").html("<div style='margin-left: 8px;'>导入失败</div>"); 
+                                }
+                                if(percent >= 100) { 
+                                   clearInterval(FireinputTableMgr.importTimer);
+                                   $("#importFile").show(); 
+                                   $("#importPercent").hide();
+                                   $("#importLoading").hide(); 
+                                   $("#importFormError").html("<div style='margin-left: 8px; color: green'>成功导入</div>");
+                                 }
+                             }, 1000); 
    },
 
-   importRemoteTableFile: function(remotefile)
+   importRemoteTableFile: function(e, remotefile)
    {
-       // getspt.php
+      var ajax = new Ajax();
+       if(!ajax)
+          return;
+
+       var self = this;
+
+       ajax.setOptions(
+          {
+             method: 'get',
+             onSuccess: function(p) { self.installRemoteTableFile(e, p); },
+             onFailure: function() { self.installRemoteTableFile(e); }
+          });
+       ajax.request(remotefile);
+   },
+
+   installRemoteTableFile: function(e, p)
+   {
+       if(!p || p.responseText.length <= 0)
+       {
+          $("#installError", e.target.parentNode).html("<span>导入失败</span>");
+          return;
+       }
+
+       var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+       var ime = gs.getChromeWindow().getFireinput().getCurrentIME();
+
+       var lines = p.responseText.split(/\r\n|\r|\n/);
+
+       ime.processPhraseFromLocal(lines, 0, p.responseText.length);
+       var ptarget = e.target.parentNode; 
+       var ohtml = ptarget.innerHTML; 
+    
+       ptarget.innerHTML = '';
+       this.importTimer = setInterval(function() {
+                                var percent = ime.getStorePhrasePercent();
+                                if(percent >0)
+                                {
+                                   ptarget.innerHTML = "<span style='margin-right: 8px; color: green'>" + percent+"%</span><img  src='chrome://fireinput/skin/loading.gif'/>";
+                                }
+                                else {
+                                   clearInterval(FireinputTableMgr.importTimer);
+                                   ptarget.innerHTML = ohtml;
+                                   $("#installError", ptarget).html("<span>导入失败</span>");
+                                }
+                                if(percent >= 100) {
+                                   clearInterval(FireinputTableMgr.importTimer);
+                                   ptarget.innerHTML = ohtml;
+                                   $("#installError", ptarget).html("<span style='color:green'>成功导入</span>");
+                                 }
+                             }, 1000);
 
    }
-
 }; 
 

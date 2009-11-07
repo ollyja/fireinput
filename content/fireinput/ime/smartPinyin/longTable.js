@@ -268,7 +268,7 @@ var FireinputLongTable =
               element.setAttribute("value",  codeArray[i]);
               element.setAttribute("tooltiptext", "右点搜索“"+codeArray[i]+"”");
               element.setAttribute("class", "charinputlabel");
-              elsement.style.fontSize = fontsize + "pt"; 
+              element.style.fontSize = fontsize + "pt"; 
               document.getElementById(elementId + "_hbox").style.display = "";
               continue;
 
@@ -287,7 +287,7 @@ var FireinputLongTable =
           element.setAttribute("value",  codeArray[i]);
           element.setAttribute("tooltiptext", "右点搜索“"+codeArray[i]+"”");
           element.setAttribute("class", "charinputlabel");
-          elsement.style.fontSize = fontsize + "pt"; 
+          element.style.fontSize = fontsize + "pt"; 
           element.setAttribute("id", elementId);
           var self = this;
           element.onclick = function(event) { self.insertCharToTargetByMouse(event);};

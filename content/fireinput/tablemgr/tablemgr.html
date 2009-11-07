@@ -8,7 +8,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="description" content="Fireinput, IME, chinese, input method">
 <meta name="keywords" content="Fireinput, IME, chinese, input method">
-<link href="chrome://fireinput/skin/jquery.tabs.css" rel="stylesheet" type="text/css" media="print, projection, screen">
+<link href="chrome://fireinput/skin/jquery.tabs.css" rel="stylesheet" type="text/css">
 <link href="chrome://fireinput/skin/emotionmgr.css" rel="stylesheet" type="text/css">
 <link href="chrome://fireinput/skin/common.css" rel="stylesheet" type="text/css">
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib.js"></script>
@@ -30,6 +30,7 @@
 #keySuggestion .keySuggestionNote {margin: 5px 0px;padding: 0px;font-size: 11px;color: #6F706C;}
 #keySuggestionData span { padding: 0; margin: 0 5px 0 5px; font-size: 15px;}
 #keySuggestionData input { padding: 0px; margin: 0px;height: 12px;width: 12px;}
+.helpMsg { font-size: 80%; font-style: italic; color: green}
 </style>
 
 <script type="text/javascript">
@@ -118,7 +119,7 @@ $(function() {
       <br/>
      <div style="margin-right: 3px">
         <div id="updateForm" style="padding-left: 3px">
-            <span>最近一次更新发生在：</span><span id='lastTableUpdate' style="font-style: italic; font-size: 80%; color: green"></span>
+            <span>最近一次更新发生在：</span><span id='lastTableUpdate' class="helpMsg"></span>
             <input id='updateNowButton' class="textInputButton" style="margin-left: 10px" type="button" onclick='FireinputTableMgr.updateTableNow(this)' value="立即更新"/><img id="updateNowImg" style='display: none' src="chrome://fireinput/skin/loading.gif"/>
         </div>
      </div>
@@ -214,46 +215,35 @@ $(function() {
 
     <div id="importWord">
        <div id="importWordForm" style="margin: 0px 3px 0px 7px; font-size: 14px">
-         <div style="">Select import file and click import to start importing your personal word table. The file must be text in one of following format: 
+         <div style="">你可以导入自己的词库, 火输的导入程序支持以下的格式:  
            <ul>
-             <li> phrase </li>
-             <li> phrase=input key </li>
-             <li> freq phrase=input key </li>
-             <li> freq phrase</li>
+             <li><div> 词组 </div><div class="helpMsg" style="margin-left: 10px">(例如: 天各一方)</div></li>
+             <li><div> 词组=拼音 </div> <div class="helpMsg" style="margin-left: 10px">(例如: 天各一方=tian ge yi fang)</div></li>
+             <li><div> 词频 词组=拼音 </div><div class="helpMsg" style="margin-left:10px">(例如: 1000 天各一方=tian ge yi fang) </div></li>
+             <li><div> 词频 词组 </div><div class="helpMsg" style="margin-left:10px">(例如: 1000 天各一方)</div></li>
            </ul>
          </div>
          <div style="margin-top: 0px">
            <table cellspacing=0 cellpadding=7 border=0>
-              <tr><td></td><td><div id="formError" class="errorMsg">&nbsp;</div></td></tr>
+              <tr><td></td><td><div id="importFormError" class="errorMsg">&nbsp;</div></td></tr>
               <tr>
-                  <td valign="middle">Load from local file: </td>
+                  <td valign="middle">选择本地词库文件: </td>
                   <td style="background-color: #eee;">
                     <input id="importFile" type="file" name="NewFile" size="40">
+                    <span id="importPercent"></span><img id="importLoading" style="display:none" src="chrome://fireinput/skin/loading.gif"/>
                   </td>   
-              </tr>
-              <tr>    
-                  <td valign="middle">Load from website: </td>
-                  <td style="background-color: #eee;">
-                     <input id="webLink" name="webLink" size="40">
-                  </td>
               </tr>
               <tr>
                   <td></td>
-                  <td><input type="button" value="Import" onclick="return FireinputTableMgr.importToLocal()"></td>
+                  <td><input type="button" value="导入" onclick="return FireinputTableMgr.importToLocal()"></td>
               </tr>
            </table>
          </div>
-         <div id="downloadLinkArea" style="margin:10px 0 0 7px">
-           <div style="font-size: 120%; font-weight: 700">Available for download</div>
+         <div id="downloadLinkArea" style="margin:10px 0 0 7px; display: none">
+           <div style="font-size: 120%; font-weight: 700">直接下载网络词库</div>
+           <div> <span style="font-size: 80%; color:#ddd">(所有词库均来自网络, 版权归各自网站所有)</span>
+           </div>
            <div id="downloadLinks" style="margin: 10px 0px 20px 150px">
-             <table cellspacing=0 cellpadding=0 border=0 width="70%">
-               <tr style="font-weight: 700"><td>Name</td><td>Update time</td><td></td></tr>
-               <tr>
-                 <td><a href="http://www.fireinput.com/tables/download/mill">Millitory</a></td>
-                 <td>2008-10-9</td>
-                 <td><input type="button" value="Install" onlick="installme()"></td>
-               </tr>
-             </table>      
            </div>  
          </div> <!-- downloadLinkArea -->
        </div>            

@@ -58,7 +58,6 @@ var _currentFireinputWindow = null;
 
 function FireinputService() 
 {
-//    this.wrappedJSObject = this;	
 }
 
 FireinputService.prototype = 

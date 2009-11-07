@@ -35,7 +35,7 @@
  */
 
 // fireinput service url 
-const SERVER_URL = "http://website.com"; // "http://www.fireinput.com/";
+const SERVER_URL = "http://www.fireinput.com/";
 
 // Perference domain 
 const prefDomain = "extensions.fireinput";
