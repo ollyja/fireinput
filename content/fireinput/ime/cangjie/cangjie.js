@@ -260,6 +260,11 @@ Cangjie.prototype = extend(new FireinputIME(),
        this.cangjieSchema = schema;
     },
 
+    getSchema: function()
+    {
+       return this.cangjieSchema; 
+    },
+
     getAllowedInputKey: function()
     {
        return "abcdefghijklmnopqrstuvwxyz";

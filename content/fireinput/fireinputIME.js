@@ -81,6 +81,11 @@ FireinputIME.prototype =
     {
        return "/userwordtable.fireinput";
     }, 
+
+    getExtDataFile: function()
+    {
+       return "/extwordtable.fireinput";
+    },
  
     getUserHistoryFile: function()
     {
@@ -155,16 +160,6 @@ FireinputIME.prototype =
     setFullPunctMode: function()
     {
        this.punctMode = FULL_PUNCT_MODE;    
-    },
-
-    storeOneUpdatePhrase: function(string)
-    {
-
-    },
-
-    storeUpdatePhrases: function(array)
-    {
-
     }
     
 };

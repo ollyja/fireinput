@@ -319,6 +319,11 @@ Wubi.prototype =  extend(new FireinputIME(),
        this.wubiSchema = schema; 
     }, 
 
+    getSchema: function()
+    {
+       return this.wubiSchema; 
+    }, 
+
     getAllowedInputKey: function()
     {
        return "abcdefghijklmnopqrstuvwxyz"; 

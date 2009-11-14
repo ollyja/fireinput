@@ -38,7 +38,7 @@ var FireinputSaver =
 {
     debug: 1, 
 
-    init: function()
+    getUserDataFile: function()
     {
        var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
@@ -46,15 +46,36 @@ var FireinputSaver =
 
        var IME = new FireinputIME(); 
        var path = FireinputUtils.getAppRootPath() + IME.getUserDataFile();
-       var datafile = fileHandler.getFileFromURLSpec(path); 
-       return datafile; 
+       return fileHandler.getFileFromURLSpec(path); 
     },
 
-
-    save: function()
+    saveUserData: function()
     {
        var args = arguments; 
+       var file = this.getUserDataFile();
+       this.save(file, args);
+    }, 
 
+    getExtDataFile: function()
+    {
+       var ios = FireinputXPC.getIOService(); 
+       var fileHandler = ios.getProtocolHandler("file")
+                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+
+       var IME = new FireinputIME(); 
+       var path = FireinputUtils.getAppRootPath() + IME.getExtDataFile();
+       return fileHandler.getFileFromURLSpec(path); 
+    }, 
+
+    saveExtData: function()
+    {
+       var args = arguments; 
+       var file = this.getExtDataFile();
+       this.save(file, args);
+    }, 
+
+    save: function(file, args)
+    {
        if(!args || args.length <= 0)
           return; 
  
@@ -63,7 +84,6 @@ var FireinputSaver =
        var fos = Components.classes["@mozilla.org/network/file-output-stream;1"]
                     .createInstance(Components.interfaces.nsIFileOutputStream);
 
-       var file = this.init(); 
        // use 0x02 | 0x10 to open file for appending.
        // write, create, truncate
        fos.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
@@ -116,7 +136,8 @@ var FireinputSaver =
 
        // if it's not new phrase, and the used times is smaller than filter 
        // it will be skipped to save some memory 
-       if((typeof(value.newPhrase) == 'undefined') && used < filter)
+       // always save imported data which has signature 
+       if(typeof(value.signature) == 'undefined' && typeof(value.newPhrase) == 'undefined' && used < filter)
        {
            return null; 
        }
@@ -129,6 +150,9 @@ var FireinputSaver =
        str += ":" + value.initKey; 
        if(typeof(value.newPhrase) != 'undefined')
          str += ":1"
+
+       if(typeof(value.signature) != 'undefined')
+         str += ":" + value.signature;
 
        str += "\n";
        return FireinputUnicode.getUnicodeString(str); 

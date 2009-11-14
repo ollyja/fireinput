@@ -16,6 +16,7 @@
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/md5.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/constant.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/stream.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/debug.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib/jquery.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib/json2.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib/jquery.tabs.pack.js"></script>
@@ -23,6 +24,8 @@
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/fireinputPrefs.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/server/login.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/tablemgr/tablemgr.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/fireinputIME.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/store/storeword.js"></script>
 <style>
 .errorMsg { font-size: 15px; color: red; }
 #toggleKeySuggestion {font-size:13px; color:#CC8B14;cursor: pointer;display: none;}
@@ -30,7 +33,7 @@
 #keySuggestion .keySuggestionNote {margin: 5px 0px;padding: 0px;font-size: 11px;color: #6F706C;}
 #keySuggestionData span { padding: 0; margin: 0 5px 0 5px; font-size: 15px;}
 #keySuggestionData input { padding: 0px; margin: 0px;height: 12px;width: 12px;}
-.helpMsg { font-size: 80%; font-style: italic; color: green}
+.helpMsg { display: inline; font-size: 80%; font-style: italic; color: green}
 </style>
 
 <script type="text/javascript">
@@ -217,19 +220,19 @@ $(function() {
        <div id="importWordForm" style="margin: 0px 3px 0px 7px; font-size: 14px">
          <div style="">你可以导入自己的词库, 火输的导入程序支持以下的格式:  
            <ul>
-             <li><div> 词组 </div><div class="helpMsg" style="margin-left: 10px">(例如: 天各一方)</div></li>
-             <li><div> 词组=拼音 </div> <div class="helpMsg" style="margin-left: 10px">(例如: 天各一方=tian ge yi fang)</div></li>
-             <li><div> 词频 词组=拼音 </div><div class="helpMsg" style="margin-left:10px">(例如: 1000 天各一方=tian ge yi fang) </div></li>
-             <li><div> 词频 词组 </div><div class="helpMsg" style="margin-left:10px">(例如: 1000 天各一方)</div></li>
+             <li><div> 词组 <span class="helpMsg" style="margin-left: 10px">(例如: 天各一方)</span></li>
+             <li><div> 词组=拼音 <span class="helpMsg" style="margin-left: 10px">(例如: 天各一方=tian ge yi fang)</span></li>
+             <li><div> 词频 词组=拼音 <span class="helpMsg" style="margin-left:10px">(例如: 1000 天各一方=tian ge yi fang) </span></li>
+             <li><div> 词频 词组 <span class="helpMsg" style="margin-left:10px">(例如: 1000 天各一方)</span></li>
            </ul>
          </div>
          <div style="margin-top: 0px">
            <table cellspacing=0 cellpadding=7 border=0>
               <tr><td></td><td><div id="importFormError" class="errorMsg">&nbsp;</div></td></tr>
               <tr>
-                  <td valign="middle">选择本地词库文件: </td>
+                  <td valign="middle" width="120px">选择本地词库文件: </td>
                   <td style="background-color: #eee;">
-                    <input id="importFile" type="file" name="NewFile" size="40">
+                    <input id="importFile" type="file" name="NewFile" size=35>
                     <span id="importPercent"></span><img id="importLoading" style="display:none" src="chrome://fireinput/skin/loading.gif"/>
                   </td>   
               </tr>
@@ -239,11 +242,16 @@ $(function() {
               </tr>
            </table>
          </div>
+         <div id="importedArea" style="margin:10px 0 0 7px; display: none">
+           <div style="font-size: 120%; font-weight: 700">已导入词库</div>
+           <div id="importedLinks" style="margin: 10px 0px 20px 120px;">
+           </div>  
+         </div> <!-- downloadLinkArea -->
          <div id="downloadLinkArea" style="margin:10px 0 0 7px; display: none">
            <div style="font-size: 120%; font-weight: 700">直接下载网络词库</div>
            <div> <span style="font-size: 80%; color:#ddd">(所有词库均来自网络, 版权归各自网站所有)</span>
            </div>
-           <div id="downloadLinks" style="margin: 10px 0px 20px 150px">
+           <div id="downloadLinks" style="margin: 10px 0px 20px 120px; padding: 7px">
            </div>  
          </div> <!-- downloadLinkArea -->
        </div>            
