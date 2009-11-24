@@ -7,6 +7,8 @@ all: $(XPTS)
 #	$(IDLC) -m typelib -w -v -I $(INC) -e $(@) $(<)
 %.xpt: %.idl
 	$(IDLC) -m typelib -w -v -I $(INC) -e $(@) $(<)
+	cp -f *.js ../components/
+	cp -f *.xpt ../components/
 
 .PHONY: all
 
