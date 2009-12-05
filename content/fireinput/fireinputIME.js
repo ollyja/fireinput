@@ -77,6 +77,11 @@ FireinputIME.prototype =
        return "/chrome/data/cangjie5_table";
     },
 
+    getZhengmaFile: function()
+    {
+       return "/chrome/data/zhengma_table";
+    },
+
     getUserDataFile: function()
     {
        return "/userwordtable.fireinput";

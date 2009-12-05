@@ -34,15 +34,15 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var Wubi = function()  {}; 
+var Zhengma = function()  {}; 
 
-Wubi.prototype =  extend(new FireinputIME(), 
+Zhengma.prototype =  extend(new FireinputIME(), 
 {
     // 0 to disable debug or non zero to enable debug 
     debug: 1, 
 
     // the name of IME 
-    name: IME_WUBI,
+    name: IME_ZHENGMA,
 
     // array to keep all matched words 
     charArray: null,
@@ -53,16 +53,16 @@ Wubi.prototype =  extend(new FireinputIME(),
     // invalid input key 
     validInputKey: null,
 
-    // the hash table for wubi key=> word
-    keyWubiHash: null, 
+    // the hash table for zhengma key=> word
+    keyZhengmaHash: null, 
 
-    // the hash table for wubi word=>key for learning 
-    wordWubiHash: null, 
+    // the hash table for zhengma word=>key for learning 
+    wordZhengmaHash: null, 
 
     // the hash table for user frequency 
     userCodeHash: null, 
 
-    // the wubi key map in format of z 
+    // the zhengma key map in format of z 
     keyMapTable: null, 
 
     // use code hash table event 
@@ -72,7 +72,7 @@ Wubi.prototype =  extend(new FireinputIME(),
     letterConverter: null, 
 
     // pinyin Schema 
-    wubiSchema: null, 
+    zhengmaSchema: null, 
 
     // encoding mode. Either simplified or big5. Simplified default. 
     encodingMode: ENCODING_ZH, 
@@ -93,7 +93,7 @@ Wubi.prototype =  extend(new FireinputIME(),
 
        // setTimeout to not block firefox start
        var self = this; 
-       setTimeout(function() { return self.loadWubiTable(); }, 500); 
+       setTimeout(function() { return self.loadZhengmaTable(); }, 500); 
 
        // init encoding table 
        FireinputEncoding.init(); 
@@ -131,26 +131,33 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     getCodeLine: function(str)
     {
-       var strArray = str.split(':');
-       if(strArray.length < 2)
+       var strArray = str.split(' ');
+       if(strArray.length < 1)
           return;
 
-       // key=>word1, word2 
-       this.keyWubiHash.setItem(strArray[0],strArray[1]);
+       // key word1 word2 
+       var key = strArray.shift();
+
+       if(this.keyZhengmaHash.hasItem(key))
+       {
+          this.keyZhengmaHash.setItem(key, this.keyZhengmaHash.getItem(key) + "," + strArray.join(","));
+       }
+       else
+          this.keyZhengmaHash.setItem(key,strArray.join(","));
 
        // build key map table in a format as: 
        // a => { "z" => array(), "zz" => array(), "zzz"=> array(), "zzzz"=> array()}
        
-       var initialChar = strArray[0].substring(0,1);
+       var initialChar = key.substring(0,1);
        if(this.keyMapTable.hasItem(initialChar))
        {
           var keyTable = this.keyMapTable.getItem(initialChar); 
-          this.insert(keyTable, strArray[0]); 
+          this.insert(keyTable, key); 
        }
        else
        {
           var keyTable = new Object(); 
-          this.insert(keyTable, strArray[0]); 
+          this.insert(keyTable, key); 
           this.keyMapTable.setItem(initialChar, keyTable);
        }
        
@@ -161,7 +168,7 @@ Wubi.prototype =  extend(new FireinputIME(),
        this.keyMapTable.foreach(function(k, v) { for(var s in v) { v[s] = v[s].sort(); } }); 
     }, 
 
-    loadWubiTable: function()
+    loadZhengmaTable: function()
     {
        var ios = FireinputXPC.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
@@ -169,12 +176,9 @@ Wubi.prototype =  extend(new FireinputIME(),
 
        var path = this.getDataPath(); 
        var datafile = ""; 
-       if(this.wubiSchema == WUBI_86)
-          datafile = fileHandler.getFileFromURLSpec(path + this.getWubi86File()); 
-       if(this.wubiSchema == WUBI_98)
-          datafile = fileHandler.getFileFromURLSpec(path + this.getWubi98File()); 
+       datafile = fileHandler.getFileFromURLSpec(path + this.getZhengmaFile()); 
        
-       this.keyWubiHash = new FireinputHash();
+       this.keyZhengmaHash = new FireinputHash();
        this.keyMapTable = new FireinputHash(); 
 
        if(!datafile.exists())
@@ -195,10 +199,10 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     updateUserCodeValue: function(key, word, freq)
     {
-       if(this.keyWubiHash.hasItem(key))
+       if(this.keyZhengmaHash.hasItem(key))
        {
 
-          var phrase = this.keyWubiHash.getItem(key);
+          var phrase = this.keyZhengmaHash.getItem(key);
           var regex = new RegExp(word + "\\d+", "g");
           var oldWordFreq = phrase.match(regex);
           if(oldWordFreq)
@@ -207,12 +211,12 @@ Wubi.prototype =  extend(new FireinputIME(),
           }
 
           phrase = word+freq + "," + phrase;
-          this.keyWubiHash.setItem(key, phrase);
+          this.keyZhengmaHash.setItem(key, phrase);
 
           return;
        }
        //the initKey is not in hash. Add it in  
-       this.keyWubiHash.setItem(key, word+freq);
+       this.keyZhengmaHash.setItem(key, word+freq);
     },
      
     getUserCodeLine: function(str)
@@ -229,7 +233,7 @@ Wubi.prototype =  extend(new FireinputIME(),
        else
        {
           this.userCodeHash.setItem(strArray[1]+":"+strArray[3], {freq: strArray[2], initKey: strArray[4], schema: strArray[0]});
-          if(strArray[0] == this.wubiSchema)
+          if(strArray[0] == this.zhengmaSchema)
              this.updateUserCodeValue(strArray[3], strArray[1], strArray[2]);
        }      
 
@@ -266,12 +270,12 @@ Wubi.prototype =  extend(new FireinputIME(),
        if(strArray.length < 5)
           return;
 
-       // for wubi, we only care about the first 3 values 
+       // for zhengma, we only care about the first 3 values 
        var word = "";
        var freq = "";
        var key = "";
 
-       if(strArray[0] != this.wubiSchema)
+       if(strArray[0] != this.zhengmaSchema)
           return; 
 
        word = strArray[1];
@@ -308,12 +312,9 @@ Wubi.prototype =  extend(new FireinputIME(),
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
        var path = this.getDataPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getWubi86File());
+       var datafile = fileHandler.getFileFromURLSpec(path + this.getZhengmaFile());
        if(!datafile.exists())
        {
-          datafile = fileHandler.getFileFromURLSpec(path + this.getWubi98File());
-          if(datafile.exists())
-             return true; 
           return false; 
        }
 
@@ -329,10 +330,7 @@ Wubi.prototype =  extend(new FireinputIME(),
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
  
        var path = this.getDataPath();
-       if(this.wubiSchema == WUBI_86)
-          datafile = fileHandler.getFileFromURLSpec(path + this.getWubi86File()); 
-       if(this.wubiSchema == WUBI_98)
-          datafile = fileHandler.getFileFromURLSpec(path + this.getWubi98File()); 
+       var datafile = fileHandler.getFileFromURLSpec(path + this.getZhengmaFile()); 
        if(!datafile.exists())
        {
           return false;
@@ -353,18 +351,18 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     getIMEType: function()
     {
-       return  this.wubiSchema;
+       return  this.zhengmaSchema;
     },
 
     setSchema: function(schema)
     {
        //FireinputLog.debug(this, "Set schema: " + schema);
-       this.wubiSchema = schema; 
+       this.zhengmaSchema = schema; 
     }, 
 
     getSchema: function()
     {
-       return this.wubiSchema; 
+       return this.zhengmaSchema; 
     }, 
 
     getAllowedInputKey: function()
@@ -394,6 +392,7 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     find: function(inputChar)
     {
+       FireinputLog.debug(this,"inputChar: " + inputChar);
        var s = inputChar; 
        var retArray = null;
 
@@ -497,7 +496,8 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     getValidWord: function(key)
     {
-       if(key.indexOf('z') < 0)
+       FireinputLog.debug(this,"key: " + key);
+       if(key.indexOf('z') <= 0)
        {
           return this.getValidWordWithKey(key); 
        }
@@ -537,25 +537,34 @@ Wubi.prototype =  extend(new FireinputIME(),
        if(!key)
           return null; 
 
-       if(!this.keyWubiHash.hasItem(key))
+       if(!this.keyZhengmaHash.hasItem(key))
+       {
+          // if first key is z, try zmode 
+          if(key.substr(0, 1) == 'z')
+          {
+             return FireinputSpecialChar.getZMode(key);
+          }
+
           return null; 
- 
+       }
+  
        // only enable autoinsertion for 4 keys 
        if(key.length >= 4)
           this.autoInsertion = true; 
 
-       var wubiWordList = this.keyWubiHash.getItem(key); 
+       var zhengmaWordList = this.keyZhengmaHash.getItem(key); 
 
-       var wubiWordArray = wubiWordList.split(","); 
+       FireinputLog.debug(this,"zhengmaWordList: " + zhengmaWordList);
+       var zhengmaWordArray = zhengmaWordList.split(","); 
 
        wordArray = new Array(); 
 
-       for(var i=0; i < wubiWordArray.length; i++)
+       for(var i=0; i < zhengmaWordArray.length; i++)
        {
           var word = ""; 
           try 
           {
-             word = wubiWordArray[i].match(/[\D\.]+/g)[0];
+             word = zhengmaWordArray[i].match(/[\D\.]+/g)[0];
           }        
           catch(e) {}
 
@@ -579,14 +588,28 @@ Wubi.prototype =  extend(new FireinputIME(),
           }
           else
           {
-             var freq = wubiWordArray[i].match(/[\d\.]+/g)[0];
-             wordArray[wordArray.length] = {key:key, word:wubiWordArray[i], encodedWord:encodedWord+freq};
+             var freq = zhengmaWordArray[i].match(/[\d\.]+/g); 
+             if(freq)
+                freq = freq[0];
+             else
+                freq = 0;
+
+             wordArray[wordArray.length] = {key:key, word:zhengmaWordArray[i], encodedWord:encodedWord+freq};
           }
        }
 
        // free it 
        wordList = null;
-       //FireinputLog.debug(this,"wordArray: " + this.getKeyWord(wordArray));
+
+       // append zmode list 
+       // if first key is z, try zmode 
+       if(key.substr(0, 1) == 'z')
+       {
+          var zArray =  FireinputSpecialChar.getZMode(key);
+          if(zArray)
+            arrayInsert(wordArray, wordArray.length, zArray.slice(0, zArray.length));
+       }
+
        if(userArray.length <= 0)         
           return wordArray; 
 
@@ -603,7 +626,7 @@ Wubi.prototype =  extend(new FireinputIME(),
           arrayInsert(userArray, userArray.length, wordArray.slice(0, wordArray.length)); 
        }
 
-       //FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
+       // FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
        return userArray; 
     },
 
@@ -651,7 +674,7 @@ Wubi.prototype =  extend(new FireinputIME(),
        }
        freq = Math.round(newfreq) + parseInt(freq); 
 
-       this.userCodeHash.setItem(chars+":"+key , {freq: freq, initKey: initKey, schema: this.wubiSchema});
+       this.userCodeHash.setItem(chars+":"+key , {freq: freq, initKey: initKey, schema: this.zhengmaSchema});
 
        this.userTableChanged = true; 
 

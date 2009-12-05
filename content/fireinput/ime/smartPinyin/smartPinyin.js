@@ -1564,22 +1564,27 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           if(i < (userPhrase.length - 1))
              keys += " "; 
        }
+      
+       this.storeUserAddPhrase(phrase, keys);
+    }, 
 
-       validInitialKey = this.getPhraseInitKey(keys); 
+    storeUserAddPhrase: function(phrase, keys, freq, initialKey)
+    { 
+       if(!initialKey)
+          initialKey = this.getPhraseInitKey(keys); 
 
        // FireinputLog.debug(this,"keys: " + keys + ", phrase: " + phrase);
-       FireinputLog.debug(this,"storeUserPhrase, validInitialKey: " + validInitialKey);
        if(!this.userCodeHash)
           this.userCodeHash = new FireinputHash();
 
        if(this.userCodeHash.hasItem(phrase + ":" + keys))
           return; 
 
-       var freq = this.updateFrequency(phrase+0, keys, validInitialKey, true); 
+       freq = this.updateFrequency(phrase+freq, keys, initialKey, true); 
        // FireinputLog.debug(this,"freq: " + freq);
        FireinputLog.debug(this, "phrase: " + phrase + ", freq: " + freq); 
 
-       this.updatePhraseTable(phrase, keys, freq, validInitialKey); 
+       this.updatePhraseTable(phrase, keys, freq, initialKey); 
     }, 
 
     storeOneUpdatePhraseWithFreq: function(phrase, keys, freq, initialKey)

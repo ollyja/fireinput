@@ -48,6 +48,7 @@ const LANGUAGE_ZH   = "zh";
 const IME_SMART_PINYIN = "Smart Pinyin"; 
 const IME_WUBI         = "Wubi"; 
 const IME_CANGJIE      = "Cangjie"
+const IME_ZHENGMA      = "Zhengma"
 
 // Smart Pinyin Keyboard schema 
 const SMART_PINYIN          = "1"; 
@@ -58,6 +59,7 @@ const SMARTABC_SHUANGPIN    = "5";
 const WUBI_86               = "6"; 
 const WUBI_98               = "7"; 
 const CANGJIE_5             = "8";
+const ZHENGMA               = "9";
 
 // Pinyin key type 
 const KEY_FINAL   = 1;

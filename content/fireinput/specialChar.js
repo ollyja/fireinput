@@ -425,6 +425,8 @@ var FireinputSpecialChar =
     {
        var ivalue = []; 
 
+       if(!key || key.length <= 0)
+          return ivalue; 
        for(var i = iMode.length-1; i>=0; i--)
        {
           var ikey = 'i' + iMode[i].key; 
@@ -445,14 +447,55 @@ var FireinputSpecialChar =
        }
 
        return ivalue; 
-    }
+    }, 
 
+    getZMode: function(key)
+    {
+       var ivalue = []; 
+
+       if(!key || key.length <= 0)
+          return ivalue; 
+
+       for(var i = zMode.length-1; i>=0; i--)
+       {
+          var ikey = 'z' + zMode[i].key; 
+          if(ikey.indexOf(key) == 0)
+          {
+              var list = []; 
+              if((zMode[i].word).fn)
+                 list = (zMode[i].word).fn(); 
+              else 
+                 list = zMode[i].word; 
+
+              for(var j = 0; list && j<list.length; j++)
+              {
+                 // put it in a format which the display engine can recognize 
+                 ivalue[ivalue.length] = {key: ikey, word: FireinputUnicode.convertFromUnicode(list[j]), ufreq: 'false'}; 
+              }
+          }
+       }
+
+       return ivalue; 
+    }
 };              
 
 // short key for date, week, time 
 const iMode = [
                 {key: 'rq', word: { fn: FireinputSpecialChar.getMonth} },
+                {key: 'month', word: { fn: FireinputSpecialChar.getMonth} },
                 {key: 'sj', word: { fn: FireinputSpecialChar.getTime} },
-                {key: 'xq', word: { fn: FireinputSpecialChar.getWeek} }
+                {key: 'time', word: { fn: FireinputSpecialChar.getTime} },
+                {key: 'now', word: { fn: FireinputSpecialChar.getTime} },
+                {key: 'xq', word: { fn: FireinputSpecialChar.getWeek} },
+                {key: 'week', word: { fn: FireinputSpecialChar.getWeek} }
 ]; 
 
+const zMode = [
+                {key: 'rq', word: { fn: FireinputSpecialChar.getMonth} },
+                {key: 'month', word: { fn: FireinputSpecialChar.getMonth} },
+                {key: 'sj', word: { fn: FireinputSpecialChar.getTime} },
+                {key: 'time', word: { fn: FireinputSpecialChar.getTime} },
+                {key: 'now', word: { fn: FireinputSpecialChar.getTime} },
+                {key: 'xq', word: { fn: FireinputSpecialChar.getWeek} }, 
+                {key: 'week', word: { fn: FireinputSpecialChar.getWeek} }
+]; 

@@ -119,13 +119,13 @@ Cangjie.prototype = extend(new FireinputIME(),
 	  datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
        }
 
+       this.keyCangjieHash = new FireinputHash();
+
        if (!datafile.exists())
        {
        	  this.engineDisabled = true;
        	  return;
        }
-
-       this.keyCangjieHash = new FireinputHash();
 
        var options =
        {
@@ -166,13 +166,10 @@ Cangjie.prototype = extend(new FireinputIME(),
 
        if (strArray.length < 4) return;
 
-       // user data format: word: freq key initKey
-       // new user data format: schema: word: freq initKey  
+       // user data format: schema: word: freq initKey  
        if(isNaN(parseInt(strArray[0])))
        {
-          // hash as word:key 
-          this.userCodeHash.setItem(strArray[0]+":"+strArray[2], {freq: strArray[1], initKey: strArray[3], schema: this.cangjieSchema});
-          this.updateUserCodeValue(strArray[2], strArray[0], strArray[1]);
+          return; 
        }
        else
        {
@@ -489,7 +486,7 @@ Cangjie.prototype = extend(new FireinputIME(),
     {
        if (this.userCodeHash && this.userTableChanged)
        {
-       	  FireinputSaver.save(this.userCodeHash);
+       	  FireinputSaver.saveUserData(this.userCodeHash);
        }
     },
 
@@ -546,8 +543,21 @@ Cangjie.prototype = extend(new FireinputIME(),
        return;
     },
 
-    storeOneUserPhrase: function(userPhrase)
+    storeUserAddPhrase: function(phrase, keys, freq)
     {
-       return;
+      if(!this.userCodeHash)
+          this.userCodeHash = new FireinputHash();
+
+       if(this.userCodeHash.hasItem(phrase + ":" + keys))
+          return;
+
+       freq = this.updateFrequency(phrase+freq, keys);
+       this.updateUserCodeValue(keys, phrase, freq);
+    },
+
+    storeOneUpdatePhraseWithFreq: function(phrase, key, freq)
+    {
+       this.updateUserCodeValue(key, phrase, freq);
     }
+
 });

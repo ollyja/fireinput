@@ -58,6 +58,7 @@ var imeInterfaceUI = [
             {id: "menuWubi86", strKey: "fireinput.wubi86.label", attribute: "label"},
             {id: "menuWubi98", strKey: "fireinput.wubi98.label", attribute: "label"},
             {id: "menuCangjie5", strKey: "fireinput.cangjie5.label", attribute: "label"}, 
+            {id: "menuZhengma", strKey: "fireinput.zhengma.label", attribute: "label"}, 
             {id: "inputHistoryList", strKey: "fireinput.history.list", attribute: "label"},
             {id: "fireinputHelp", strKey: "fireinput.help.label", attribute: "label"},
             {id: "fireinputSearchButton", strKey: "fireinput.search.label", attribute: "value"},
@@ -185,48 +186,32 @@ top.Fireinput =
        os.addObserver(this, "quit-application-requested", false);
     }, 
 
-    getDefaultIME: function(schema)
+    getDefaultIME: function()
     {
-       if(typeof(schema) == 'undefined')
-          this.myIMESchema = fireinputPrefGetDefault("defaultInputMethod"); 
-       else
-          this.myIMESchema = schema; 
+       this.myIMESchema = fireinputPrefGetDefault("defaultInputMethod"); 
 
        var ime = null; 
 
        switch(this.myIMESchema)
        {
+          case ZHENGMA:
+             ime = new Zhengma();
+          break; 
           case CANGJIE_5:
              ime = new Cangjie();
-             if (!ime.isEnabled())
-             {
-                // if the default set is not valid, fall back to pinyin 
-                if(typeof(schema) == 'undefined')
-                   return this.getDefaultIME(SMART_PINYIN);
-                return null; 
-             }
           break; 
           case WUBI_86: 
           case WUBI_98: 
              ime = new Wubi(); 
-             if(!ime.isEnabled())
-             {
-                // if the default set is not valid, fall back to pinyin 
-                if(typeof(schema) == 'undefined')
-                   return this.getDefaultIME(SMART_PINYIN);
-                return null; 
-             }
           break; 
           default:
              ime = new SmartPinyin(); 
-             if(!ime.isEnabled() && typeof(schema) == 'undefined')
-             {
-                // if the default set is not valid, we search for other method in an order of wubi, canjei5 
-                ime = this.getDefaultIME(WUBI_86) ||  this.getDefaultIME(CANGJIE_5); 
-                return ime; 
-             }
           break; 
        }
+
+       // we cannot save ourself if ime is null.
+       if(!ime)
+         return null; 
 
        ime.setSchema(this.myIMESchema); 
        ime.loadTable();
@@ -240,10 +225,32 @@ top.Fireinput =
     toggleIMEMenu: function()
     {
        var hideIMEList = fireinputPrefGetDefault("hiddenInputMethod") || []; 
-       var wime = new Wubi(); 
+       var supportIMEList = fireinputPrefGetDefault("inputMethodList"); 
+       supportIMEList = supportIMEList ? supportIMEList.split(",") : []; 
+
+       // hide autoInsert first. AutoInsert is only for Wubi or Canjie(not sure)
+       var autoInsertHandle = document.getElementById("autoInsert"); 
+       autoInsertHandle.style.display = "none"; 
 
        // check for hidden IME list 
-       if(!wime.isEnabled() || inArray(hideIMEList,WUBI_86))
+       if(!inArray(supportIMEList, ZHENGMA) || inArray(hideIMEList,ZHENGMA))
+       {
+          var handle = document.getElementById("menuZhengma");
+          if(handle) handle.style.display = "none";
+          var handle = document.getElementById("imeZhengma");
+          if(handle) handle.style.display = "none";
+       }
+       else
+       {
+          this.myEnabledIME.push(ZHENGMA);
+          var handle = document.getElementById("menuZhengma");
+          if(handle) handle.style.display = "";
+          var handle = document.getElementById("imeZhengma");
+          if(handle) handle.style.display = "";
+          autoInsertHandle.style.display = "";
+       }
+       
+       if(!inArray(supportIMEList, WUBI_86) || inArray(hideIMEList,WUBI_86))
        {
           var handle = document.getElementById("menuWubi86"); 
           if(handle) handle.style.display = "none"; 
@@ -257,9 +264,10 @@ top.Fireinput =
           if(handle) handle.style.display = ""; 
           var handle = document.getElementById("imeWubi86"); 
           if(handle) handle.style.display = ""; 
+          autoInsertHandle.style.display = ""; 
        }
 
-       if(!wime.isEnabled() || inArray(hideIMEList,WUBI_98))
+       if(!inArray(supportIMEList, WUBI_98) || inArray(hideIMEList,WUBI_98))
        {
           var handle = document.getElementById("menuWubi98"); 
           if(handle) handle.style.display = "none"; 
@@ -275,9 +283,9 @@ top.Fireinput =
           var handle = document.getElementById("imeWubi98"); 
           if(handle) handle.style.display = ""; 
 
+          autoInsertHandle.style.display = ""; 
        } 
-       var cime = new Cangjie();
-       if(!cime.isEnabled() || inArray(hideIMEList,CANGJIE_5))
+       if(!inArray(supportIMEList,CANGJIE_5) || inArray(hideIMEList,CANGJIE_5))
        {
           var handle = document.getElementById("menuCangjie5");
           if(handle) handle.style.display = "none";
@@ -291,22 +299,11 @@ top.Fireinput =
           if(handle) handle.style.display = "";
           var handle = document.getElementById("imeCangjie5");
           if(handle) handle.style.display = "";
+
+          autoInsertHandle.style.display = ""; 
        }
     
-       if(!wime.isEnabled() && !cime.isEnabled())
-       {
-          // autoinsert is only for wubi or cangjie 
-          var handle = document.getElementById("autoInsert"); 
-          if(handle) handle.style.display = "none"; 
-       }
-       else
-       {
-          var handle = document.getElementById("autoInsert"); 
-          if(handle) handle.style.display = ""; 
-       }
-
-       var sime = new SmartPinyin(); 
-       if(!sime.isEnabled())
+       if(!inArray(supportIMEList,SMART_PINYIN))
        {
           var handle = document.getElementById("fireinputAMB"); 
           if(handle) handle.style.display = "none";
@@ -317,7 +314,7 @@ top.Fireinput =
           if(handle) handle.style.display = "";
        }
 
-       if(!sime.isEnabled() || inArray(hideIMEList,SMART_PINYIN))
+       if(!inArray(supportIMEList,SMART_PINYIN) || inArray(hideIMEList,SMART_PINYIN))
        {
           var handle = document.getElementById("menuPinyinQuan"); 
           if(handle) handle.style.display = "none"; 
@@ -334,7 +331,7 @@ top.Fireinput =
         
        }
    
-       if(!sime.isEnabled() || inArray(hideIMEList,ZIGUANG_SHUANGPIN))
+       if(!inArray(supportIMEList,ZIGUANG_SHUANGPIN) || inArray(hideIMEList,ZIGUANG_SHUANGPIN))
        {
           var handle = document.getElementById("menuPinyinShuangZiGuang"); 
           if(handle) handle.style.display = "none"; 
@@ -350,7 +347,7 @@ top.Fireinput =
           if(handle) handle.style.display = ""; 
        }
   
-       if(!sime.isEnabled() || inArray(hideIMEList,MS_SHUANGPIN))
+       if(!inArray(supportIMEList,MS_SHUANGPIN) || inArray(hideIMEList,MS_SHUANGPIN))
        {
           var handle = document.getElementById("menuPinyinShuangMS"); 
           if(handle) handle.style.display = "none"; 
@@ -366,7 +363,7 @@ top.Fireinput =
           if(handle) handle.style.display = ""; 
        }
   
-       if(!sime.isEnabled() || inArray(hideIMEList,CHINESESTAR_SHUANGPIN))
+       if(!inArray(supportIMEList, CHINESESTAR_SHUANGPIN) || inArray(hideIMEList,CHINESESTAR_SHUANGPIN))
        {
           var handle = document.getElementById("menuPinyinShuangChineseStar"); 
           if(handle) handle.style.display = "none"; 
@@ -382,7 +379,7 @@ top.Fireinput =
           if(handle) handle.style.display = ""; 
        }
 
-       if(!sime.isEnabled() || inArray(hideIMEList,SMARTABC_SHUANGPIN))
+       if(!inArray(supportIMEList, SMARTABC_SHUANGPIN) || inArray(hideIMEList,SMARTABC_SHUANGPIN))
        {
           var handle = document.getElementById("menuPinyinShuangSmartABC"); 
           if(handle) handle.style.display = "none"; 
@@ -659,9 +656,19 @@ top.Fireinput =
           this.myIME.setSchema(method);
           this.myIME.loadTable();
        }
+       else if(method == ZHENGMA)
+       {
+          if(this.myIME)
+             this.myIME.flushUserTable();
+          this.myIME = null;
+          this.myIME = new Zhengma();
+          this.myIME.setSchema(method);
+          this.myIME.loadTable();
+       }
        else if(this.myIMESchema == WUBI_86 || 
                this.myIMESchema == WUBI_98 || 
-               this.myIMESchema == CANGJIE_5)
+               this.myIMESchema == CANGJIE_5 ||
+               this.myIMESchema == ZHENGMA)
        {
           // we need to load table only if the current schema is not pinyin schema. Otherwise just set new schema 
           if(this.myIME)
@@ -691,7 +698,7 @@ top.Fireinput =
 
        if(!this.myIME.isSchemaEnabled())
        { 
-          alert("火输中文输入: 对不起,此输入法字库没有安装,请到http://www.fireinput.com/forum/ 去下载字库"); 
+          alert("火输中文输入: 对不起,此输入法字库没有安装,请安装字库: 火输菜单->词库管理->导入词库"); 
           return; 
        }
     }, 

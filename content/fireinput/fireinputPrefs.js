@@ -37,6 +37,7 @@ const prefNames =
 [
     {name: "interfaceLanguage", type: "STRING", value: LANGUAGE_ZH},
     {name: "defaultInputMethod", type: "STRING", value: SMART_PINYIN},
+    {name: "inputMethodList", type: "STRING", value: ""},
     {name: "defaultInputEncoding", type: "STRING", value: ENCODING_ZH},
     {name: "saveHistory", type: "BOOL", value: true},
     {name: "autoInsert", type: "BOOL", value: true},
@@ -100,6 +101,7 @@ const prefInterfaceUI = [
             {id: "imeWubi86", strKey: "fireinput.wubi86.label", attribute: "label"},
             {id: "imeWubi98", strKey: "fireinput.wubi98.label", attribute: "label"},
             {id: "imeCangjie5", strKey: "fireinput.cangjie5.label", attribute: "label"},
+            {id: "imeZhengma", strKey: "fireinput.zhengma.label", attribute: "label"},
             {id: "fireinputAMB", strKey: "fireinput.pref.amb.label", attribute: "label"},
             {id: "imeAdvancedConfig", strKey: "fireinput.pref.ime.advanced.label", attribute: "label"},
             {id: "configHotKey", strKey: "fireinput.pref.hotkey.config.label", attribute: "label"},

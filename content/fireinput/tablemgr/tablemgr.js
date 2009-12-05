@@ -267,6 +267,30 @@ Cangjie5Input.prototype = extend(new KeyInput(),
     }
 });
 
+var ZhengmaInput = function() { };
+
+ZhengmaInput.prototype = extend(new KeyInput(),
+{
+    validateInputKey: function(inputkey)
+    {
+       var allowedkeys = "abcdefghijklmnopqrstuvwxyz";
+       for(i = inputkey.length -1; i > 0; i--)
+       {
+          var s = inputkey.substr(i, 1);
+          if(!allowedkeys.indexOf(s))
+              return false;
+       }
+       return true;
+    },
+
+    parseKeys: function(inputchar)
+    {
+       if(inputchar.length > 5 || inputchar.length <= 0)
+          return null;
+       return inputchar;
+    }
+});
+
 
 var FireinputTableMgr = 
 {
@@ -441,26 +465,45 @@ var FireinputTableMgr =
     imeSelect: function()
     {
         var schema = fireinputPrefGetDefault("defaultInputMethod");
-        options = document.newWordForm.imetype; 
+        $("#newWordError").hide();
+        $("#newWordForm").show();
         switch(schema)
         { 
+           case ZHENGMA:
+             $("#importZhengmaFormat").show();
+             $("#addNewServer").attr("disabled", true);
+           break; 
            case CANGJIE_5:
+             $("#importCanjieFormat").show();
+             $("#addNewServer").attr("disabled", true);
+           break; 
+           case SMART_PINYIN: 
+             $("#importPinyinFormat").show();
+             $("#addNewServer").attr("disabled", false);
+           break; 
            case WUBI_98:
            case WUBI_86:
+             $("#addNewServer").attr("disabled", true);
+             $("#importWubiFormat").show();
+           break; 
+           default: 
              $("#newWordForm").fadeOut("fast", function() { 
                         $("#newWordError").fadeIn("fast"); 
              }); 
            break; 
-           case SMART_PINYIN: 
-             $("#newWordError").hide();
-             $("#newWordForm").show();
-             for (var i = 0; i < options.length; i++)  
-             {
-               if(options[i].value == schema)
-                  options[i].selected = true; 
-             }
-           break; 
-        } 
+        }
+ 
+        options = document.newWordForm.imetype; 
+        for (var i = 0; i < options.length; i++)  
+        {
+           if(options[i].value == schema)
+           {
+              options[i].selected = true; 
+              options[i].disabled = false; 
+           }
+           else 
+              options[i].disabled = true; 
+        }
     }, 
 
     imeChange: function(sel)
@@ -495,6 +538,9 @@ var FireinputTableMgr =
            break; 
            case CANGJIE_5:
               parser = new Canjie5Input(); 
+           break; 
+           case ZHENGMA:
+              parser = new ZhengmaInput(); 
            break; 
            default: 
               this.showError("对不起,不支持此输入法");
@@ -578,8 +624,8 @@ var FireinputTableMgr =
         var notification = 0; 
         switch(imetype)
         {
+           case ZHENGMA:
            case CANGJIE_5:
-             notification = (schema == imetype) ? 1 : 0; 
            case WUBI_98:
            case WUBI_86:
              notification = (schema == imetype) ? 1 : 0; 
@@ -607,7 +653,7 @@ var FireinputTableMgr =
            try {
               var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
               var ime = gs.getChromeWindow().getFireinput().getCurrentIME();
-              ime.storeOneUpdatePhrase(inputword + "0:" + inputkey);  
+              ime.storeUserAddPhrase(inputword, inputkey, 0); 
               this.showError("<div style='margin-left: 8px; color: green'>成功加入</div>");
            }
            catch(e)
@@ -961,9 +1007,14 @@ var FireinputTableMgr =
  
    loadDownloadTableList: function()
    {
+      // only show pinyin phrase list 
+      var schema = fireinputPrefGetDefault("defaultInputMethod");
+      if(schema != SMART_PINYIN)
+         return;
+
       var ajax = new Ajax();
        if(!ajax)
-          return;
+         return;
 
        var self = this;
 

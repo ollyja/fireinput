@@ -581,6 +581,9 @@ var FireinputUtils =
           case CANGJIE_5:
              return this.getLocaleString('fireinput.cangjie5.label' + defaultLanguage);
           break;
+          case ZHENGMA:
+             return this.getLocaleString('fireinput.zhengma.label' + defaultLanguage);
+          break;
        }
 
        return "";

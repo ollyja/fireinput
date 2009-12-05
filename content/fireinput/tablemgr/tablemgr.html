@@ -144,6 +144,7 @@ $(function() {
                    <option value="6" disabled>五笔86</option>
                    <option value="7" disabled>五笔98</option>
                    <option value="8" disabled>仓颉5</option>
+                   <option value="9" disabled>郑码</option>
                   </select>
                </td>
              </tr>
@@ -219,11 +220,23 @@ $(function() {
     <div id="importWord">
        <div id="importWordForm" style="margin: 0px 3px 0px 7px; font-size: 14px">
          <div style="">你可以导入自己的词库, 火输的导入程序支持以下的格式:  
-           <ul>
+           <ul id="importPinyinFormat" style="display: none">
              <li><div> 词组 <span class="helpMsg" style="margin-left: 10px">(例如: 天各一方)</span></li>
              <li><div> 词组=拼音 <span class="helpMsg" style="margin-left: 10px">(例如: 天各一方=tian ge yi fang)</span></li>
              <li><div> 词频 词组=拼音 <span class="helpMsg" style="margin-left:10px">(例如: 1000 天各一方=tian ge yi fang) </span></li>
              <li><div> 词频 词组 <span class="helpMsg" style="margin-left:10px">(例如: 1000 天各一方)</span></li>
+           </ul>
+           <ul id="importWubiFormat" style="display: none">
+             <li><div> 词组=五笔输入键 <span class="helpMsg" style="margin-left: 10px">(例如: 天各一方=ggyf)</span></li>
+             <li><div> 词频 词组=五笔输入键 <span class="helpMsg" style="margin-left: 10px">(例如: 1000 天各一方=ggyf)</span></li>
+           </ul>
+           <ul id="importCanjieFormat" style="display: none">
+             <li><div> 词组=仓颉输入键 <span class="helpMsg" style="margin-left: 10px">(例如: 天各一方=ggyf)</span></li>
+             <li><div> 词频 词组=仓颉输入键 <span class="helpMsg" style="margin-left: 10px">(例如: 1000 天各一方=ggyf)</span></li>
+           </ul>
+           <ul id="importZhengmaFormat" style="display: none">
+             <li><div> 词组=郑码输入键 <span class="helpMsg" style="margin-left: 10px">(例如: 天各一方=aras)</span></li>
+             <li><div> 词频 词组=郑码输入键 <span class="helpMsg" style="margin-left: 10px">(例如: 1000 天各一方=aras)</span></li>
            </ul>
          </div>
          <div style="margin-top: 0px">

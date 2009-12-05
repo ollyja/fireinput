@@ -14,14 +14,13 @@
     <em:description>Fireinput Chinese IME</em:description>
     <em:creator>Olly Ja</em:creator>
     <em:homepageURL>http://www.fireinput.com</em:homepageURL>
-    <em:updateURL>https://www.fireinput.com/releases/update.wubi.rdf</em:updateURL>
     <em:iconURL>chrome://fireinput/skin/fireinput.png</em:iconURL>
 
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>1.5</em:minVersion>
-        <em:maxVersion>3.5.*</em:maxVersion>
+        <em:minVersion>3.5</em:minVersion>
+        <em:maxVersion>3.6.*</em:maxVersion>
       </Description>
     </em:targetApplication>
 

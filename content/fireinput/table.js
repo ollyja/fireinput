@@ -412,7 +412,10 @@ var FireinputImporter = {
        var IME = new FireinputIME();
        var datafile = fileHandler.getFileFromURLSpec(path + IME.getExtDataFile());
        if(!datafile.exists())
+       {
+          callback();
           return;
+       }
 
        this.extPhraseCodeHash = new FireinputHash();
 
