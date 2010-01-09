@@ -293,7 +293,6 @@ var FireinputUtils =
                  {
                      var f = node.getAttribute("oninput"); 
                      try {
-                        eval(f); 
                      } catch(e) { }
                  }
              }
