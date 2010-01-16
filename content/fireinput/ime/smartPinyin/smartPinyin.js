@@ -1440,7 +1440,12 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     updateFrequency: function(word, key, initKey, newPhrase, keepFreq)
     {
-       var freq = word.match(/[\d\.]+/g)[0];
+       var freq = word.match(/[\d\.]+/g); 
+       if(freq)
+          freq = freq[0];
+       else 
+          freq = 0; 
+
        var chars = word.match(/[\D\.]+/g)[0];
        if(!this.userCodeHash)
           this.userCodeHash = new FireinputHash();
