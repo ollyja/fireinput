@@ -165,6 +165,12 @@ FireinputIME.prototype =
     setFullPunctMode: function()
     {
        this.punctMode = FULL_PUNCT_MODE;    
+    },
+
+    getMaxAllowedKeys: function()
+    {
+       // default unlimited for pinyin 
+       return 0; 
     }
     
 };

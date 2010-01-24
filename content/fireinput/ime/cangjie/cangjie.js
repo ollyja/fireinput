@@ -241,6 +241,11 @@ Cangjie.prototype = extend(new FireinputIME(),
        return false;
     },
 
+    getMaxAllowedKeys: function()
+    {
+       return 0;
+    },
+
     setNumWordSelection: function(num)
     {
        this.numSelection = num > 9 ? 9 : (num < 1 ? 1: num);

@@ -340,7 +340,10 @@ var FireinputTableMgr =
    
           if(name == 'defaultInputMethod')
           {
+             this.toggleImportHelp(); 
              this.imeSelect(); 
+             this.loadDownloadTableList(); 
+             this.loadImportedTableList(); 
           } 
        }
 
@@ -480,6 +483,12 @@ var FireinputTableMgr =
            case SMART_PINYIN: 
              $("#importPinyinFormat").show();
              $("#addNewServer").attr("disabled", false);
+           break; 
+           case ZIGUANG_SHUANGPIN: 
+           case MS_SHUANGPIN: 
+           case CHINESESTAR_SHUANGPIN: 
+           case SMARTABC_SHUANGPIN: 
+             $("#importPinyinFormat").show();
            break; 
            case WUBI_98:
            case WUBI_86:
@@ -978,6 +987,15 @@ var FireinputTableMgr =
        }
    },
 
+   /* import functions */
+   toggleImportHelp: function()
+   {
+      $("#importPinyinFormat").hide(); 
+      $("#importWubiFormat").hide(); 
+      $("#importCanjieFormat").hide(); 
+      $("#importZhengmaFormat").hide(); 
+   }, 
+
    loadImportedTableList: function()
    {
        $("#importedArea").hide();
@@ -1008,8 +1026,12 @@ var FireinputTableMgr =
    loadDownloadTableList: function()
    {
       // only show pinyin phrase list 
+      $("#downloadLinkArea").hide(); 
+
       var schema = fireinputPrefGetDefault("defaultInputMethod");
-      if(schema != SMART_PINYIN)
+  
+      // only support pinyin now
+      if(schema > SMARTABC_SHUANGPIN)
          return;
 
       var ajax = new Ajax();

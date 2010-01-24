@@ -1672,7 +1672,7 @@ top.Fireinput =
              // initial key event (which is trggered when fireinput was initialized first time)
              this.myIMEInputBarStatus = true; 
 
-             // The reason I have put here is because textbox won't be able to initialize correctly without first assign the value 
+             // The reason I have to put here is because textbox won't be able to initialize correctly without first assign the value 
              // thus either idf.selectionEnd or idf.value will throw exception. It only happens when fireinput is loaded first time 
 	     var idf = document.getElementById("fireinputField");
              FireinputIMEPanel.setInputChar(key); 
@@ -1680,7 +1680,13 @@ top.Fireinput =
           } 
           else 
           {
-             var idf = document.getElementById("fireinputField");	
+             var idf = document.getElementById("fireinputField");
+             // if the input field meets the maxAllowedKeys, don't append 
+             if(this.myIME.getMaxAllowedKeys() > 0 && idf.value.length >= this.myIME.getMaxAllowedKeys())
+             {
+                return; 
+             }
+
              // see whether the caret is 
              if(idf.selectionEnd < idf.value.length)
              {

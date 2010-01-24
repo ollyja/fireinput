@@ -345,6 +345,11 @@ Wubi.prototype =  extend(new FireinputIME(),
     {
        return false; 
     },
+ 
+    getMaxAllowedKeys: function()
+    {
+       return 4; 
+    }, 
 
     setNumWordSelection: function(num)
     {
