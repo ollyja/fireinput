@@ -48,7 +48,11 @@ var FireinputXPC =
 
     getService: function(cName, ifaceName)
     {
-       return this.CC(cName).getService(this.CI(ifaceName));
+       if(ifaceName)
+          return this.CC(cName).getService(this.CI(ifaceName));
+       else 
+          return this.CC(cName).getService();
+
     },
 
     createInstance: function(cName, ifaceName)

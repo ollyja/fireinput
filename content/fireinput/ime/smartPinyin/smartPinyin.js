@@ -39,7 +39,7 @@ var SmartPinyin = function()  {};
 SmartPinyin.prototype =  extend(new FireinputIME(), 
 {
     // 0 to disable debug or non zero to enable debug 
-    debug: 0, 
+    debug: 1, 
 
     // the name of IME 
     name: IME_SMART_PINYIN, 
@@ -1531,7 +1531,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        return freq; 
     },
 
-    updatePhraseTable: function(phrase, keys, freq, validInitialKey)
+    updatePhraseTable: function(phrase, keys, freq, validInitialKey, updateKey)
     {
        FireinputLog.debug(this, "updatePhraseTable: " + phrase + ", freq: " + freq); 
        if(this.phraseCodeHash.hasItem(validInitialKey))
@@ -1542,6 +1542,10 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           var matched = nowPhrase.match(regex);
           if(matched)
           {
+             // don't update the key. It's possible the key is generated from importing, thus it may not be accurate 
+             if(!updateKey)
+                return; 
+
              nowPhrase = nowPhrase.replace(keys + "=>" + matched, "");  
           }
           this.phraseCodeHash.setItem(validInitialKey, keys + "=>" + phrase+freq + "," + nowPhrase); 
@@ -1589,7 +1593,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        // FireinputLog.debug(this,"freq: " + freq);
        FireinputLog.debug(this, "phrase: " + phrase + ", freq: " + freq); 
 
-       this.updatePhraseTable(phrase, keys, freq, initialKey); 
+       this.updatePhraseTable(phrase, keys, freq, initialKey, true); 
     }, 
 
     storeOneUpdatePhraseWithFreq: function(phrase, keys, freq, initialKey)
@@ -1607,7 +1611,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           return;
 
        FireinputLog.debug(this, "phrase: " + phrase + ", freq: " + freq);
-       this.updatePhraseTable(phrase, keys, freq, initialKey);
+       this.updatePhraseTable(phrase, keys, freq, initialKey, false);
     },
 
     getWordPinyin: function(word)

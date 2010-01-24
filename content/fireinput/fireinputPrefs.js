@@ -75,7 +75,11 @@ const prefNames =
     {name: "pageDownKey", type: "STRING", value: "3040"},
     {name: "selectFirstKey", type: "STRING", value: "512"},
     {name: "selectSecondKey", type: "STRING", value: "944"},
-    {name: "selectThirdKey", type: "STRING", value: "3056"}
+    {name: "selectThirdKey", type: "STRING", value: "3056"},
+
+    /*plugin features*/
+    {name: "enableContextReader", type: "BOOL", value: true}
+    
 ];
 
 const prefInterfaceUI = [ 

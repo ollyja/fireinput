@@ -40,6 +40,7 @@
 <script type="application/x-javascript" src="chrome://fireinput/content/table.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/help.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/md5.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/plugins/contextReader/readerThread.js"/>
 
 <commandset id="mainCommandSet">
 	<command id="cmd_focusSearchBox" oncommand="FireinputWebSearch.focusSearchbox();"/>

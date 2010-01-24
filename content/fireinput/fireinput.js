@@ -1919,3 +1919,11 @@ function fireinput_onPopupShowing(event)
     Fireinput.fireinputContext(event);
 }
 
+// monitor page loads and switches 
+window.addEventListener("load", function (e) {
+    gBrowser.addEventListener("load", function(event) {
+
+        if (event.target.defaultView && !event.target.defaultView.frameElement)
+             contextReader.run(event.target); 
+    }, true);
+},false); 

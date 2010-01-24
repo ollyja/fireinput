@@ -499,7 +499,7 @@ var FireinputImporter = {
        var ime = gs.getChromeWindow().getFireinput().getCurrentIME();
 
        var pinyin = ime.getWordPinyin(word);
-       FireinputLog.debug(this, "pinyin: " + pinyin);
+       //FireinputLog.debug(this, "pinyin: " + pinyin);
        if(!pinyin)
           return keyArray; 
 
@@ -557,7 +557,7 @@ var FireinputImporter = {
           }
 
        }
-       FireinputLog.debug(this, "build keyArray: " + keyArray.join(",")); 
+       //FireinputLog.debug(this, "build keyArray: " + keyArray.join(",")); 
 
     }, 
 
@@ -577,7 +577,7 @@ var FireinputImporter = {
           return null; 
        }
 
-       FireinputLog.debug(this, "word: " + FireinputUnicode.getUnicodeString(word));
+       //FireinputLog.debug(this, "word: " + FireinputUnicode.getUnicodeString(word));
        if(word)
        {
           phrase = phrase.substr(1, phrase.length);
@@ -585,8 +585,8 @@ var FireinputImporter = {
           this.getPhrasePinyinKey(phrase, keyArray);
        }
 
-       FireinputLog.debug(this, "return keyArray: " + keyArray.join(",")); 
-       FireinputLog.debug(this, "return keyArray.length: " + keyArray.length); 
+      // FireinputLog.debug(this, "return keyArray: " + keyArray.join(",")); 
+      // FireinputLog.debug(this, "return keyArray.length: " + keyArray.length); 
        return keyArray; 
     }, 
 
@@ -599,6 +599,9 @@ var FireinputImporter = {
        FireinputLog.debug(this, "line: " + line); 
        var pinyinkey = null; 
        var phraseFreq = null; 
+
+       var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+       var ime = gs.getChromeWindow().getFireinput().getCurrentIME();
 
        // supported format: 
        // phrase
@@ -618,6 +621,11 @@ var FireinputImporter = {
        {
           // must be freq phrase or phrase only 
           phraseFreq = line; 
+          if(ime.getIMEType() != SMART_PINYIN)
+          {
+             // for any non-pinyin importing, we need the key; ignore if the line doesn't have it 
+             return; 
+          }
        }
 
        if(phraseFreq)
@@ -634,7 +642,7 @@ var FireinputImporter = {
           }
           else
           {
-             // ignore if it's singal word 
+             // ignore if it's single word 
              if(phraseFreqItems[1].length <= 1)
                   return; 
 
@@ -642,14 +650,12 @@ var FireinputImporter = {
              freq = parseInt(phraseFreqItems[0]); 
           }
 
-          var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
-          var ime = gs.getChromeWindow().getFireinput().getCurrentIME();
           if(!pinyinkey)
           {
               var keys = this.getPhrasePinyinKey(phrase);
               if(!keys || keys.length <= 0)
                  return; 
-              FireinputLog.debug(this, "Got keys: " + keys.join(",")); 
+              FireinputLog.debug(this, "Phrase: " + phrase + ", Got keys: " + keys.join(",")); 
 
               phrase = FireinputUnicode.convertFromUnicode(phrase); 
               for(var i=0; i<keys.length; i++)
@@ -657,7 +663,9 @@ var FireinputImporter = {
                  var initialKey = ime.getPhraseInitKey(keys[i]);
                  ime.storeOneUpdatePhraseWithFreq(phrase, keys[i], freq, initialKey); 
                  // add it to ext phrase list
-                 this.addOneExtPhrase(phrase, keys[i], freq, initialKey, ime.getIMEType(), signature);
+                 // only update ext hash when signature is set. This is not true for on-demand processing 
+                 if(signature)
+                    this.addOneExtPhrase(phrase, keys[i], freq, initialKey, ime.getIMEType(), signature);
               }
 
            }
@@ -665,7 +673,9 @@ var FireinputImporter = {
            {
               var initialKey = ime.getPhraseInitKey(pinyinkey);
               ime.storeOneUpdatePhraseWithFreq(FireinputUnicode.convertFromUnicode(phrase), pinyinkey, freq, initialKey);         
-              this.addOneExtPhrase(FireinputUnicode.convertFromUnicode(phrase), keys[i], freq, initialKey, ime.getIMEType(), signature);
+              // only update ext hash when signature is set. This is not true for on-demand processing 
+              if(signature)
+                 this.addOneExtPhrase(FireinputUnicode.convertFromUnicode(phrase), keys[i], freq, initialKey, ime.getIMEType(), signature);
            }
        }
     }, 
@@ -704,6 +714,15 @@ var FireinputImporter = {
        }); 
     }, 
  
+    /* It's on demand processing which requires in-memory process only */
+    processPhraseFromRemoteOnDemand: function(lines, totalsize)
+    {
+       this.storePhrasePercent = 0; 
+       // process any insertion after loading is completed 
+       this.processPhraseFromLocal(lines, 0, totalsize);
+    }, 
+
+    /* The phrases will be saved into ext phrase table. */
     processPhraseFromRemote: function(lines, totalsize, signature)
     {
        this.storePhrasePercent = 0; 
@@ -753,13 +772,13 @@ var FireinputImporter = {
        FireinputLog.debug(this, "updatePhrase.length: " + updatePhrases.length);
        // load existing tables 
        this.loadExtPhraseTable(function() {
-          var signature = hex_md5("autoupdate");
+          var signature = hex_md5("火输词库更新");
           for(var i=0; i<updatePhrases.length; i++)
           {
              FireinputImporter.storeOneUpdatePhrase(updatePhrases[i], signature);
           }
           FireinputImporter.flushExtPhraseTable();
-          FireinputImporter.updateHistory(SERVER_URL + "table/index.php", "autoupdate");
+          FireinputImporter.updateHistory(SERVER_URL + "table/index.php", "火输词库更新");
        }); 
     },
 
