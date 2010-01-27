@@ -55,7 +55,7 @@
     <popup id="fireinputIMEContainer" ignorekeys="true" onpopupshowing="Fireinput.IMEWindowShowing()" onpopuphidden="Fireinput.IMEWindowHidden();" onpopupshown="Fireinput.IMEWindowShown();">
       <vbox id="fireinputIMEContainerBox" style="padding: 0px; margin:0px">
         <hbox style="margin: 1px 0px; padding:0px;">
-         <hbox id="fireinputComposeField" style="margin-right:1px">
+         <hbox id="fireinputComposeField" style="margin-right:1px;">
          </hbox>
          <textbox id="fireinputField" rows="1" flex="1" value="" 
            onmousedown="FireinputIMEPanel.IMEInputFieldMouseEvent(event)" 

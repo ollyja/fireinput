@@ -610,9 +610,23 @@ var FireinputUtils =
 
     notify: function(aSubject, aTopic, aData)
     {
-      var os = FireinputXPC.getService("@mozilla.org/observer-service;1", "nsIObserverService");
-      os.notifyObservers(aSubject, aTopic, aData); 
-      return true;
+       var os = FireinputXPC.getService("@mozilla.org/observer-service;1", "nsIObserverService");
+       os.notifyObservers(aSubject, aTopic, aData); 
+       return true;
+    }, 
+
+    getCurrentIME: function()
+    {
+       /* If we are being called inside of Fireinput, don't lookup XPCOM */
+       if(typeof(Fireinput) != 'undefined')
+       {
+          return Fireinput.getCurrentIME();
+       }
+       else
+       {
+          var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+          return ime = gs.getChromeWindow().getFireinput().getCurrentIME();
+       }
     }
 }; 
 

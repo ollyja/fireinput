@@ -48,8 +48,7 @@ var contextReader = {
           return; 
 
        /* only run contextReader when IME is SMART_PINYIN */
-       var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
-       if(gs.getChromeWindow().getFireinput().getCurrentIME().getIMEType() != SMART_PINYIN)
+       if(FireinputUtils.getCurrentIME().getIMEType() != SMART_PINYIN)
           return; 
 
        /*FIXME: do we need to use a different thread id ? */
@@ -70,8 +69,11 @@ var contextReader = {
              docCharset == "BIG5" || docCharset == "BIG5-HKSCS" || /^(EUC-TW|X-EUC-TW)$/.test(docCharset))
           {
              // valid charset. If the content length is too small, don't do any processing  
-             if(tab.defaultView.document.body.innerHTML.length > 100)
-                return true; 
+             try {
+                if(tab.defaultView.document.body.innerHTML.length > 100)
+                   return true; 
+             } catch(e) { }
+             
           }
        }
 
@@ -80,6 +82,9 @@ var contextReader = {
 
     start: function(str)
     {
+       if(!str)
+          return null; 
+
        var strLength = str.length;
        var phraseString = ""; 
        var phraseList = []; 

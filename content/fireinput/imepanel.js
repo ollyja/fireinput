@@ -37,7 +37,7 @@
 var FireinputIMEPanel = 
 {
     // debug: 0 disable, non-zero enable 
-    debug: 1,
+    debug: 0,
 
     myComposeEnabled: false, 
     // last input key chars before composing a new phrase 
@@ -203,12 +203,19 @@ var FireinputIMEPanel =
              codeValue = codeArray[i].encodedWord.replace(/[\d\.]+$/g, ''); 
           else
              codeValue = FireinputUnicode.getUnicodeString(codeArray[i].word.replace(/[\d\.]+$/g, '')); 
-             
+        
+          var codeDisplayValue = codeValue; 
+          if(i== 0 && FireinputComposer.hasSet())
+          {     
+             // preserve the first composed element if it's set 
+             codeDisplayValue = FireinputComposer.getComposeWord().value + codeValue; 
+          }
+
           var elementId = "fireinputIMEList_label" + (i+1); 
           if(document.getElementById(elementId))
           {
               var element = document.getElementById(elementId); 
-              element.setAttribute("value",  (i+1) + '.' + codeValue);
+              element.setAttribute("value",  (i+1) + '.' + codeDisplayValue);
               element.setAttribute("tooltiptext", "键: " + codeArray[i].key+"/右点搜索“"+codeValue+"”");
               element.setAttribute("hiddenvalue", codeValue);
               element.setAttribute("hiddenkey", codeArray[i].key);
@@ -220,7 +227,7 @@ var FireinputIMEPanel =
           }
                
            var element = document.createElement("label"); 
-           element.setAttribute("value",  (i+1) + '.' + codeValue);
+           element.setAttribute("value",  (i+1) + '.' + codeDisplayValue);
            element.setAttribute("tooltiptext", "键: " + codeArray[i].key+"/右点搜索“"+codeValue+"”");
            element.setAttribute("hiddenvalue", codeValue);
            element.setAttribute("hiddenkey", codeArray[i].key);
@@ -247,7 +254,7 @@ var FireinputIMEPanel =
 
        // add long table  to panel 
        if(this.mySaveHistory)
-          FireinputLongTable.addToPanel(); 
+          FireinputLongTable.notify(Fireinput.getTarget());
     },
  
     hideAndCleanInput: function()
@@ -272,6 +279,10 @@ var FireinputIMEPanel =
     {
        start = start || 0; 
 
+       /* preserve the first composed element if it's set */
+       if(FireinputComposer.hasSet())
+          start = start > 0 ? start : 1; 
+       
        for (var i = this.myNumWordSelection; i >= start; i--)
        {
           var elementId = "fireinputIMEList_label" + (i+1);
@@ -396,7 +407,7 @@ var FireinputIMEPanel =
        FireinputUtils.insertCharAtCaret(Fireinput.getTarget(), charstr);
        // add into long table 
        if(this.mySaveHistory)
-          FireinputLongTable.addIntoLongTable(Fireinput.getTarget().target,charstr);
+          FireinputLongTable.notify(Fireinput.getTarget());
     }, 
 
     insertCharToTarget: function (event, target, i, hideInput, outputAll)
@@ -503,7 +514,7 @@ var FireinputIMEPanel =
              Fireinput.getCurrentIME().updateFrequency(word, key);
 
           if(this.mySaveHistory)
-             FireinputLongTable.addIntoLongTable(target.target, insertValue);
+             FireinputLongTable.notify(Fireinput.getTarget());
        }   
     },
 
@@ -629,7 +640,7 @@ var FireinputIMEPanel =
        this.myKeyTimer = setTimeout(function () { self.findChar(); }, delayMSec); 
     },
  
-    findChar: function()
+    findChar: function(newKeyFlag)
     {
       
        if(this.myInputChar.length <= 0)
@@ -642,8 +653,17 @@ var FireinputIMEPanel =
 
        FireinputLog.debug(this, "findChar: " + this.myInputChar);
  
+       var autoCompKeys = ""; 
+       if(newKeyFlag && Fireinput.getCurrentIME().canComposeNew() && FireinputComposer.hasSet())
+       {
+          /* Fireinput might have composed a few, but it may not be accurate. If there is a new key in, 
+           * redo the composition, so there might be a chance to get correct result 
+           */
+          autoCompKeys = FireinputComposer.getLastAutoSelected(); 
+          /* Note: don't directly change this.myInputChar as it syncs with inputField position */
+       } 
        // send to IME method to query the string 
-       var result = Fireinput.getCurrentIME().find(this.myInputChar, singleWord, this.myInputKeyExactMatch);
+       var result = Fireinput.getCurrentIME().find(autoCompKeys+this.myInputChar, singleWord, this.myInputKeyExactMatch);
        this.sendStringToPanel(result.charArray, result.validInputKey);
        if(!result.charArray || result.charArray.length < this.myNumWordSelection)
           this.disableSelButton(true, true); 
@@ -657,10 +677,12 @@ var FireinputIMEPanel =
 
        FireinputLog.debug(this, "result.validInputKey: " + result.validInputKey);
        FireinputLog.debug(this, "this.myInputChar: " + this.myInputChar);
+
+       /* sanity check. autoCompKeys must be considered since it was part of search keys */
        if(result && result.charArray && result.charArray.length > 0 && 
-          this.myInputChar.length > result.validInputKey.length)
+          (autoCompKeys.length + this.myInputChar.length) > result.validInputKey.length)
        {
-          var newvalue = this.myInputChar.substr(result.validInputKey.length, this.myInputChar.length); 
+          var newvalue = (autoCompKeys+this.myInputChar).substr(result.validInputKey.length, autoCompKeys.length + this.myInputChar.length); 
           this.insertCharToComposer(null, 1, "true");
           var idf = document.getElementById("fireinputField");
 	  FireinputLog.debug(this,"newvalue:" + newvalue + ", idf.value: " + idf.value + ", this.myInputChar: " + this.myInputChar);
@@ -668,6 +690,19 @@ var FireinputIMEPanel =
           FireinputUtils.setCaretTo(idf, newvalue.length); 
           this.myInputChar = newvalue; 
           this.findChar(); 
+       }
+       else 
+       {
+          /* either no result or all keys are valid input key. In both cases, the autoCompKeys must be put back to 
+           * inputField, and its caret must be set to the original pos 
+           * Now myInputChar should include autoCompKeys 
+           */
+          var idf = document.getElementById("fireinputField");
+          idf.value = autoCompKeys + idf.value; 
+          this.myInputChar = autoCompKeys + this.myInputChar; 
+          FireinputUtils.setCaretTo(idf, autoCompKeys.length + this.myInputChar.length);
+          FireinputLog.debug(this, "not result or all key are valid: idf.value:  " + idf.value);
+          FireinputLog.debug(this, "not result or all key are valid: this.myInputChar:  " + this.myInputChar);
        }
 
        // FireinputLog.debug(this, "after findChar, this.myInputChar: " + this.myInputChar);

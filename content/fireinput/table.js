@@ -185,7 +185,7 @@ var FireinputTable =
 
     startTableUpdate: function(lastupdatetime)
     {
-       var ime = Fireinput.getCurrentIME();
+       var ime = FireinputUtils.getCurrentIME();
        // FIXME: only support pinyin now 
        if(ime.getIMEType() > SMARTABC_SHUANGPIN)
        {
@@ -209,7 +209,7 @@ var FireinputTable =
 
        this.showUpdatingProgress(true); 
 
-       var ime = Fireinput.getCurrentIME(); 
+       var ime = FireinputUtils.getCurrentIME(); 
        var params = "imetype=" + encodeURIComponent(ime.getIMEType()) + 
                     "&lastupdate=" + encodeURIComponent(lastupdatetime); 
 
@@ -268,7 +268,7 @@ var FireinputTable =
 
 var FireinputImporter = {
 
-   debug: 1, 
+   debug: 0, 
    extPhraseCodeHash: null, 
    mDBConn: null, 
    extPhraseTableChanged: 0, 
@@ -495,8 +495,7 @@ var FireinputImporter = {
 
     buildPhraseKeyMap: function(word, keyArray)
     {
-       var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
-       var ime = gs.getChromeWindow().getFireinput().getCurrentIME();
+       var ime = FireinputUtils.getCurrentIME();
 
        var pinyin = ime.getWordPinyin(word);
        //FireinputLog.debug(this, "pinyin: " + pinyin);
@@ -568,9 +567,9 @@ var FireinputImporter = {
 
        var uword = phrase.substr(0, 1); 
        var word = FireinputUnicode.convertFromUnicode(uword);
-       
-       var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
-       var ime = gs.getChromeWindow().getFireinput().getCurrentIME();
+ 
+       var ime = FireinputUtils.getCurrentIME(); 
+
        if(!ime.getWordPinyin(word) || uword == word)
        {
           // if first one is not valid word, ignore it 
@@ -600,8 +599,7 @@ var FireinputImporter = {
        var pinyinkey = null; 
        var phraseFreq = null; 
 
-       var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
-       var ime = gs.getChromeWindow().getFireinput().getCurrentIME();
+       var ime = FireinputUtils.getCurrentIME(); 
 
        // supported format: 
        // phrase
@@ -797,8 +795,7 @@ var FireinputImporter = {
           var keys = phraseKey[1]; //.replace(/\d+/g, ''); 
           var freq = phraseKey[0].match(/[\d\.]+/g)[0];
 
-          var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
-          var ime = gs.getChromeWindow().getFireinput().getCurrentIME();
+          var ime = FireinputUtils.getCurrentIME(); 
           var initialKey = ime.getPhraseInitKey(keys);
           ime.storeOneUpdatePhraseWithFreq(phrase, keys, freq, initialKey);
           // add it to ext phrase list

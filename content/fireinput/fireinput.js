@@ -159,9 +159,6 @@ top.Fireinput =
        // initial default IME 
        this.myIME = this.getDefaultIME(); 
 
-       // load long table 
-       FireinputLongTable.init();
-
        // setup tooltips 
        this.loadIMEPref(); 
 
@@ -937,7 +934,6 @@ top.Fireinput =
        {
           if(this.myIME)
              this.myIME.flushUserTable(); 
-          FireinputLongTable.flushLongTable(); 
        }
 
        if(topic == "nsPref:changed" && data && data.indexOf(prefDomain) != -1)
@@ -1187,7 +1183,6 @@ top.Fireinput =
           {
              event.preventDefault();
              event.stopPropagation(); 
-             FireinputLongTable.insertCharToTarget(String.fromCharCode(keyCode)); 
           } 
           return;
        }
@@ -1262,7 +1257,7 @@ top.Fireinput =
           FireinputUtils.insertCharAtCaret(this.myTarget, FireinputIMEPanel.getLastSelectedElementValue());
           // add into long table 
           if(this.mySaveHistory)
-             FireinputLongTable.addIntoLongTable(this.myTarget.target, FireinputIMEPanel.getLastSelectedElementValue());
+             FireinputLongTable.notify(this.myTarget); 
 
 	  return; 
        }
@@ -1425,7 +1420,7 @@ top.Fireinput =
           if(!this.myIMEInputBarStatus && event.keyCode == KeyEvent.DOM_VK_RETURN)
           {
              if(this.mySaveHistory)
-                FireinputLongTable.flush();
+                FireinputLongTable.notify(this.myTarget);
              return true; 
           }
 
@@ -1658,7 +1653,7 @@ top.Fireinput =
                    ypos += gBrowser.mStrip.boxObject.height;
                 }
 
-                // most rich editor has toolbar on top, put popup on top of toolbar 
+                // most of rich editors have toolbar on top, put popup on top of toolbar 
                 ypos -= 30; 
 
                 if(ypos <= 20)
@@ -1706,7 +1701,7 @@ top.Fireinput =
 	  // FireinputLog.debug(this,"idf.value:" + idf.value);
 	  FireinputLog.debug(this,"call findChar when idf.value:" + idf.value);
 	  //The findchar has to invoked here to resolve the performance issue 
-	  FireinputIMEPanel.findChar();
+	  FireinputIMEPanel.findChar(true);
 	  return; 
        }
         
@@ -1765,7 +1760,7 @@ top.Fireinput =
          
           // time to flush long table 
           if(this.mySaveHistory)
-             FireinputLongTable.flush();    
+             FireinputLongTable.notify(this.myTarget);    
        }
 
        return; 
@@ -1781,7 +1776,6 @@ top.Fireinput =
        }
 
        FireinputComposer.reset(); 
-       FireinputLongTable.hidePanel(); 
        this.myIMEInputBarStatus = false; 
        FireinputIMEPanel.setIMEInputFieldFocusedStatus(false); 
        FireinputIMEPanel.hideAndCleanInput(); 

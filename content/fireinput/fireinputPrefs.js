@@ -67,7 +67,7 @@ const prefNames =
     {name: "openEditorKey", type: "STRING", value: "1107"},
     {name: "toggleIMEKey", type: "STRING", value: "514"},
     {name: "quickToggleIMEKey", type: "STRING", value: "256"},
-    {name: "switchInputMethodKey", type: "STRING", value: "1107"},
+    {name: "switchInputMethodKey", type: "STRING", value: "1155"},
     {name: "toggleHalfKey", type: "STRING", value: "1235"},
     {name: "togglePuncKey", type: "STRING", value: "1283"},
     {name: "toggleEncodingKey", type: "STRING", value: "1251"},

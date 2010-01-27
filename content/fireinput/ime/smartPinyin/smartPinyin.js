@@ -1577,7 +1577,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        this.storeUserAddPhrase(phrase, keys);
     }, 
 
-    storeUserAddPhrase: function(phrase, keys, freq, initialKey)
+    storeUserAddPhrase: function(phrase, keys, freq, initialKey, newPhrase)
     { 
        if(!initialKey)
           initialKey = this.getPhraseInitKey(keys); 
@@ -1589,7 +1589,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(this.userCodeHash.hasItem(phrase + ":" + keys))
           return; 
 
-       freq = this.updateFrequency(phrase+freq, keys, initialKey, true); 
+       freq = this.updateFrequency(phrase+freq, keys, initialKey, (typeof(newPhrase) != 'undefined' ? newPhrase : true)); 
        // FireinputLog.debug(this,"freq: " + freq);
        FireinputLog.debug(this, "phrase: " + phrase + ", freq: " + freq); 
 

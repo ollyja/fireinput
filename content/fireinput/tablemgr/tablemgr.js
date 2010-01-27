@@ -660,9 +660,8 @@ var FireinputTableMgr =
         if(notification)
         {
            try {
-              var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
-              var ime = gs.getChromeWindow().getFireinput().getCurrentIME();
-              ime.storeUserAddPhrase(inputword, inputkey, 0); 
+              var ime = FireinputUtils.getCurrentIME(); 
+              ime.storeUserAddPhrase(FireinputUnicode.convertFromUnicode(inputword), inputkey, 0); 
               this.showError("<div style='margin-left: 8px; color: green'>成功加入</div>");
            }
            catch(e)

@@ -34,28 +34,15 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-const MaxSelectionLen = 30;
+const MaxSelectionLen = 20;
  
 var FireinputLongTable = 
 {
-    debug: 0, 
+    debug: 1, 
 
-    // to hash based on first few words 
-    lookupHashTable: null, 
+    // current target 
+    currentTarget: null, 
 
-    // long table hash to avoid string duplication 
-    userLongTable: null, 
-
-    // user current typing long table 
-    typinglongTable: null, 
-
-    // is changed 
-    longTableChanged: false, 
-
-    init: function()
-    {
-       this.loadLongTable(); 
-    }, 
 
     showSelection: function()
     {
@@ -99,312 +86,96 @@ var FireinputLongTable =
        return selection; 
     },
 
-    hashThisKey: function(key, value)
-    {
-       if(this.lookupHashTable.hasItem(key))
-       {
-          var check = new RegExp("/^" + value + "/", "g");
-          if(!check.test(this.lookupHashTable.getItem(key)))
-             this.lookupHashTable.setItem(key, this.lookupHashTable.getItem(key) + "," + value);
-       }
-       else
-          this.lookupHashTable.setItem(key, value);
-         
-    }, 
-
-    hashLongTableLine: function(line)
-    {
-       var wordArray = line.split(":"); 
-       var freq = 0; 
-       if(wordArray.length > 1)
-       {
-          line = wordArray[0]; 
-          freq = wordArray[1];
-       }
-  
-       
-       line = FireinputUnicode.getUnicodeString(line); 
-       if(this.userLongTable.hasItem(line))
-          return; 
-
-       this.userLongTable.setItem(line, freq); 
-
-       if(line.length > 10)
-       {
-          // use first few chars as hash key 
-          var key1 = line.substr(0, 1); 
-          var key2 = line.substr(0, 2); 
-          var key3 = line.substr(0, 3); 
-          this.hashThisKey(key1, line);
-          this.hashThisKey(key2, line);
-          this.hashThisKey(key3, line);
-       }
-       else
-       {
-          var key1 = line.substr(0, 2); 
-          this.hashThisKey(key1, line);
-       }
-
-    }, 
-
-    loadLongTable: function()
-    {
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-
-       var path = FireinputUtils.getAppRootPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + "/userlargetable.fireinput");
-       this.lookupHashTable = new FireinputHash();
-       this.userLongTable = new FireinputHash();
-
-       if(!datafile.exists())
-          return;
-
-       var options = {
-          caller: this,
-          onavailable: this.hashLongTableLine
-       };
-       FireinputStream.loadDataAsync(datafile, options);
-
-    }, 
-
     addSelectionIntoTable: function()
     {
        var selectedText = this.getSelection();
        if (!selectedText)
           return false;
-         
-       this.hashLongTableLine(selectedText);
-   
-       this.longTableChanged = true; 
-       if(this.userLongTable.hasItem(selectedText))
-       {
-          var freq = this.userLongTable.getItem(selectedText); 
-          freq += 10; 
-          this.userLongTable.setItem(selectedText, freq); 
-       }
-       else 
-       {
-          this.userLongTable.setItem(selectedText, 10); 
-       }
+ 
+       var ime = FireinputUtils.getCurrentIME(); 
 
-       return true; 
-    },
-
-    getLongTableByKey: function(key)
-    {
-       if(!this.lookupHashTable)
-          return null; 
-
-       for(var i=key.length; i>=1; i--)
-       {
-          var skey = key.substr(0, i); 
-          if(this.lookupHashTable.hasItem(skey))
-             return this.lookupHashTable.getItem(skey).split(","); 
-       }
-
-       return null; 
-    },
-
-    addToPanel: function()
-    {
-       var result = FireinputIMEPanel.getCharByPos(1); 
-       if(!result)
-       { 
-          this.hidePanel(); 
+       /* no other IME won't allow add words without keys */
+       if(ime.getIMEType() != SMART_PINYIN)
           return; 
-       }
 
-       var codeArray = this.getLongTableByKey(result.value); 
-       if(!codeArray)
-       {  
-          this.hidePanel(); 
-          return; 
-       }
-
-       this.sendToPanel(codeArray); 
-    }, 
-
-    hidePanel: function(start)
-    {
-       start = start || 0;
-
-       var inputPanelElement = document.getElementById('fireinputLongPanel');
-       for (var i = start; i <= 5; i++)
-       {
-          var elementId = "fireinputLongPanel_label" + (i+1) + "_hbox";
-          var element = document.getElementById(elementId); 
-          if(element)
-          {
-             element.style.display = "none";
-          }
-       }
-       // nothing to display. hide this 
-       if(start <= 0)
-          inputPanelElement.style.display="none";
-    },
-
-    sendToPanel: function(codeArray)
-    {
-       
-       if(!codeArray || codeArray.length <= 0)
-       {
-          this.hidePanel();
+       var keys = FireinputImporter.getPhrasePinyinKey(selectedText);
+       if(!keys || keys.length <= 0)
           return;
-       }
 
-       // get font size 
-       var fontsize = fireinputPrefGetDefault("wordselectionFontsize");
+       FireinputLog.debug(this, "Phrase: " + selectedText + ", Got keys: " + keys.join(","));
 
-       var inputPanelElement = document.getElementById('fireinputLongPanel');
-
-       for (var i = 0; i < codeArray.length && i < 5; i++)
+       for(var i=0; i<keys.length; i++)
        {
-          var elementId = "fireinputLongPanel_label" + (i+1);
-          if(document.getElementById(elementId + "_hbox"))
-          {
-              var element = document.getElementById(elementId);
-              element.setAttribute("value",  codeArray[i]);
-              element.setAttribute("tooltiptext", "右点搜索“"+codeArray[i]+"”");
-              element.setAttribute("class", "charinputlabel");
-              element.style.fontSize = fontsize + "pt"; 
-              document.getElementById(elementId + "_hbox").style.display = "";
-              continue;
-
-          }
-
-          var hboxElement = document.createElement("hbox");
-          hboxElement.setAttribute("id", elementId + "_hbox");
-
-          var element = document.createElement("label");
-          element.setAttribute("value", "Alt+" + (i+1) + ".");
-          element.setAttribute("class", "largetablelabel"); 
-         
-          hboxElement.appendChild(element); 
-
-          element = document.createElement("label");
-          element.setAttribute("value",  codeArray[i]);
-          element.setAttribute("tooltiptext", "右点搜索“"+codeArray[i]+"”");
-          element.setAttribute("class", "charinputlabel");
-          element.style.fontSize = fontsize + "pt"; 
-          element.setAttribute("id", elementId);
-          var self = this;
-          element.onclick = function(event) { self.insertCharToTargetByMouse(event);};
-          hboxElement.appendChild(element);
-          inputPanelElement.appendChild(hboxElement);
-       }
-       // show long table panel 
-       inputPanelElement.style.display = "";
-       // hide all other values 
-       this.hidePanel(codeArray.length);
-    },
-
-    insertCharToTargetByMouse: function(event)
-    {
-       var charstr = event.target.value; 
-       if(event.button == 2)
-       {
-          FireinputWebSearch.loadByMouse(charstr);
-          return;
-       }
-
-       if(!charstr)
-          return; 
-       FireinputIMEPanel.insertCharToTargetByValue(charstr); 
-       FireinputIMEPanel.hideAndCleanInput(); 
-       if(this.userLongTable.hasItem(charstr))
-       {
-          var freq = this.userLongTable.getItem(charstr); 
-          freq++; 
-          this.userLongTable.setItem(charstr, freq); 
-          this.longTableChanged = true; 
+          ime.storeUserAddPhrase(FireinputUnicode.convertFromUnicode(selectedText), keys[i], 0);
        }
     },
-
-    insertCharToTarget: function(pos)
-    {
-       var elementId = "fireinputLongPanel_label" + pos;
-       var handle = document.getElementById(elementId + "_hbox"); 
-       if(!handle || handle.style.display == "none")
-          return; 
-
-
-       handle = document.getElementById(elementId); 
-       if(!handle)
-          return; 
-       FireinputIMEPanel.insertCharToTargetByValue(handle.getAttribute("value")); 
-       FireinputIMEPanel.hideAndCleanInput(); 
-       if(this.userLongTable.hasItem(handle.getAttribute("value")))
-       {
-          var freq = this.userLongTable.getItem(handle.getAttribute("value")); 
-          freq++; 
-          this.userLongTable.setItem(handle.getAttribute("value"), freq); 
-          this.longTableChanged = true; 
-       }
-          
-    }, 
 
     // collect long table 
-    addIntoLongTable: function(target, value)
+    notify: function(element)
     {
-       if(value.length <= 0)
+       if(!element || !element.target)
           return; 
-       if(!this.typinglongTable)
+
+       var ime = FireinputUtils.getCurrentIME(); 
+
+       /* no other IME won't allow add words without keys */
+       if(ime.getIMEType() != SMART_PINYIN)
+          return; 
+
+       if(!this.currentTarget || !this.currentTarget.target)
        {
-          this.typinglongTable = {target: target, insertTimes: 1, longTable: value};
+          this.currentTarget = element; 
        }
        else
        {
-          if(this.typinglongTable.target == target)
+          if(this.currentTarget.target != element.target)
           {
-             this.typinglongTable.longTable += value; 
-             this.typinglongTable.insertTimes += 1; 
-             if(this.typinglongTable.longTable.length > MaxSelectionLen)
+             if(this.currentTarget.target.setSelectionRange)
              {
-                this.flush(); 
+                this.flush(this.currentTarget.target.value); 
+                // set to new 
+                this.currentTarget = element; 
              }
+             else if(this.currentTarget.documentTarget)
+             {
+                var win = this.currentTarget.target;
+                var doc = win.content.document;
+                var selection =  win.getSelection();
 
-          } 
-          else 
-          {
-             this.flush(); 
-             this.typinglongTable = {target: target, insertTimes: 1, longTable: value};
+                // set to new 
+                this.currentTarget = element; 
+
+                if(!selection.focusNode)
+                   return;
+                
+                this.flush(selection.focusNode.parentNode.textContent); 
+             }
           } 
        }
     }, 
  
-    flush: function()
+    flush: function(str)
     {
-       if(!this.typinglongTable)
-          return; 
+       FireinputLog.debug(this, "str: " + str);
+       var result = contextReader.start(str);
+       if(!result || result.length <= 0)
+         return; 
 
-       if(this.typinglongTable.longTable.length > 5 && this.typinglongTable.insertTimes > 1)
+       var ime = FireinputUtils.getCurrentIME();
+
+       for(var i=0; i<result.length; i++)
        {
-          this.hashLongTableLine(this.typinglongTable.longTable);
-          this.longTableChanged = true; 
-          if(this.userLongTable.hasItem(this.typinglongTable.longTable))
-          {
-             var freq = this.userLongTable.getItem(this.typinglongTable.longTable);       
-             freq += 1; 
-             this.userLongTable.setItem(this.typinglongTable.longTable, freq);       
-          }
-          else
-          {
-             this.userLongTable.setItem(this.typinglongTable.longTable, 1);
-          }
-       }        
+          var keys = FireinputImporter.getPhrasePinyinKey(result[i]);
+          if(!keys || keys.length <= 0)
+            continue; 
 
-       this.typinglongTable = null; 
-    }, 
-  
-    flushLongTable: function()
-    {
-       if(!this.longTableChanged)
-          return; 
+          FireinputLog.debug(this, "Phrase: " + result[i] + ", Got keys: " + keys.join(","));
 
-       if(this.userLongTable)
-          FireinputLongTableSaver.save(this.userLongTable); 
+          for(var n=0; n<keys.length; n++)
+          {
+             ime.storeUserAddPhrase(FireinputUnicode.convertFromUnicode(result[i]), keys[n], 0, null, false);
+          }
+       }
     }
     
 }; 

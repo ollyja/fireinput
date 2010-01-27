@@ -38,11 +38,9 @@ const composerFieldTag = "composerfield_";
 
 var FireinputComposer = 
 {
-    debug: 0, 
+    debug: 1, 
 
     composedNumber: 0, 
-
-    composeEditorId: 0, 
 
     hasSet: function()
     {
@@ -65,7 +63,6 @@ var FireinputComposer =
 
        this.composedNumber = 0; 
        FireinputIMEPanel.enableComposeEditor(false);
-       this.composeEditorId = 0; 
     }, 
 
     getLastAutoSelected: function()
@@ -76,7 +73,6 @@ var FireinputComposer =
        var composerFieldsElement = document.getElementById("fireinputComposeField"); 
        FireinputLog.debug(this, "getLastAutoSelected: this.composedNumber= " + this.composedNumber);
        var inputkeys = ""; 
-       var needed = 0; 
        while(this.composedNumber > 0)
        {
           var hboxElement = document.getElementById(composerFieldTag + this.composedNumber);
@@ -87,12 +83,13 @@ var FireinputComposer =
           }
           else
           {
-             // To make searching less expensive, only last autoselected value will be used 
-             var editorBox = document.getElementById(composerFieldTag + this.composedNumber + "_textbox");
+             // To make searching less expensive, only last autoselected values will be used 
+             var editorBox = document.getElementById(composerFieldTag + this.composedNumber + "_label");
              if(editorBox.getAttribute("autoselected") == "true")
              {
                 this.composedNumber--; 
                 inputkeys = editorBox.getAttribute("hiddeninputkey") + inputkeys;
+                hboxElement.style.display = "none"; 
                 FireinputLog.debug(this, "getLastAutoSelected: inputkeys= " + inputkeys);
              }
 
@@ -100,7 +97,7 @@ var FireinputComposer =
           }
        }
        FireinputLog.debug(this, "getLastAutoSelected: inputkeys: " + inputkeys);
-       return needed ? inputkeys : ""; 
+       return inputkeys; 
     }, 
 
     removeLastFromPanel: function()
@@ -110,7 +107,7 @@ var FireinputComposer =
 
        // we actually don't remove them here. Instead they will just be marked as hidden. 
        // Removing is not thread-safe, as the function might be invoked more than one time 
-       // if the user is typing or removing input keys really quick.
+       // if the user is typing or removing input keys really quickly.
        var composerFieldsElement = document.getElementById("fireinputComposeField"); 
        FireinputLog.debug(this, "removeLastFromPanel: this.composedNumber= " + this.composedNumber);
        while(this.composedNumber > 0)
@@ -124,7 +121,7 @@ var FireinputComposer =
           }
           else
           {
-             var editorBox = document.getElementById(composerFieldTag + this.composedNumber + "_textbox");
+             var editorBox = document.getElementById(composerFieldTag + this.composedNumber + "_label");
              this.composedNumber--; 
              var inputkey = editorBox.getAttribute("hiddeninputkey");
              hboxElement.style.display = "none"; 
@@ -137,21 +134,23 @@ var FireinputComposer =
 
     addToPanel: function(autoselected, result)
     {
-       FireinputLog.debug(this, "addToPanel: this.composeEditorId= " + this.composeEditorId);
-       if(this.composeEditorId != 0)
-       {
-          var editorBox = document.getElementById(composerFieldTag + this.composeEditorId + "_textbox");
-          if(editorBox)
-          {
-             this.hideComposeEditorWithValue(editorBox, autoselected, result);
-             return; 
-          }
-       }
+       FireinputLog.debug(this, "addToPanel: result.value: " + result.value);
 
        if(this.composedNumber >= maxComposedNumber)
           return; 
 
        this.createComposePanel(autoselected, result);
+
+       // update first choice 
+       /*
+       var firstEl = document.getElementById("fireinputIMEList_label" + 1);
+       if(firstEl)
+       {
+          var hiddenValue = firstEl.getAttribute("hiddenvalue") + result.value; 
+          firstEl.value = "1." + hiddenValue; 
+          firstEl.setAttribute("hiddenvalue", hiddenValue);
+       }
+       */
     },
 
     createComposePanel: function(autoselected, result)
@@ -170,30 +169,28 @@ var FireinputComposer =
           hboxElement.setAttribute("id", thisId);
           hboxElement.setAttribute("cfindex", this.composedNumber);
 
-          var element = document.createElement("textbox");
+          var element = document.createElement("label");
+          
           element.setAttribute("value",result.value);
           element.setAttribute("hiddenvalue", result.value); 
           element.setAttribute("hiddenkey", result.key);
           element.setAttribute("hiddeninputkey", result.inputkey);
           element.setAttribute("hiddenword", result.word);
           element.setAttribute("tooltiptext", "键: " + result.key);
-          element.setAttribute("class", "composeeditorboxview");
-          element.setAttribute("id", thisId + "_textbox");
+          if(this.composedNumber <= 1)
+              element.setAttribute("class", "composeeditorboxviewfirst");
+          else 
+              element.setAttribute("class", "composeeditorboxview");
+          element.setAttribute("id", thisId + "_label");
           element.setAttribute("cfindex", this.composedNumber);
           element.setAttribute("composeopened", "false");
           element.setAttribute("autoselected", autoselected);
 
-          element.style.width = 13 * result.value.length + "px"; 
-
-          var self = this; 
-          element.onclick = function(event) { self.showWordEditor(event); }; 
-          element.addEventListener("blur", function(event) { self.hideWordEditor(event); }, true); 
-          element.addEventListener("focus", function(event) { self.showWordEditor(event); }, true); 
-          element.addEventListener("input", function(event) { self.updateWordEditor(event); } , true);
-
+          FireinputLog.debug(this, "element.value: " + element.value);
           hboxElement.appendChild(element);
            
           composerFieldsElement.appendChild(hboxElement); 
+
        }
        else
        {
@@ -202,10 +199,9 @@ var FireinputComposer =
 
           var hboxElement = document.getElementById(thisId);
 
-          var element = document.getElementById(thisId + "_textbox");
-          element.value =  result.value;
+          var element = document.getElementById(thisId + "_label");
           FireinputLog.debug(this, "element.value: " + element.value);
-          element.setAttribute("class", "composeeditorboxview");
+          element.setAttribute("value",result.value);
           element.setAttribute("hiddenkey", result.key);
           element.setAttribute("hiddenvalue", result.value); 
           element.setAttribute("tooltiptext", "键: " + result.key);
@@ -214,128 +210,9 @@ var FireinputComposer =
           element.setAttribute("composeopened", "false");
           element.setAttribute("autoselected", autoselected);
 
-          element.style.width = 13 * result.value.length + "px"; 
-
           hboxElement.style.display = ""; 
        }
     },
- 
-    switchWordEditor: function(cfindex, flag)
-    {
-       var editorBox = document.getElementById(composerFieldTag + cfindex + "_textbox");
-       if(flag)
-       {
-          editorBox.style.display = ""; 
-       }
-       else
-       {
-          editorBox.style.display = "none"; 
-       }
-    }, 
-
-    showWordEditor: function(e)
-    {
-       var target = e.target; 
-       if(target.getAttribute("composeopened") == "true")
-          return; 
-
-       var cfindex = target.getAttribute("cfindex");
-
-       target.setAttribute("composeopened", "true");
-       target.setAttribute("class", "composeeditorbox");
-       target.style.width = 13 * target.getAttribute("hiddeninputkey").length + "px";
-       target.value = target.getAttribute("hiddeninputkey"); 
-       FireinputLog.debug(this, "showWordEditor: " + target.value + ",cfindex=" + cfindex);
-          
-       this.composeEditorId = cfindex; 
-     
-       // enable compose mode 
-       FireinputIMEPanel.enableComposeEditor(true); 
-
-       FireinputIMEPanel.findCharWithKey(target.value); 
-
-    },
-
-    updateWordEditor: function(e)
-    {
-       var target = e.target; 
-       FireinputLog.debug(this, "update target.value: " + target.value);
-       target.style.width = (13 * target.value.length < 20 ? 20 : 13 * target.value.length) + "px";
-       FireinputIMEPanel.findCharWithKey(target.value); 
-    }, 
-
-    hideWordEditor: function(e)
-    {
-       var target = e.target; 
-       // FIXME: I have seen at least one time the function was not invoked, thus leaving editorbox to be editable. 
-       // maybe the compseopened was reset somehow ? 
-
-       if(target.getAttribute("composeopened") == "false")
-          return; 
-
-       var cfindex = target.getAttribute("cfindex");
-
-       target.setAttribute("composeopened", "false");
-       FireinputLog.debug(this, "hide word editor"); 
-       FireinputIMEPanel.enableComposeEditor(false); 
-
-       this.composeEditorId = 0; 
-
-       target.setAttribute("class", "composeeditorboxview");
-       // hide if everything has been removed 
-       if(target.value.length <= 0)
-       {
-          var hboxElement = document.getElementById(composerFieldTag + cfindex);
-          hboxElement.style.display = "none"; 
-          return; 
-       }
- 
-       FireinputLog.debug(this, "target.value=" + target.value + "<=>" + target.getAttribute("hiddeninputkey"));
-       // no change            
-       if(target.value == target.getAttribute("hiddeninputkey"))
-       {
-          target.value = target.getAttribute("hiddenvalue"); 
-          target.style.width = 13 * target.getAttribute("hiddenvalue").length + "px";
-          return;
-       }
- 
-       var charResult = FireinputIMEPanel.getCharByPos(1); 
-       if(!charResult)
-       {
-          target.value = target.getAttribute("hiddenvalue"); 
-          target.style.width = 13 * target.getAttribute("hiddenvalue").value.length + "px";
-          return; 
-       }
-
-       target.value = charResult.value; 
-       target.style.width = 13 * charResult.value.length + "px";
-       target.setAttribute("hiddenvalue", charResult.value);
-       target.setAttribute("hiddenkey", charResult.key);
-       target.setAttribute("tooltiptext", "键: " + charResult.key);
-       target.setAttribute("hiddenword", charResult.word);
-       target.setAttribute("hiddeninputkey", charResult.inputkey);
-
-    }, 
-
-    hideComposeEditorWithValue: function(editorBox, autoselected, charResult)
-    {
-       FireinputLog.debug(this, "hide word editor with value");
-
-       editorBox.setAttribute("class", "composeeditorboxview");
-       editorBox.setAttribute("composeopened", "false");
-
-       editorBox.value = charResult.value;
-       editorBox.style.width = 13 * charResult.value.length + "px";
-       editorBox.setAttribute("hiddenkey", charResult.key);
-       editorBox.setAttribute("hiddenvalue", charResult.value);
-       editorBox.setAttribute("tooltiptext", "键: " + charResult.key);
-       editorBox.setAttribute("hiddeninputkey", charResult.inputkey);
-       editorBox.setAttribute("hiddenword", charResult.word);
-       editorBox.setAttribute("autoselected", autoselected);
-
-       FireinputIMEPanel.enableComposeEditor(false);
-       this.composeEditorId = 0;
-    }, 
  
     getComposeWord: function()
     {
@@ -353,11 +230,11 @@ var FireinputComposer =
           if(wlist[i].style.display == "none") 
              continue;
           var cfindex = wlist[i].getAttribute("cfindex");
-          var editorBox = document.getElementById(composerFieldTag + cfindex + "_textbox"); 
+          var editorBox = document.getElementById(composerFieldTag + cfindex + "_label"); 
           if(!editorBox)
              continue; 
           words += editorBox.getAttribute("hiddenword"); 
-          value += editorBox.value; 
+          value += editorBox.getAttribute("hiddenvalue"); 
           if(keys.length <= 0)
              keys = editorBox.getAttribute("hiddenkey"); 
           else
