@@ -118,69 +118,39 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           return;
 
        // initKey:key=>word 
+       
        if(/=>/.test(strArray[1]))
        {
           this.codePinyinHash.setItem(strArray[0],strArray[1]);
        }
-       else
-       {
-          var codeList = strArray[0].split(",");
 
-          for(var i=0; i<codeList.length; i++)
+       var codeList = strArray[1].split(",");
+
+       for(var i=0; i<codeList.length; i++)
+       {
+          var codePinyin  = codeList[i].split("=>"); 
+          var freq = codePinyin[1].match(/(\d+)/)[0]; 
+          var word = codePinyin[1].match(/(\D+)/)[0]; 
+
+          var item = this.codePinyinHash.getItem(word);
+          if(!item)
           {
-             var item = this.codePinyinHash.getItem(codeList[i]);
-             if(!item)
-             {
-                this.codePinyinHash.setItem(codeList[i], strArray[1]); 
-             }
-             else if(typeof(item) == 'object' && item instanceof Array)
-             {
-                item[item.length++] = strArray[1]; 
-             }
-             else
-             {
-                var itemArray = [];
-                itemArray[itemArray.length++] = item;
-                itemArray[itemArray.length++] = strArray[1]; 
-                this.codePinyinHash.setItem(codeList[i], itemArray);
-             }
+              this.codePinyinHash.setItem(word, codePinyin[0] + freq); 
           }
-       }
-
-       /* create word:ping list
-       var codePinyinList = strArray[1].split(",");
-       for(var i=0; i<codePinyinList.length; i++)
-       {
-           var codePinyin  = codePinyinList[i].split("=>"); 
-           codePinyin[1] = codePinyin[1].replace(/\d+/, ''); 
-           var tmpArray = this.tmpHash.getItem(codePinyin[0]); 
-           if(!tmpArray)
-           {
-              tmpArray = []; 
-           }
-           tmpArray[tmpArray.length++] = codePinyin[1]; 
-           this.tmpHash.setItem(codePinyin[0], tmpArray); 
-
-           var item = this.codePinyinHash.getItem(codePinyin[1]);
-	   if(!item)
-           {
-              this.codePinyinHash.setItem(codePinyin[1], codePinyin[0]); 
-           }
-           else if(typeof(item) == 'object' && item instanceof Array)
-           {
-              item[item.length++] = codePinyin[0]; 
-           }
-           else
-           {
+          else if(typeof(item) == 'object' && item instanceof Array)
+          {
+              item[item.length++] = codePinyin[0] + freq; 
+              item.sort(this.sortKeyArray);
+          }
+          else
+          {
               var itemArray = [];
               itemArray[itemArray.length++] = item;
-              itemArray[itemArray.length++] = codePinyin[0]; 
-              this.codePinyinHash.setItem(codePinyin[1], itemArray);
-           }
-//           dump(FireinputUnicode.getUnicodeString(codePinyin[1]) + ":" + codePinyin[0] + "\n");
+              itemArray[itemArray.length++] = codePinyin[0] + freq; 
+              itemArray.sort(this.sortKeyArray);
+              this.codePinyinHash.setItem(word, itemArray);
+          }
        }
-       */
-
     },
 
     loadPinyinTable: function()
@@ -505,7 +475,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     find: function(inputChar, singleWord, keyMatch)
     {
        var result = null;
-       FireinputLog.debug(this, "find, inputChar: " + inputChar); 
+       //FireinputLog.debug(this, "find, inputChar: " + inputChar); 
        // use current schema 
        result = this.findBySchema(inputChar, false, singleWord, keyMatch);
        if(!result)
@@ -537,6 +507,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
              break; 
           }
 
+          //FireinputLog.debug(this, "findBySchema: _keymatch " + _keymatch + ", keyMatch " + keyMatch + ", s => " + s);
           /*  
            * If the keyMatch from upper level is true, it's not necessary for loop 
            */
@@ -578,7 +549,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        var keySet = null; 
        var keyArray = this.pinyinSchema.getComposeKey(inputChar, useDefaultSchema); 
 
-       FireinputLog.debug(this, "keyArray=" + keyArray);
+       //FireinputLog.debug(this, "keyArray=" + keyArray);
        if(typeof(keyArray) == "string")
        {
           keySet = this.parseKeys(inputChar); 
@@ -623,10 +594,10 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           {
              /* If the last input is FINAL, there might be more input coming, return null to wait
               * if the keymatch is set, take the input as completed pinyin  
-              */
              if(keySet[keySet.length-1].type == KEY_FINAL && !keyMatch)
                 return null; 
              else 
+              */
                 return {charArray: null, keySize: keySet[keySet.length-1].key.length};
           }
           else
@@ -1255,7 +1226,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
        var stringList = this.phraseCodeHash.getItem(initialKeys); 
        //FireinputLog.debug(this, "currentInex: " + currentIndex);
-       FireinputLog.debug(this,"stringList: " + FireinputUnicode.getUnicodeString(stringList));
+       //FireinputLog.debug(this,"stringList: " + FireinputUnicode.getUnicodeString(stringList));
  
        var stringArray = stringList.split(","); 
        //FireinputLog.debug(this,"stringArray.length: " + stringArray.length);
@@ -1284,12 +1255,13 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
 
           // The key length should be checked to make sure small keys will be skipped 
-          // if keyMatch is true, the key length must be same 
+          // if keyMatch is true, the key enforcement is installed at for loop 
           // In case of keyList has one entry only, we should skip the check as it might be 
           // from userword table 
-          if(keyList.length != 1 && (keyList.length < keys.length || (keyMatch && keyList.length != keys.length)))
+          if(keyList.length != 1 && keyList.length < keys.length)
              continue; 
-          FireinputLog.debug(this,"word: " + FireinputUnicode.getUnicodeString(phrase) + ", keyList.length: " + keyList.length); 
+
+          //FireinputLog.debug(this,"word: " + FireinputUnicode.getUnicodeString(phrase) + ", keyList.length: " + keyList.length); 
 
           // assume it's a exact Match with input char. Don't be confused with keyMatch here. 
           // the keyMatch is to make sure a selection has to be matched for inputkey length and key string.
@@ -1333,10 +1305,57 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
              }      
           }
 
+
+          
           if(shouldAdd == 1)
           { 
-             // FireinputLog.debug(this,"word: " + FireinputUnicode.getUnicodeString(phrase) + "exactMatch: " + exactMatch);
+              // if the keyList has more entries than keys, the exactMatch should be false 
+              if(exactMatch && keyList.length > keys.length)
+                exactMatch = 0; 
+
+             // exactMatch false position 
+             var exactMatchPos = keys.length; 
+
+             FireinputLog.debug(this,"word: " + FireinputUnicode.getUnicodeString(phrase) + ", exactMatch: " + exactMatch);
+             FireinputLog.debug(this,"exactMatchPos: " + exactMatchPos);
              var encodedWord = FireinputEncoding.getEncodedString(phrase, this.encodingMode);
+
+             // What we are trying to achieve here is that when exactMatch is false, we only copy the first few matched words 
+             // into the list, and add the exact phrase after it
+             // The rule should be subjected to be same as exact phrase  
+             if(!exactMatch && exactMatchPos >= 2)
+             {
+                var matchedWord = encodedWord.substring(0, exactMatchPos); 
+                FireinputLog.debug(this,"word: " + matchedWord);
+                if(typeof(phraseList[matchedWord]) == 'undefined')
+                {
+                   var matchedPhrase = FireinputUnicode.convertFromUnicode(FireinputUnicode.getUnicodeString(phrase).substring(0, exactMatchPos));
+                   var matchedphraseKey = keyList.splice(0, exactMatchPos).join(" "); 
+                   FireinputLog.debug(this,"phraseKey: " + phraseKeyValue[0] + ", matched: " + matchedphraseKey);
+                   phraseList[matchedWord] = ""; 
+
+                   oldIndex++; 
+                   if(oldIndex <= currentIndex)
+                      continue; 
+
+                   var freq = phraseKeyValue[1].match(/[\d\.]+/g)[0];   
+
+                   var inUserHash = this.userCodeHash && this.userCodeHash.hasItem(matchedPhrase + ":" + matchedphraseKey); 
+                   if(inUserHash)
+                   {
+                      var ufreq = this.userCodeHash.getItem(matchedPhrase + ":" + matchedphraseKey);
+                      userArray[userArray.length] = {key: matchedphraseKey, word:matchedPhrase+ufreq.freq, encodedWord:matchedWord+ufreq.freq}; 
+                   }
+                   else 
+                      phraseArray[phraseArray.length] = {key: matchedphraseKey, word:matchedPhrase+freq, encodedWord:matchedWord+freq};
+
+                   // if hasInitialKey is true, mostly like there will no exactMatch at all, so we need to check non-exact phraseArray and userArray 
+                   // whether there are enough items to return 
+                   if(hasInitialKey && (phraseArray.length + userArray.length) >= (this.numSelection+1)) 
+                      break; 
+                }
+             }
+
 	     if(typeof(phraseList[encodedWord]) == 'undefined')
              {
 
@@ -1380,9 +1399,9 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           }
        }                    
 
-       FireinputLog.debug(this,"exactPhraseArray.length: " + exactPhraseArray.length);
-       FireinputLog.debug(this,"phraseArray.length: " + phraseArray.length);
-       FireinputLog.debug(this,"userArray.length: " + userArray.length);
+       //FireinputLog.debug(this,"exactPhraseArray.length: " + exactPhraseArray.length);
+       //FireinputLog.debug(this,"phraseArray.length: " + phraseArray.length);
+       //FireinputLog.debug(this,"userArray.length: " + userArray.length);
        //FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
        //FireinputLog.debug(this,"exactPhraseArray: " + this.getKeyWord(exactPhraseArray));
        if(userArray.length <= 0)
@@ -1428,11 +1447,15 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(/ /.test(keys) && validInitialKey.length >= 4) 
        {
           // put user phrase into 4 keys if 3 keys is already defined 
-          var subValidInitialKey = validInitialKey.substring(0, 3); 
-          if(this.phraseCodeHash.hasItem(subValidInitialKey))
-              validInitialKey = subValidInitialKey;
+          // force initialKey as 4 minimum if keys is too long 
+          if(keyArray.length <= 8)
+          {
+             var subValidInitialKey = validInitialKey.substring(0, 3); 
+             if(this.phraseCodeHash.hasItem(subValidInitialKey))
+               validInitialKey = subValidInitialKey;
+          }
           else 
-              validInitialKey = validInitialKey.substring(0, 4);
+             validInitialKey = validInitialKey.substring(0, 4);
        }
 
        return validInitialKey; 
@@ -1543,12 +1566,14 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           if(matched)
           {
              // don't update the key. It's possible the key is generated from importing, thus it may not be accurate 
-             if(!updateKey)
-                return; 
-
-             nowPhrase = nowPhrase.replace(keys + "=>" + matched, "");  
+             if(updateKey)
+             {
+                nowPhrase = nowPhrase.replace(",\\D+" + "=>" + matched, "");  
+                this.phraseCodeHash.setItem(validInitialKey, keys + "=>" + phrase+freq + "," + nowPhrase); 
+             }
           }
-          this.phraseCodeHash.setItem(validInitialKey, keys + "=>" + phrase+freq + "," + nowPhrase); 
+          else 
+             this.phraseCodeHash.setItem(validInitialKey, keys + "=>" + phrase+freq + "," + nowPhrase); 
        }
        else 
           this.phraseCodeHash.setItem(validInitialKey, keys + "=>" + phrase+freq); 
