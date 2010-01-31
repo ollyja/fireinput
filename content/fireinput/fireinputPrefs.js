@@ -50,6 +50,7 @@ const prefNames =
     {name: "lastTableUpdate", type: "STRING", value: ''},
     {name: "tableUpdateInterval", type: "INT", value: 12},
     {name: "inputKeyExactMatch", type: "BOOL", value: false},
+    {name: "enableUrlbarInput", type: "BOOL", value: false},
 
     /* guest email/name for accessing server resouces */
     {name: "serverGuestName", type: "STRING", value: ''}, 
