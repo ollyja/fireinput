@@ -1469,7 +1469,9 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        else 
           freq = 0; 
 
+       FireinputLog.debug(this,"word: " + word);
        var chars = word.match(/[\D\.]+/g)[0];
+       FireinputLog.debug(this,"chars: " + chars);
        if(!this.userCodeHash)
           this.userCodeHash = new FireinputHash();
  
@@ -1549,7 +1551,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
        //FireinputLog.debug(this,"word: " + word);
        //FireinputLog.debug(this,"chars: " + chars + ", freq: " + freq);
-       //FireinputLog.debug(this,"chars: " + chars + ", key: " + key + ", initKey: " + initKey);
+       FireinputLog.debug(this,"chars: " + chars + ", key: " + key + ", initKey: " + initKey);
        this.userTableChanged = true; 
        return freq; 
     },
@@ -1606,6 +1608,9 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     { 
        if(!initialKey)
           initialKey = this.getPhraseInitKey(keys); 
+
+       if(!freq)
+          freq = 0; 
 
        // FireinputLog.debug(this,"keys: " + keys + ", phrase: " + phrase);
        if(!this.userCodeHash)
