@@ -37,7 +37,7 @@
 var FireinputIMEPanel = 
 {
     // debug: 0 disable, non-zero enable 
-    debug: 0,
+    debug: 1,
 
     myComposeEnabled: false, 
     // last input key chars before composing a new phrase 
@@ -701,8 +701,8 @@ var FireinputIMEPanel =
           idf.value = autoCompKeys + idf.value; 
           this.myInputChar = autoCompKeys + this.myInputChar; 
           FireinputUtils.setCaretTo(idf, autoCompKeys.length + this.myInputChar.length);
-          FireinputLog.debug(this, "not result or all key are valid: idf.value:  " + idf.value);
-          FireinputLog.debug(this, "not result or all key are valid: this.myInputChar:  " + this.myInputChar);
+          FireinputLog.debug(this, "no result or all key are valid: idf.value:  " + idf.value);
+          FireinputLog.debug(this, "no result or all key are valid: this.myInputChar:  " + this.myInputChar);
        }
 
        // FireinputLog.debug(this, "after findChar, this.myInputChar: " + this.myInputChar);
