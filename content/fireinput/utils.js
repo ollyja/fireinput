@@ -625,7 +625,7 @@ var FireinputUtils =
        else
        {
           var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
-          return ime = gs.getChromeWindow().getFireinput().getCurrentIME();
+          return gs.getChromeWindow().getFireinput().getCurrentIME();
        }
     }
 }; 

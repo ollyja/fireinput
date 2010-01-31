@@ -123,6 +123,20 @@ FireinputIME.prototype =
        return 0; 
     },
 
+    sortKeyArray: function (a, b)
+    {
+       if(!a || !b)
+          return 0;
+
+       var num1 = a.match(/[\d\.]+/g)[0];
+       var num2 = b.match(/[\d\.]+/g)[0];
+
+       if(num2 != num1)
+          return num2 - num1; 
+
+       return 0; 
+    },
+
     getKeyWord: function(wordArray)
     {
        if(!wordArray) return null; 

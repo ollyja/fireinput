@@ -507,6 +507,8 @@ var FireinputImporter = {
        // items, it's unlikely people will make a hit 
        if(typeof(pinyin) == "string")
        {
+          // remove freq 
+          pinyin = pinyin.replace(/\d+/, ""); 
           // there no key yet, just put it in as a single item 
           if(keyArray.length <= 0)
               keyArray[keyArray.length++] = pinyin; 
@@ -526,6 +528,8 @@ var FireinputImporter = {
           { 
               for(var i=0; i<pinyin.length; i++)
               {
+                 // remove freq 
+                 pinyin[i] = pinyin[i].replace(/\d+/, ""); 
                  keyArray[keyArray.length++] = pinyin[i]; 
               }
           }
@@ -536,13 +540,16 @@ var FireinputImporter = {
              var result = cloneArray(keyArray);
              for(var i=0; i<pinyin.length; i++)
              {
+                // remove freq 
+                pinyin[i] = pinyin[i].replace(/\d+/, ""); 
+
                 // attach pinyin to first N entries 
                 for(var j=i*result.length; j<keyArray.length; j++)
                 {
                    keyArray[j] = keyArray[j] + ' ' + pinyin[i]; 
                 }
                 // we need to put a break to protect a too long list 
-                if(keyArray.length >= 8) 
+                if(keyArray.length >= 4) 
                 {
                    // ignore the reset pingyin keys 
                    break; 
@@ -639,7 +646,7 @@ var FireinputImporter = {
              phrase = phraseFreq; 
           }
           else
-          {
+		  {
              // ignore if it's single word 
              if(phraseFreqItems[1].length <= 1)
                   return; 
