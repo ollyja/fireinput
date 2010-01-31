@@ -1046,7 +1046,12 @@ top.Fireinput =
           return {target: target, valid: false, documentTarget: documentTarget};
 
        if(target instanceof XULElement && target.id == "urlbar")
-          return {target: target, valid: false, documentTarget: documentTarget};
+       {
+          if(fireinputPrefGetDefault("enableUrlbarInput"))
+            return {target: target, valid: true, documentTarget: documentTarget};
+          else 
+            return {target: target, valid: false, documentTarget: documentTarget};
+       }
 
        if(target.hasAttribute('_no_cjk_input') && 
           (target.getAttribute('_no_cjk_input') == "true" || target.getAttribute('_no_cjk_input')=="1"))

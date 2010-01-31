@@ -35,6 +35,7 @@
  */
 
 const RELEASE_NEW = "http://www.fireinput.com/wiki/Release_Page"; 
+const DEVRELEASE_NEW = "http://www.fireinput.com/releases/test.html"; 
 
 const helpUI = [
     {id: "helpMenuHome", strKey: "fireinput.help.home", attribute: "label"},
@@ -49,6 +50,7 @@ const helpUI = [
 const helpSite = {
     home: "http://www.fireinput.com",
     release: RELEASE_NEW, 
+    devrelease: DEVRELEASE_NEW, 
     docs: "http://www.fireinput.com/wiki/Document_Page",
     shortkey: "chrome://fireinput/content/shortkey.html",
     contribute: "http://www.fireinput.com/contribute.html"
@@ -68,6 +70,8 @@ var FireinputHelp =
 
        // check new releases
        this.checkNewRelease(); 
+       // check if it's running dev version 
+       this.checkNewDevRelease(); 
 
        this.initialized = true; 
     },
@@ -108,6 +112,12 @@ var FireinputHelp =
           FireinputUtils.loadURI(url); 
     },
 
+    showRelease: function()
+    {
+       var element = document.getElementById("helpNewRelease");
+       this.showSite(element.getAttribute("release")); 
+    }, 
+
     openEditor: function()
     {
        FireinputUtils.loadURI("chrome://fireinput/content/editor.html"); 
@@ -142,14 +152,11 @@ var FireinputHelp =
        if(p.responseText.length <= 0)
           return;
 
-       var version = p.responseText.match(/latestrelease_[\d\.]+/g)[0];
-       if(!version)
+       var version = p.responseText.match(/latestrelease_([\d\.]+)/);
+       if(!version || version.length < 2)
           return; 
 
-       version = version.replace("latestrelease_", ""); 
-       if(!version || version.length <= 0)
-          return; 
-
+       version = version[1]; 
        var newVersionArray = version.split('.'); 
        var curVersionArray = FIREINPUT_VERSION.split('.'); 
 
@@ -200,6 +207,7 @@ var FireinputHelp =
        element.style.display = ""; 
        element.style.color = "red"; 
        element.setAttribute("label", element.getAttribute("label") + " " + version);
+       element.setAttribute("release", "release");
 
        element = document.getElementById("fireinputHelp"); 
        element.style.color = "red"; 
@@ -209,6 +217,79 @@ var FireinputHelp =
        element = document.getElementById("fireinputNewVersion");
        var msg = FireinputUtils.getLocaleString("fireinput.help.newrelease.text" + defaultLanguage);
        msg = msg.replace(/%VERSION%/, version); 
+       element.setAttribute("label", msg); 
+
+       
+       element = document.getElementById("fireinputNewVersionPanel");
+       element.style.display = "";
+    }, 
+
+    checkNewDevRelease: function()
+    {
+       var buildDateArray = FIREINPUT_VERSION.match(/[\d\.]+_(\d{4})(\d{2})(\d{2})/); 
+       // just return if it's not dev release 
+       if(!buildDateArray || buildDateArray.length < 4)
+          return; 
+
+       var ajax = new Ajax();
+       if(!ajax)
+          return;
+
+       var self = this;
+
+       ajax.setOptions(
+          {
+             method: 'get',
+             onSuccess: function(p) { self.displayNewDevReleaseMenuItem(p); }
+          });
+
+       ajax.request(DEVRELEASE_NEW);
+    },
+
+    displayNewDevReleaseMenuItem: function(p)
+    {
+       if(!p)
+          return;
+       if(p.responseText.length <= 0)
+          return;
+
+       var version = p.responseText.match(/latestrelease_([\d\.]+)_([\d]+)/);
+       if(!version || version.length < 3)
+          return; 
+
+       var newBuildDateArray = version[2].match(/(\d{4})(\d{2})(\d{2})/); 
+       var curBuildDateArray = FIREINPUT_VERSION.match(/[\d\.]+_(\d{4})(\d{2})(\d{2})/); 
+       if(!newBuildDateArray || newBuildDateArray.length < 3)
+          return; 
+
+       // it may not dev release. 
+       if(!curBuildDateArray || curBuildDateArray.length < 4)
+          return; 
+
+       if(parseInt(version[2]) > parseInt(curBuildDateArray[1] + "" + curBuildDateArray[2] + "" + curBuildDateArray[3]))
+       {
+          // new dev release 
+          newBuildDateArray.shift(); 
+          this.showNewDevRelease(version[1], newBuildDateArray); 
+       } 
+    }, 
+   
+    showNewDevRelease: function(version, buildDateArray)
+    {   
+       var element = document.getElementById("helpNewRelease"); 
+       element.style.display = ""; 
+       element.style.color = "red"; 
+       element.setAttribute("label", element.getAttribute("label") + " " + version + " " + buildDateArray.join("/"));
+       element.setAttribute("release", "devrelease");
+
+       element = document.getElementById("fireinputHelp"); 
+       element.style.color = "red"; 
+
+       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
+
+       element = document.getElementById("fireinputNewVersion");
+       var msg = FireinputUtils.getLocaleString("fireinput.help.newdevrelease.text" + defaultLanguage);
+       msg = msg.replace(/%VERSION%/, version + " " + buildDateArray.join("/")); 
        element.setAttribute("label", msg); 
 
        
