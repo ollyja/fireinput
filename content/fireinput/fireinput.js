@@ -1057,6 +1057,10 @@ top.Fireinput =
           (target.getAttribute('_no_cjk_input') == "true" || target.getAttribute('_no_cjk_input')=="1"))
           return {target: target, valid: false, documentTarget: documentTarget};
 
+       if(target.hasAttribute('noime') && 
+          (target.getAttribute('noime') == "true" || target.getAttribute('noime')=="1"))
+          return {target: target, valid: false, documentTarget: documentTarget};
+
        if(!target.setSelectionRange)
        {
           var wrappedTarget = document.commandDispatcher.focusedElement;
