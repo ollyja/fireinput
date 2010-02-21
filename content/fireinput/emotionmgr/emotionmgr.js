@@ -251,7 +251,7 @@ var EmotionMgr =
     {
        var n = 'f' + Math.floor(Math.random() * 99999);
        var d = document.createElement('div');
-       d.innerHTML = '<iframe style="display:none" src="about:blank" id="'+n+'" name="'+n+'" onload="EmotionMgr.uploadLoaded(\''+n+'\')"></iframe>';
+       d.innerHTML = '<iframe type="content" style="display:none" src="about:blank" id="'+n+'" name="'+n+'" onload="EmotionMgr.uploadLoaded(\''+n+'\')"></iframe>';
        document.body.appendChild(d);
        var i = document.getElementById(n);
        if (cb && typeof(cb.onComplete) == 'function') {

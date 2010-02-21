@@ -154,14 +154,14 @@ keyCodeMapper['224']='META'
 
 /* a list of key and its command mapping */
 var keyActions = [
-    {name: "openKey", value: "",  command: "Fireinput.toggleFireinput()"},
-    {name: "openEditorKey", value: "", command: "FireinputHelp.openEditor()"},
-    {name: "toggleIMEKey", value: "", command: "Fireinput.toggleIMEMode()"},
+    {name: "openKey", value: "",  command: "Fireinput.toggleFireinput"},
+    {name: "openEditorKey", value: "", command: "FireinputHelp.openEditor"},
+    {name: "toggleIMEKey", value: "", command: "Fireinput.toggleIMEMode"},
     {name: "quickToggleIMEKey", value: "", command: ""},
-    {name: "switchInputMethodKey", value: "", command: "Fireinput.switchInputMethod()"},
-    {name: "toggleHalfKey", value: "", command: "Fireinput.toggleHalfMode()"},
-    {name: "togglePuncKey", value: "", command: "Fireinput.togglePunctMode()"},
-    {name: "toggleEncodingKey", value: "", command: "Fireinput.toggleEncodingMode()"},
+    {name: "switchInputMethodKey", value: "", command: "Fireinput.switchInputMethod"},
+    {name: "toggleHalfKey", value: "", command: "Fireinput.toggleHalfMode"},
+    {name: "togglePuncKey", value: "", command: "Fireinput.togglePunctMode"},
+    {name: "toggleEncodingKey", value: "", command: "Fireinput.toggleEncodingMode"},
     {name: "pageUpKey", value: "", command: null},
     {name: "pageDownKey", value: "", command: null},
     {name: "selectFirstKey", value: "", command: null},
@@ -265,7 +265,17 @@ var FireinputKeyBinding =
        {
           event.preventDefault();
           event.stopPropagation();
-          window.eval(keyAction.command); 
+          // http://adblockplus.org/blog/five-wrong-reasons-to-use-eval-in-an-extension
+          var commands = keyAction.command.split(".");
+          if(commands && commands.length >= 2)
+          {
+             var func = window[commands[0]][commands[1]]; 
+             func.call(window[commands[0]]); 
+          }
+          else if(commands)
+          {
+             window[keyAction.command].call(window);
+          }
        }
  
     }, 
