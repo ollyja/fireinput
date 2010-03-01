@@ -77,14 +77,14 @@ copy_wubi_package()
 copy_cangjie5_package()
 {
   copy_common_package_files
-  cp ../update/install.wubi.rdf xpi/install.rdf
+  cp ../update/install.cangejie.rdf xpi/install.rdf
   cp  ../data/cangjie5_table  xpi/chrome/data
 }
 
 copy_zhengma_package()
 {
   copy_common_package_files
-  cp ../update/install.wubi.rdf xpi/install.rdf
+  cp ../update/install.zhengma.rdf xpi/install.rdf
   cp  ../data/zhengma_table  xpi/chrome/data
 }
 

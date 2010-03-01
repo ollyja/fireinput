@@ -37,6 +37,8 @@
          document.getElementById("localEditor").style.width =(dwidth - 100) + "px"; 
          document.getElementById("fireinputEditor").style.height =(dheight - 180) + "px"; 
          document.getElementById("fireinputEditor").style.width =  (dwidth - 105) + "px"; 
+         document.getElementById("fireinputText").style.height = (dheight - 180) + "px"; 
+         document.getElementById("fireinputText").style.width = (dwidth - 105) + "px"; 
        }
 
        function setOpacity (obj, opacity)
@@ -198,7 +200,8 @@
                     var openContent = FireinputUnicode.getUnicodeString(docData);
                     FireinputEditor.setHTML(openContent); 
                     FireinputEditor.savedContent = openContent; 
-
+                    var textarea = document.getElementById('fireinputText'); 
+                    textarea.value = openContent; 
              }; 
 
              FireinputDocSaver.read(openfile, readDone);
@@ -571,6 +574,9 @@
             } else if (target.id == 'viewsource') {
                 this.viewSource(); 
             }
+            else if (target.id == 'viewtext') {
+                this.viewText(); 
+            }
             else {
               document.getElementById('fireinputEditor').contentWindow.document.execCommand(target.id, false, null);
             }
@@ -707,6 +713,25 @@
                button.className = 'imagebutton textbutton viewsource'; 
             }
          }, 
+
+         viewText: function()
+         {
+           var editor = document.getElementById('fireinputEditor');
+           var text = document.getElementById('fireinputText');
+           var button = document.getElementById('viewtext');
+           if(!this.viewtexting) {
+             this.viewtexting = true; 
+             button.className = 'imagebutton textbutton viewsourcing'; 
+             editor.style.display = "none"; 
+             text.style.display = "block"; 
+           } else {
+             this.viewtexting = false; 
+             button.className = 'imagebutton textbutton viewsource'; 
+             editor.style.display = "block"; 
+             text.style.display = "none"; 
+           }
+         },   
+	
          setHTML: function(html)
          {
             var editor = document.getElementById('fireinputEditor');
@@ -840,6 +865,9 @@
        <tr>
           <td>
             <div class="imagebutton textbutton viewsource" id="viewsource" title="源代码">源代码</div>
+          </td>
+          <td>
+            <div class="imagebutton textbutton viewsource" id="viewtext" title="原文本">原文本</div>
           </td>
           <td>
             <div class="imagebutton newimagebutton" id="new" title="新建"></div>
@@ -1007,6 +1035,7 @@
     <div style="margin: 0px; padding: 0px;">
        <iframe type="content" id="fireinputEditor" name="fireinputEditor" style="min-width: 795px; background-color: #FFFFFF"></iframe>
        <iframe type="content" width="250" height="185" id="colorpalette" src="chrome://fireinput/content/color.html" style="display:none; z-index: 10; position: absolute;"></iframe>
+       <textarea id="fireinputText" style="min-width: 795px; background-color: #FFFFFF; display: none"></textarea>
     </div>
   </div>
   
