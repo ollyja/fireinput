@@ -502,6 +502,7 @@ var FireinputUtils =
     {
        try 
        {
+
           var chromeRegistry = FireinputXPC.getService("@mozilla.org/chrome/chrome-registry;1", "nsIChromeRegistry");
           var uri = FireinputXPC.createInstance("@mozilla.org/network/standard-url;1", "nsIURI");
 					
@@ -524,12 +525,47 @@ var FireinputUtils =
        return undefined; 
     },
 
+    getUserFile: function(filename)
+    {
+       this.moveOldUserDataFile(filename);
+       var dirService = FireinputXPC.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
+
+       var file = dirService.get("ProfD", Components.interfaces.nsIFile);
+       file.append("fireinput"); 
+       file.append(filename);
+       return file; 
+    }, 
+
+    moveOldUserDataFile: function(filename)
+    {
+       var dirService = FireinputXPC.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
+
+       var sfile = dirService.get("ProfD", Components.interfaces.nsIFile);
+       sfile.append(filename);
+       if(sfile.exists()) {
+          var dfile = dirService.get("ProfD", Components.interfaces.nsIFile);
+          dfile.append("fireinput"); 
+          sfile.moveTo(dfile, filename); 
+       }
+    }, 
+
+    initUserDataDir: function()
+    {
+       var dirService = FireinputXPC.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
+
+       var file = dirService.get("ProfD", Components.interfaces.nsIFile);
+       file.append("fireinput"); 
+       if( !file.exists() || !file.isDirectory() ) {   // if it doesn't exist, create  
+           file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);  
+       }  
+    }, 
+
     getAppRootPath: function()
     {
-       var path = this.getExtensionPath();
+       var dirService = FireinputXPC.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
 
-       path =  path.substring(0, path.lastIndexOf("/extensions/fireinput@software"));
-       return path;
+       var file = dirService.get("ProfD", Components.interfaces.nsIFile);
+       return file.path; 
     },
 
     trimString: function(str)

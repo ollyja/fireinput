@@ -48,8 +48,8 @@ var FireinputDocSaver =
 
     initAutoSave: function()
     {
-       var path = FireinputUtils.getAppRootPath() + "/userdocument.fireinput"; 
-       return this.getFile(path); 
+       var path = FireinputUtils.getUserFile("userdocument.fireinput"); 
+       return path; 
     },
 
     loadFileDone: function(cb)

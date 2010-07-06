@@ -39,13 +39,7 @@ var FireinputLongTableSaver =
 
     init: function()
     {
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-
-       var path = FireinputUtils.getAppRootPath() + "/userlargetable.fireinput"; 
-       var datafile = fileHandler.getFileFromURLSpec(path); 
-       return datafile; 
+       return FireinputUtils.getUserFile("userlargetable.fireinput");
     },
 
 

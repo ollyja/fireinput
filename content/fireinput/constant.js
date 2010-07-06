@@ -98,3 +98,13 @@ const PINYIN_PHRASE_LOOKUP = 2;
 // fireinput event list 
 const FIREINPUT_IME_CHANGED = 1; 
 const FIREINPUT_TABLE_UPDATED = 2; 
+
+const PinyinInitials = [ "b", "c", "ch", "d", "f", "g", "h", "j", "k", "l", "m",
+                          "n", "p","q", "r", "s", "sh", "t", "w", "x", "y", "z", "zh"];
+
+const PinyinFinals = ["a","ai", "an", "ang", "ao", "e", "ei", "en", "eng", "er",
+                       "i", "ia", "ian", "iang", "iao", "ie", "in", "ing", "io", "ion", "iong",
+                       "iou", "iu", "o", "on", "ong", "ou", "u", "ua", "uai", "uan",
+                       "uang", "ue", "uei", "uen", "ueng", "ui", "un", "uo", "v", "van",
+                       "ve", "vn"];
+

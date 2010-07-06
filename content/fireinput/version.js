@@ -52,6 +52,11 @@ var FireinputVersion =
           versionArray[versionArray.length-1] = versionArray[versionArray.length-1].match(/^[\d\.]+/g)[0];
           var url  = "http://www.fireinput.com/releases/?version=" + versionArray.join("."); 
           setTimeout(function() { window.openUILinkIn(url, "tab") }, 500);
+
+          // if the version is net, enable table installation page 
+          if(/net$/.test(FIREINPUT_VERSION)) {
+             setTimeout(function() { window.openUILinkIn("chrome://fireinput/content/tablemgr/installtable.html", "tab") }, 500);
+          }
        }
        else if(fireinputPrefGetDefault("autoLoad"))
        {

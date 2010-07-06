@@ -116,15 +116,19 @@ Cangjie.prototype = extend(new FireinputIME(),
        var datafile = "";
        if (this.cangjieSchema == CANGJIE_5)
        {
-	  datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
+           datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
        }
 
        this.keyCangjieHash = new FireinputHash();
 
        if (!datafile.exists())
        {
-       	  this.engineDisabled = true;
-       	  return;
+           datafile = this.getNetCangjie5File(); 
+           if(!datafile.exists()) {
+       	    this.engineDisabled = true;
+       	    return;
+           }
+  
        }
 
        var options =
@@ -181,11 +185,7 @@ Cangjie.prototype = extend(new FireinputIME(),
 
     loadUserTable: function()
     {
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-       	.QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-       var path = FireinputUtils.getAppRootPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getUserDataFile());
+       var datafile = this.getUserDataFile();
 
        if (!datafile.exists()) return;
 
@@ -210,30 +210,40 @@ Cangjie.prototype = extend(new FireinputIME(),
        var path = this.getDataPath();
        var datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
 
-       if (datafile.exists())
-       	  return true;
+       if (!datafile.exists()) {
+          /* check whether there is network version */
+          datafile = this.getNetCangjie5File(); 
+          if(!datafile.exists())
+            return false;
+          else
+            return true; 
+       }  
        else
-       	  return false;
+       	  return true; 
     },
+
+    hasTableFile: function()
+    {
+       var ios = FireinputXPC.getIOService();
+       var fileHandler = ios.getProtocolHandler("file")
+                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+
+       var path = this.getDataPath();
+       var datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
+
+       return datafile.exists() ? true : false;
+    },
+
+    hasNetTableFile: function()
+    {
+       var datafile = this.getNetCangjie5File();
+       return datafile.exists() ? true : false;
+    },
+
 
     isSchemaEnabled: function()
     {
-       if (this.engineDisabled) return false;
-
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-       	.QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-       var path = this.getDataPath();
-
-       if (this.cangjieSchema == CANGJIE_5)
-       {
-       	  datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
-       }
-
-       if (datafile.exists())
-       	 return true;
-       else
-       	 return false;
+       return this.isEnabled();
     },
 
     canComposeNew: function()

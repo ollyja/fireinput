@@ -155,6 +155,9 @@ top.Fireinput =
        // load shortkey settings 
        FireinputKeyBinding.init(); 
 
+       // init user data directory if necessary 
+       FireinputUtils.initUserDataDir(); 
+
        this.toggleIMEMenu(); 
        // initial default IME 
        this.myIME = this.getDefaultIME(); 
@@ -221,9 +224,10 @@ top.Fireinput =
    
     toggleIMEMenu: function()
     {
-       var hideIMEList = fireinputPrefGetDefault("hiddenInputMethod") || []; 
+       var hideIMEList = fireinputPrefGetDefault("hiddenInputMethod") || ""; 
        var supportIMEList = fireinputPrefGetDefault("inputMethodList"); 
        supportIMEList = supportIMEList ? supportIMEList.split(",") : []; 
+       hideIMEList = hideIMEList.split(","); 
 
        // hide autoInsert first. AutoInsert is only for Wubi or Canjie(not sure)
        var autoInsertHandle = document.getElementById("autoInsert"); 
@@ -579,6 +583,16 @@ top.Fireinput =
        }
     },
 
+    reloadIME: function()
+    {
+       if(!this.myRunStatus)
+	      return; 
+
+       this.myIMESchema = -1; 
+
+       this.toggleInputMethod(); 
+    }, 
+
     toggleIME: function()
     {
        if(!this.myRunStatus)
@@ -622,6 +636,27 @@ top.Fireinput =
        return this.myEvent; 
     }, 
 
+    isIMESchemaEnabled: function()
+    {
+       if(!this.myIME)
+          return; 
+       if(!this.myIME.isSchemaEnabled())
+       {
+          var h = document.getElementById('fireinputMessagePanel');
+          h.style.display = "";
+
+          h = document.getElementById('fireinputMessage');
+          var str = document.getElementById("inputMethod").getAttribute("label"); 
+          str = str + "输入法字库没有安装, 点击安装词库"; 
+          h.setAttribute("label", str);
+          h.onclick = function() { window.openUILinkIn("chrome://fireinput/content/tablemgr/installtable.html", "tab"); };
+       }
+       else {
+          var h = document.getElementById('fireinputMessagePanel');
+          h.style.display = "none";
+       }
+    }, 
+
     toggleInputMethod: function()
     {
        // close the IME inputbar 
@@ -662,10 +697,8 @@ top.Fireinput =
           this.myIME.setSchema(method);
           this.myIME.loadTable();
        }
-       else if(this.myIMESchema == WUBI_86 || 
-               this.myIMESchema == WUBI_98 || 
-               this.myIMESchema == CANGJIE_5 ||
-               this.myIMESchema == ZHENGMA)
+       else if(this.myIMESchema > SMARTABC_SHUANGPIN || 
+               this.myIMESchema < SMART_PINYIN)
        {
           // we need to load table only if the current schema is not pinyin schema. Otherwise just set new schema 
           if(this.myIME)
@@ -692,12 +725,6 @@ top.Fireinput =
 
        // notify to all regarding this change 
        this.notify(FIREINPUT_IME_CHANGED); 
-
-       if(!this.myIME.isSchemaEnabled())
-       { 
-          alert("火输中文输入: 对不起,此输入法字库没有安装,请安装字库: 火输菜单->词库管理->导入词库"); 
-          return; 
-       }
     }, 
  
     // loop through next enabled input method 
@@ -743,6 +770,8 @@ top.Fireinput =
           case IME_MODE_ZH:
              var modeString = this.getModeString(this.myInputMode); 
              this.loadIMEPrefByID("fireinputToggleIMEButton", modeString, "label"); 
+             // we need to check whether the schema has been enabled or not 
+             this.isIMESchemaEnabled(); 
           break; 
           case IME_MODE_EN:
              var modeString = this.getModeString(mode); 
@@ -790,11 +819,12 @@ top.Fireinput =
              this.myInputMode = mode; 
              this.myIMEMode = IME_MODE_ZH; 
              this.myIME.setEncoding(mode);
-             this.enableIME(); 
+             // this.enableIME(); 
+             this.isIMESchemaEnabled(); 
           break; 
           case ENCODING_EN:
              this.myIMEMode = IME_MODE_EN; 
-             this.disableIME(); 
+             // this.disableIME(); 
           break; 
           default: 
              return; 
@@ -807,6 +837,7 @@ top.Fireinput =
        { 
           this.setInputMode(ENCODING_ZH);
           fireinputPrefSave("defaultInputEncoding", ENCODING_ZH);
+
           return; 
        }
 

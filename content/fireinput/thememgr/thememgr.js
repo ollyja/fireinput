@@ -517,12 +517,7 @@ var EmotionMgr =
     loadCurrentEmotions: function()
     {
        // load local list 
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-
-       var path = FireinputUtils.getAppRootPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + "/useremotion.fireinput");
+       var datafile = FireinputUtils.getUseFile("useremotion.fireinput");
        this.userEmotionList.length = 0;
        if(!datafile.exists())
        {

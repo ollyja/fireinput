@@ -39,13 +39,7 @@ var FireinputEmotionUpdater =
 
     init: function()
     {
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-
-       var path = FireinputUtils.getAppRootPath() + "/useremotion.fireinput"; 
-       var datafile = fileHandler.getFileFromURLSpec(path); 
-       return datafile; 
+       return FireinputUtils.getUserFile("useremotion.fireinput");
     },
 
 

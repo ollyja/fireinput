@@ -163,8 +163,12 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        var datafile = fileHandler.getFileFromURLSpec(path + this.getPinyinDataFile()); 
        if(!datafile.exists())
        {
-           this.engineDisabled = true; 
-           return; 
+           /* Check downloaded table file */
+           datafile = this.getNetPinyinDataFile(); 
+           if(!datafile.exists()) {
+              this.engineDisabled = true; 
+              return; 
+           }
        }
 
        this.codePinyinHash = new FireinputHash();
@@ -202,8 +206,13 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
        if(!datafile.exists())
        {
-          this.loadUserTable();
-          return; 
+          /* check download phrase table */
+          datafile = this.getNetPinyinPhraseFile(); 
+          if(!datafile.exists())
+          {
+             this.loadUserTable();
+             return; 
+          }
        }
 
        var options = {
@@ -327,12 +336,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     loadUserTable: function()
     {
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-
-       var path = FireinputUtils.getAppRootPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getUserDataFile());
+       var datafile = this.getUserDataFile();
        this.userCodeHash = new FireinputHash();
 
        if(!datafile.exists())
@@ -376,8 +380,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
-       var path = FireinputUtils.getAppRootPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getExtDataFile());
+       var datafile = this.getExtDataFile();
        if(!datafile.exists())
           return; 
 
@@ -398,10 +401,30 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
        var path = this.getDataPath();
        var datafile = fileHandler.getFileFromURLSpec(path + this.getPinyinDataFile());
-       if(!datafile.exists())
-          return false; 
-
+       if(!datafile.exists()) {
+          /* check whether there is network version */
+          datafile = this.getNetPinyinDataFile(); 
+          return datafile.exists() ? true : false; 
+       }
        return true; 
+    }, 
+
+    hasTableFile: function()
+    {
+       var ios = FireinputXPC.getIOService();
+       var fileHandler = ios.getProtocolHandler("file")
+                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+
+       var path = this.getDataPath();
+       var datafile = fileHandler.getFileFromURLSpec(path + this.getPinyinDataFile());
+
+       return datafile.exists() ? true : false; 
+    }, 
+
+    hasNetTableFile: function()
+    {
+       var datafile = this.getNetPinyinDataFile();
+       return datafile.exists() ? true : false; 
     }, 
 
     isSchemaEnabled: function()
@@ -1064,6 +1087,9 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        else if(key.length >=3)
           keyInitial = key.substring(0, 3);
  
+       if(!this.codePinyinHash)
+          return null; 
+
        if(!this.codePinyinHash.hasItem(keyInitial))
           return null; 
  
@@ -1559,6 +1585,9 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     updatePhraseTable: function(phrase, keys, freq, validInitialKey, updateKey)
     {
        FireinputLog.debug(this, "updatePhraseTable: " + phrase + ", freq: " + freq); 
+       if(!this.phraseCodeHash)
+          return; 
+
        if(this.phraseCodeHash.hasItem(validInitialKey))
        {
           // the new phrase is already in phrase table, don't add it in
@@ -1646,6 +1675,9 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     getWordPinyin: function(word)
     {
+       if(!this.codePinyinHash)
+         return null; 
+
        return this.codePinyinHash.getItem(word);
     }
 

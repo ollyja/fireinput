@@ -264,6 +264,10 @@
           <toolbarseparator collapsed="false"/> 
           <toolbarbutton id="fireinputTableUpdate" label="" oncommand="FireinputTable.openUpdateLink()"/>
         </hbox>
+        <hbox id="fireinputMessagePanel" style="margin-left:5px; display: none">
+          <toolbarseparator collapsed="false"/> 
+          <toolbarbutton id="fireinputMessage" label=""/>
+        </hbox>
       </hbox>
   </toolbar>
 </toolbox>
@@ -421,6 +425,10 @@
         <hbox id="fireinputTableUpdatePanel" style="margin-left:5px; display: none">
           <toolbarseparator collapsed="false"/> 
           <toolbarbutton id="fireinputTableUpdate" label="" oncommand="FireinputTable.openUpdateLink()"/>
+        </hbox>
+        <hbox id="fireinputMessagePanel" style="margin-left:5px; display: none">
+          <toolbarseparator collapsed="false"/> 
+          <toolbarbutton id="fireinputMessage" label=""/>
         </hbox>
       </hbox>
     </toolbar>

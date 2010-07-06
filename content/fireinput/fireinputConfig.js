@@ -56,7 +56,7 @@ var FireinputConfig =
     displayInputMethodlist: function(param)
     {
        var list = param.split(",").sort(); 
-       var hideIMEList = fireinputPrefGetDefault("hiddenInputMethod") || [];
+       var hideIMEList = fireinputPrefGetDefault("hiddenInputMethod") || "";
        var lb = document.getElementById("inputMethodList"); 
 
        for(var i=0; i<list.length; i++)
@@ -64,6 +64,7 @@ var FireinputConfig =
           this.createListItem(lb, list[i], false); 
        }
 
+       hideIMEList = hideIMEList.split(",");  
        for(var i=0; i<hideIMEList.length; i++)
        {
           if(hideIMEList[i].length <= 0)

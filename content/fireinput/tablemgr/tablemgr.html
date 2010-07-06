@@ -22,9 +22,14 @@
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/table.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/fireinputPrefs.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/server/login.js"></script>
-<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/tablemgr/tablemgr.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/fireinputIME.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/ime/smartPinyin/schema.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/ime/smartPinyin/smartPinyin.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/ime/wubi/wubi.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/ime/cangjie/cangjie.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/ime/zhengma/zhengma.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/store/storeword.js"></script>
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/tablemgr/tablemgr.js"></script>
 <style>
 .errorMsg { font-size: 15px; color: red; }
 #toggleKeySuggestion {font-size:13px; color:#CC8B14;cursor: pointer;display: none;}
@@ -38,6 +43,7 @@
 <script type="text/javascript">
 $(function() {
    FireinputTableMgr.init(); 
+   FireinputTableMgr.initNetTableInstall();
    $('#topTabMenu').tabs({
 	fxSpeed: 'fast',
         onShow: function (){
@@ -96,6 +102,11 @@ $(function() {
                 <img class="tabs-cornerTopLeft" src="chrome://fireinput/skin/tab-topleft.png"/>
                 <img class="tabs-cornerTopRight" src="chrome://fireinput/skin/tab-topright.png"/>
            <span>导出词库</span></a>
+        </li>
+        <li><a href="#installTable">
+           <img class="tabs-cornerTopLeft" src="chrome://fireinput/skin/tab-topleft.png"/>
+           <img class="tabs-cornerTopRight" src="chrome://fireinput/skin/tab-topright.png"/>
+           <span>安装输入法词库</span></a>
         </li>
     </ul>
 
@@ -275,6 +286,40 @@ $(function() {
          <input type="button" value="Export">
        </div>
     </div>
+
+    <div id="installTable">
+     <div id="installTableHelp" style="text-align:left;padding-left: 5px;">
+       火输输入法词库网络安装. 所有输入法必須先安装词库, 才能使用。
+       <p/>
+       如想取消不用的输入法, 请点击 <a href="#" onclick="FireinputTableMgr.showInputMethodSetting(); return false">输入法高级</a>
+     </div>
+     <div style="margin-top: 20px">
+           <table cellspacing=5 cellpadding=7 border=0 valign="middle">
+             <tr><th align="middle">词库</th><th>操作</th></tr>
+             <tr id="ime1" style="display: none">
+                <td align="right">全拼/双拼输入法词库: </td>
+                <td> <input type="button" value="安装"></td>
+             </tr>
+             <tr id="ime6" style="display: none">
+                <td align="right">五笔86输入法词库: </td>
+                <td> <input type="button" value="安装"></td>
+             </tr>
+             <tr id="ime7" style="display: none">
+                <td align="right">五笔98输入法词库: </td>
+                <td> <input type="button" value="安装"></td>
+             </tr>
+             <tr id="ime8" style="display: none">
+                <td align="right">仓颉5输入法词库: </td>
+                <td> <input type="button" value="安装"></td>
+             </tr>
+             <tr id="ime9"style="display: none">
+                <td align="right">郑码输入法词库: </td>
+                <td> <input type="button" value="安装"></td>
+             </tr>
+         </table>
+      </div>
+    </div>
+
 
    </div>
 </div>

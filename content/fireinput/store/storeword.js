@@ -40,13 +40,8 @@ var FireinputSaver =
 
     getUserDataFile: function()
     {
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-
        var IME = new FireinputIME(); 
-       var path = FireinputUtils.getAppRootPath() + IME.getUserDataFile();
-       return fileHandler.getFileFromURLSpec(path); 
+       return IME.getUserDataFile(); 
     },
 
     saveUserData: function()
@@ -58,13 +53,8 @@ var FireinputSaver =
 
     getExtDataFile: function()
     {
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-
        var IME = new FireinputIME(); 
-       var path = FireinputUtils.getAppRootPath() + IME.getExtDataFile();
-       return fileHandler.getFileFromURLSpec(path); 
+       return IME.getExtDataFile(); 
     }, 
 
     saveExtData: function()

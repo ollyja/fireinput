@@ -77,7 +77,7 @@ copy_wubi_package()
 copy_cangjie5_package()
 {
   copy_common_package_files
-  cp ../update/install.cangejie.rdf xpi/install.rdf
+  cp ../update/install.cangjie5.rdf xpi/install.rdf
   cp  ../data/cangjie5_table  xpi/chrome/data
 }
 
@@ -86,6 +86,13 @@ copy_zhengma_package()
   copy_common_package_files
   cp ../update/install.zhengma.rdf xpi/install.rdf
   cp  ../data/zhengma_table  xpi/chrome/data
+}
+
+copy_net_package()
+{
+  copy_common_package_files
+  cp ../update/install.net.rdf xpi/install.rdf
+  # network version won't have any data table installed 
 }
 
 create_package()
@@ -208,9 +215,9 @@ package_buildate=$2
 # create small package 
 init
 copy_small_package
-pre_build_processing ${package_version} 1 "1,2,3,4,5,6" ${package_buildate}
+pre_build_processing "${package_version}" 1 "1,2,3,4,5" ${package_buildate}
 create_package "fireinput-${package_version}.xpi"
-generate_update_rdf "update.rdf" ${package_version}
+generate_update_rdf "update.rdf" "${package_version}"
 clean
 
 # create large package 
@@ -239,6 +246,13 @@ copy_zhengma_package
 pre_build_processing "${package_version}zhengma" 9 9 ${package_buildate}
 create_package "fireinput-${package_version}zhengma.xpi"
 generate_update_rdf "update.zhengma.rdf" "${package_version}zhengma"
+clean
+
+# create net package 
+copy_net_package
+pre_build_processing "${package_version}net" 0 "1,2,3,4,5,6,7,8,9" ${package_buildate}
+create_package "fireinput-${package_version}net.xpi"
+generate_update_rdf "update.net.rdf" "${package_version}net"
 clean
 
 exit 0

@@ -344,8 +344,7 @@ var EmotionMgr =
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
-       var path = FireinputUtils.getAppRootPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + "/useremotion.fireinput");
+       var datafile = FireinputUtils.getUserFile("useremotion.fireinput");
        this.userEmotionList.length = 0;
        if(!datafile.exists())
        {

@@ -155,6 +155,7 @@ var FireinputTable =
        {
 
           // find out the fireinput installation time 
+          // FIXME: this is wrong 
           var installpath = FireinputUtils.getAppRootPath() + "/extensions/fireinput@software.fireinput.com";
           var pathUrl = FireinputXPC.getIOService().newURI(installpath, null, null).QueryInterface(Components.interfaces.nsIFileURL);
           var path = pathUrl.file;
@@ -408,9 +409,8 @@ var FireinputImporter = {
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
-       var path = FireinputUtils.getAppRootPath();
        var IME = new FireinputIME();
-       var datafile = fileHandler.getFileFromURLSpec(path + IME.getExtDataFile());
+       var datafile = IME.getExtDataFile();
        if(!datafile.exists())
        {
           callback();

@@ -290,7 +290,7 @@ textbox.keyinputbox {
     font-size: 12px; 
 }
 
-#fireinputNewVersion {
+#fireinputNewVersion, #fireinputMessage {
     cursor: pointer; 
     color: #DAACA5; 
     -moz-appearance: none;
@@ -300,6 +300,10 @@ textbox.keyinputbox {
 
 #fireinputNewVersion:hover {
     color: red;
+}
+
+#fireinputMessage {
+   color: red; 
 }
 
 

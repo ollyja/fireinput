@@ -34,14 +34,6 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-const PinyinInitials = [ "b", "c", "ch", "d", "f", "g", "h", "j", "k", "l", "m",
-                          "n", "p","q", "r", "s", "sh", "t", "w", "x", "y", "z", "zh"];
-
-const PinyinFinals = ["a","ai", "an", "ang", "ao", "e", "ei", "en", "eng", "er",
-                       "i", "ia", "ian", "iang", "iao", "ie", "in", "ing", "io", "ion", "iong",
-                       "iou", "iu", "o", "on", "ong", "ou", "u", "ua", "uai", "uan",
-                       "uang", "ue", "uei", "uen", "ueng", "ui", "un", "uo", "v", "van",
-                       "ve", "vn"];
 const PinyinTones = ["ā", "á", "ă", "à", "ō", "ó", "ǒ", "ò", "ū", "ú", "ǔ", "ù", 
                      "ī", "í", "ǐ", "ì", "ē", "é", "ě", "è", "ǖ", "ǘ", "ǚ", "ǜ"]; 
 
@@ -345,6 +337,11 @@ var FireinputTableMgr =
              this.loadDownloadTableList(); 
              this.loadImportedTableList(); 
           } 
+
+          if(name == 'hiddenInputMethod') 
+          {
+            this.initNetTableInstall();
+          }
        }
 
     }, 
@@ -1007,7 +1004,7 @@ var FireinputTableMgr =
           {
              html += "<tr><td><a target='_blank' href='" + tablelink + "'>" + tablename + "</a></td>"; 
              html += "<td>" + last_updated + "</td>"; 
-             html += "<td><input type='button' value='卸载' onclick='return FireinputTableMgr.uninstallTableTableFile(event,\"" + signature + "\")'>";
+             html += "<td><input type='button' value='卸载' onclick='return FireinputTableMgr.uninstallTableFile(event,\"" + signature + "\")'>";
              html += "<span id='uninstallError' class='errorMsg' style='margin-left: 10px'></span></td>";
              html += "</tr>"; 
           }
@@ -1194,7 +1191,7 @@ var FireinputTableMgr =
 
    }, 
 
-   uninstallTableTableFile: function(event, signature)
+   uninstallTableFile: function(event, signature)
    {
        var ptarget = event.target.parentNode; 
        var ohtml = ptarget.innerHTML; 
@@ -1207,6 +1204,214 @@ var FireinputTableMgr =
  
        setTimeout(function() { FireinputImporter.deleteExtPhraseTable(signature, deleted)}, 1000);
        ptarget.innerHTML = "<img  src='chrome://fireinput/skin/loading.gif'/>";
+   }, 
+
+   /* handles network table installation */
+   showInputMethodSetting: function()
+   {
+       var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+       var fi = gs.getChromeWindow().getFireinput(); 
+       fi.showInputMethodSetting();
+   }, 
+
+   initNetTableInstall: function()
+   {
+       var supportIMEList = fireinputPrefGetDefault("inputMethodList");
+       supportIMEList = supportIMEList ? supportIMEList.split(",") : [];
+       var hideIMEList = fireinputPrefGetDefault("hiddenInputMethod") || ""; 
+       hideIMEList = hideIMEList.split(",");
+
+       for (var s in supportIMEList) {
+         if(inArray(hideIMEList,supportIMEList[s])) {
+            $("#ime" + supportIMEList[s]).hide();
+            continue; 
+         }
+
+         var ime = null; 
+         var id = supportIMEList[s];
+         if(id == ZIGUANG_SHUANGPIN || id == MS_SHUANGPIN || id == CHINESESTAR_SHUANGPIN ||
+            id == SMARTABC_SHUANGPIN)
+            id = SMART_PINYIN; 
+
+         switch (id) {
+            case SMART_PINYIN:
+               var ime = new SmartPinyin(); 
+            break; 
+            case WUBI_86: 
+            case WUBI_98: 
+               var ime = new Wubi();
+            break; 
+            case CANGJIE_5: 
+               var ime = new Cangjie();
+            break; 
+            case ZHENGMA: 
+               var ime = new Zhengma();
+            break; 
+         }
+
+         if(ime != null && $("#ime" + id).css("display") == "none") {
+            ime.setSchema(id);
+            if(ime.hasNetTableFile()) {
+               $("#ime" + id + " input").attr("value", "卸载").css("color", "red").attr("schema", id).unbind("click").click(function(e) {
+                  FireinputTableMgr.uninstallNetTable(e);
+               }); 
+            }
+            else if(!ime.hasTableFile()){
+               $("#ime" + id + " input").attr("value", "安装").attr("schema", id).unbind("click").click(function(e) {
+                  FireinputTableMgr.installNetTable(e);
+               });
+            }
+            else {
+               $("#ime" + id + " input").attr("value", "系统字库").attr("disabled", "disabled");
+            }
+
+            $("#ime" + id).show(); 
+         }
+       }
+   }, 
+
+   installNetTable: function(event)
+   {
+     var target = $(event.target); 
+     var schema = target.attr("schema");
+     var ajax = new Ajax();
+       if(!ajax)
+          return;
+
+     var self = this;
+     ajax.setOptions(
+          {
+             method: 'get',
+             onSuccess: function(p) { self.saveNetTableFile(target, p); },
+             onFailure: function() { self.saveNetTableFile(target); }
+          });
+     ajax.request(SERVER_URL + "table/getnetspt.php?s=" + encodeURIComponent(schema));
+   },
+
+   saveNetTableFile: function(target, p)
+   {
+     if(!p || p.responseText.length <= 0)
+     {
+        target.parent().append("<span class='errorMsg'>安装失败</span>");
+        return;
+     }
+
+     var jsonArray;
+     try {
+         jsonArray = JSON.parse(p.responseText);
+     }
+     catch(e) { };
+
+     if(typeof(jsonArray) == 'undefined')
+         return;
+
+     if(jsonArray.length <= 0)
+         return;
+
+     var ptarget = target.parent();
+     var ohtml = ptarget.html();
+
+     ptarget.html("<img  src='chrome://fireinput/skin/loading.gif'/>");
+
+     var item = jsonArray.shift(); 
+
+     this.saveNetTableFileStep(item, jsonArray, function(s) {
+        if(s) {
+          ptarget.html(ohtml);
+          ptarget.append("<span style='margin-left: 5px; color:green'>成功安装</span>");
+          target.unbind("click");
+          // reload IME 
+          var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+          var fi = gs.getChromeWindow().getFireinput(); 
+          fi.reloadIME();
+
+        } 
+        else {
+          ptarget.html(ohtml);
+          ptarget.append("<span style='margin-left: 5px;' class='errorMsg'>安装失败</span>");
+        }  
+     }); 
+   }, 
+
+   saveNetTableFileStep: function(item, next, cb) {
+     var ajax = new Ajax();
+       if(!ajax) {
+          cb.call(this, false);
+          return;
+       }
+
+     var self = this;
+     ajax.setOptions(
+          {
+             method: 'get',
+             onSuccess: function(p) {   
+                  data = FireinputUnicode.getUnicodeString(p.responseText);
+                  if(hex_md5(data) != item[2]) {
+                     cb.call(this, false);
+                  }
+
+                  var file = FireinputUtils.getUserFile(item[0]); 
+                  var fos = Components.classes["@mozilla.org/network/file-output-stream;1"]
+                          .createInstance(Components.interfaces.nsIFileOutputStream);
+                  fos.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
+                  var charset = "UTF-8";
+                  var cos = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
+                         .createInstance(Components.interfaces.nsIConverterOutputStream);
+                  cos.init(fos, charset, 0, 0x0000);
+                  cos.writeString(data); 
+                  cos.close();
+                  if(next.length > 0) {
+                     item = next.shift(); 
+                     self.saveNetTableFileStep(item, next, cb); 
+                  }
+                  else {
+                     cb.call(this, true); 
+                  }          
+                  
+              },
+             onFailure: function() {  cb.call(this, false); }
+          });
+
+     ajax.request(SERVER_URL + item[1] + "/" + item[0]); 
+   }, 
+
+   uninstallNetTable: function(event)
+   {
+     var target = $(event.target); 
+     var schema = target.attr("schema");
+     switch(schema) {
+        case SMART_PINYIN:
+            var ime = new SmartPinyin();
+            ime.getNetPinyinDataFile().remove(false); 
+            ime.getNetPinyinPhraseFile().remove(false);
+        break;
+        case WUBI_86:
+            var ime = new Wubi();
+            ime.getNetWubi86File().remove(false);
+        break; 
+        case WUBI_98:
+            var ime = new Wubi();
+            ime.getNetWubi98File().remove(false);
+        break;
+        case CANGJIE_5:
+            var ime = new Cangjie();
+            ime.getNetCangjie5File().remove(false);
+        break;
+        case ZHENGMA:
+            var ime = new Zhengma();
+            ime.getNetZhengmaFile().remove(false);
+        break;
+     }
+
+     var ptarget = target.parent();
+     ptarget.append("<span style='margin-left: 5px; color:green'>成功卸载</span>"); 
+
+     // update page 
+     $("#ime" + schema + " input").attr("value", "安装").css("color", "#000").unbind('click').click(function(e) {
+        FireinputTableMgr.installNetTable(e);
+     });
    }
+
 }; 
+
 
