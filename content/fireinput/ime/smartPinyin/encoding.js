@@ -91,6 +91,11 @@ PinyinEncodingTable.prototype = extend(new FireinputIME(),
           return charCode; 
     }, 
 
+    hasBig5Encoding: function(charCode)
+    {
+       return this.simpEncodingHash.hasItem(charCode); 
+    },
+
     switchToBig5: function(charCode)
     {
        if(this.simpEncodingHash.hasItem(charCode))

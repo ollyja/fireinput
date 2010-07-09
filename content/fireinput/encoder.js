@@ -86,6 +86,9 @@ var FireinputEncoding =
        if(!this.encoder)
           this.encoder = new PinyinEncodingTable();
 
+       if(this.encoder.hasBig5Encoding(str)) {
+          return this.encoder.switchToBig5(str); 
+       }
 
        for (var i =0; i <str.length; i++)
        {

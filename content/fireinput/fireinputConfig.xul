@@ -143,7 +143,7 @@
    <tabpanel id="inputpanel" orient="vertical">
 
   <description>
-    如不想使用某一中输入法，在下列框中点击此输入法使其不被选中。
+    如不想使用某一种输入法，在下列框中点击此输入法使其不被选中。
   </description>
 
   <spacer style="height: 10px"/>
