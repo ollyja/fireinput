@@ -178,7 +178,7 @@ function fireinputPrefGetDefault(option)
         else 
           value = getvalue; 
 
-    } catch(e) {}
+    } catch(e) { }
  
     // special handling for certain options   
     if(option == "interfaceLanguage")

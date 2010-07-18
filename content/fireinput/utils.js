@@ -52,7 +52,6 @@ var FireinputXPC =
           return this.CC(cName).getService(this.CI(ifaceName));
        else 
           return this.CC(cName).getService();
-
     },
 
     createInstance: function(cName, ifaceName)
@@ -116,45 +115,50 @@ var FireinputEnv =
 
 var FireinputPref = 
 {
-    
+    gPref: null, 
+
     getPref: function(name, type)
     {
-       var gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
+       if(!this.gPref)
+         this.gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
+
        var prefName = prefDomain + "." + name;
 
        if(type == 'undefined')
-          type = gPref.getPrefType(prefName);
+          type = this.gPref.getPrefType(prefName);
 
-       if (type == "INT" || type == gPref.PREF_INT)
-          return gPref.getIntPref(prefName);
-       else if (type == "BOOL" || type == gPref.PREF_BOOL)
-          return gPref.getBoolPref(prefName);
-       else if(type == "STRING" || type == gPref.PREF_STRING)
-          return gPref.getCharPref(prefName); 
+       if (type == "INT" || type == this.gPref.PREF_INT)
+          return this.gPref.getIntPref(prefName);
+       else if (type == "BOOL" || type == this.gPref.PREF_BOOL)
+          return this.gPref.getBoolPref(prefName);
+       else if(type == "STRING" || type == this.gPref.PREF_STRING)
+          return this.gPref.getCharPref(prefName); 
        else
           return null; 
     },
 
     setPref: function(name, type,  value)
     {
-       var gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
+       if(!this.gPref)
+         this.gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
        var prefName = prefDomain + "." + name;
 
        if(type == 'undefined')
-          type = gPref.getPrefType(prefName);
+          type = this.gPref.getPrefType(prefName);
 
-       if (type == "INT" || type == gPref.PREF_INT)
-          gPref.setIntPref(prefName, value);
-       else if (type == "BOOL" || type == gPref.PREF_BOOL)
-          gPref.setBoolPref(prefName, value);
+       if (type == "INT" || type == this.gPref.PREF_INT)
+          this.gPref.setIntPref(prefName, value);
+       else if (type == "BOOL" || type == this.gPref.PREF_BOOL)
+          this.gPref.setBoolPref(prefName, value);
        else 
-          gPref.setCharPref(prefName, value);
+          this.gPref.setCharPref(prefName, value);
     },
 
     addObserver: function(aTopic, aOwnsWeak)
     {
-       var gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
-       var pbi =  gPref.QueryInterface(Components.interfaces.nsIPrefBranch2);
+       if(!this.gPref)
+          this.gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
+       var pbi =  this.gPref.QueryInterface(Components.interfaces.nsIPrefBranch2);
        pbi.addObserver(prefDomain, aTopic, aOwnsWeak);
     }
 
@@ -162,14 +166,16 @@ var FireinputPref =
 
 var FireinputUnicode = 
 {
+    gUnicode: null, 
 
     getUnicodeString: function(text, charset)
     {
-       var gUnicode = FireinputXPC.getService("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter"); 
-       gUnicode.charset = charset ? charset : "UTF-8";
+       if(!this.gUnicode)
+         this.gUnicode = FireinputXPC.getService("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter"); 
+       this.gUnicode.charset = charset ? charset : "UTF-8";
        try
        {
-          return gUnicode.ConvertToUnicode(text);
+          return this.gUnicode.ConvertToUnicode(text);
        }
        catch(ex) 
        {
@@ -181,10 +187,11 @@ var FireinputUnicode =
     {
        try 
        {
-          var gUnicode = FireinputXPC.getService("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter"); 
-          gUnicode.charset = charset ? charset : "UTF-8";
-          text = gUnicode.ConvertFromUnicode(text);
-          return text + gUnicode.Finish();
+          if(!this.gUnicode)
+             this.gUnicode = FireinputXPC.getService("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter"); 
+          this.gUnicode.charset = charset ? charset : "UTF-8";
+          text = this.gUnicode.ConvertFromUnicode(text);
+          return text + this.gUnicode.Finish();
        }
        catch(ex) 
        {
@@ -575,9 +582,13 @@ var FireinputUtils =
 
     getLocaleString: function (stringKey)
     {
-       var stringBundle = FireinputXPC.getService("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
+       if(!this.stringBundle)
+          this.stringBundle = FireinputXPC.getService("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
+       if(!this.stringBundle)
+            return stringKey; 
+
        var propertyBundle  = "chrome://fireinput/locale/fireinput.properties";
-       var bundle = stringBundle.createBundle(propertyBundle);
+       var bundle = this.stringBundle.createBundle(propertyBundle);
        var str = ""; 
        try 
        {

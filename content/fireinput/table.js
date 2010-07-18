@@ -156,10 +156,11 @@ var FireinputTable =
 
           // find out the fireinput installation time 
           // FIXME: this is wrong 
-          var installpath = FireinputUtils.getAppRootPath() + "/extensions/fireinput@software.fireinput.com";
-          var pathUrl = FireinputXPC.getIOService().newURI(installpath, null, null).QueryInterface(Components.interfaces.nsIFileURL);
-          var path = pathUrl.file;
-          lastupdate = path.lastModifiedTime / 1000;
+          var dirService = FireinputXPC.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
+
+          var path = dirService.get("ProfD", Components.interfaces.nsIFile);
+          path.append("fireinput");
+          lastupdate = path.lastModifiedTime;  
        }
 
        if(this.updateTimer)

@@ -35,26 +35,9 @@
  */
 
 // Fireinput Component constants 
-const CLASS_ID = Components.ID('{b3d34bb1-405f-485d-a11b-39d90de735b4}');
-const CLASS_NAME = 'Fireinput Service';
-const CONTRACT_ID = '@fireinput.com/fireinput;1';
-
-
-const SOURCE = 'chrome://fireinput/components/fireinputService.js';
-const INTERFACE = Components.interfaces.nsIFireinput; 
-
-const CC = Components.classes;
-const CI = Components.interfaces;
-const CR = Components.results;
-
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
-
-var observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
-var categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
-
 var _currentFireinputWindow = null; 
+
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function FireinputService() 
 {
@@ -62,6 +45,14 @@ function FireinputService()
 
 FireinputService.prototype = 
 {
+  // properties required for XPCOM registration:  
+    classDescription: "Fireinput Service",  
+    classID:          Components.ID("{b3d34bb1-405f-485d-a11b-39d90de735b4}"),  
+    contractID:       "@fireinput.com/fireinput;1",  
+
+    QueryInterface: XPCOMUtils.generateQI(  
+      [Components.interfaces.nsIFireinput]),
+
     register: function(win)
     {
        _currentFireinputWindow = win; 
@@ -70,66 +61,16 @@ FireinputService.prototype =
     getChromeWindow: function()
     {
        return _currentFireinputWindow; 
-    }, 
-
-    QueryInterface: function(aIID) 
-    {
-        if(!aIID.equals(INTERFACE) &&
-           !aIID.equals(CI.nsISupports))
-            throw CR.NS_ERROR_NO_INTERFACE;
-        return this;
     }
+
 };
 
-// loader.loadSubScript(SOURCE, Component.prototype);
+/**
+ * XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
+ * XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
+ */
 
-var FireinputFactory = 
-{
-    createInstance: function(aOuter, aIID) {
-
-        if(aOuter != null)
-            throw CR.NS_ERROR_NO_AGGREGATION;
-
-        return (new FireinputService()).QueryInterface(aIID);
-    }
-};
-
-var FireinputModule = {
-    _firstTime: true,
-
-    registerSelf: function(aCompMgr, aFileSpec, aLocation, aType) 
-    {
-        if (this._firstTime) 
-        {
-            this._firstTime = false;
-            throw CR.NS_ERROR_FACTORY_REGISTER_AGAIN;
-        };
-        aCompMgr = aCompMgr.QueryInterface(CI.nsIComponentRegistrar);
-        aCompMgr.registerFactoryLocation(
-            CLASS_ID, CLASS_NAME, CONTRACT_ID, aFileSpec, aLocation, aType);
-    },
-
-    unregisterSelf: function(aCompMgr, aLocation, aType) 
-    {
-        aCompMgr = aCompMgr.QueryInterface(CI.nsIComponentRegistrar);
-        aCompMgr.unregisterFactoryLocation(CLASS_ID, aLocation);
-    },
-
-    getClassObject: function(aCompMgr, aCID, aIID) {
-        if (!aIID.equals(CI.nsIFactory))
-            throw CR.NS_ERROR_NOT_IMPLEMENTED;
-
-        if (aCID.equals(CLASS_ID))
-            return FireinputFactory;
-
-        throw CR.NS_ERROR_NO_INTERFACE;        
-    },
-
-    canUnload: function(aCompMgr) 
-    { 
-        return true; 
-    }
-};
-
-function NSGetModule(aCompMgr, aFileSpec) { return FireinputModule; }
-
+if (XPCOMUtils.generateNSGetFactory)
+    var NSGetFactory = XPCOMUtils.generateNSGetFactory([FireinputService]);
+else
+    var NSGetModule = XPCOMUtils.generateNSGetModule([FireinputService]);

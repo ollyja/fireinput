@@ -1217,6 +1217,10 @@ var FireinputTableMgr =
    initNetTableInstall: function()
    {
        var supportIMEList = fireinputPrefGetDefault("inputMethodList");
+       //For Dev Mode 
+       if(supportIMEList == '%IME_LIST%') 
+            supportIMEList = "1,2,3,4,5,6,7,8,9";
+
        supportIMEList = supportIMEList ? supportIMEList.split(",") : [];
        var hideIMEList = fireinputPrefGetDefault("hiddenInputMethod") || ""; 
        hideIMEList = hideIMEList.split(",");

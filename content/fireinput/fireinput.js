@@ -159,8 +159,9 @@ top.Fireinput =
        FireinputUtils.initUserDataDir(); 
 
        this.toggleIMEMenu(); 
+
        // initial default IME 
-       this.myIME = this.getDefaultIME(); 
+       this.myIME = this.getIME(); 
 
        // setup tooltips 
        this.loadIMEPref(); 
@@ -176,6 +177,7 @@ top.Fireinput =
        // register 	
        var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput"); 
        gs.register(window);
+
     },
 
     registerFireinputObserver: function()
@@ -185,6 +187,29 @@ top.Fireinput =
        // monitor application quit event 
        os.addObserver(this, "quit-application-requested", false);
     }, 
+
+    // Patch from christop...: In order to save memory we check if myIME was created in another window
+    // already. Only if not, we create myIME in current window using getDefaultIME()
+    getIME: function()
+    {
+       var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+       var fi =  gs.getChromeWindow() ? gs.getChromeWindow().getFireinput() : null;
+       
+       if(!fi) {
+         window.getFireinput=  function() { return this.Fireinput; }
+         return this.getDefaultIME();
+       }
+
+       window.getFireinput=  function() { return fi; }
+
+       for(var s in fi) {
+         if(typeof(fi[s]) != 'function') {
+          this[s] = fi[s];
+         }
+       }
+
+       return fi.getCurrentIME();
+    },
 
     getDefaultIME: function()
     {
@@ -1612,7 +1637,11 @@ top.Fireinput =
                 // care about tab header 
                 if(gBrowser.getStripVisibility())
                 {
-                   ypos += gBrowser.mStrip.boxObject.height;
+                  if(typeof(gBrowser.mStrip.boxObject) != 'undefined')
+                     ypos += gBrowser.mStrip.boxObject.height;
+
+                  // FF 4.0 or above won't need ajustment 
+                  // ypos += gBrowser.tabContainer.boxObject.height; 
                 }
 
 //	        if(ypos > (window.innerHeight - 20))
@@ -1929,11 +1958,12 @@ window.addEventListener('load', fireinput_onLoad, false);
 window.addEventListener('keydown', fireinput_onKeyDown, true);
 
 // Add a function to window object to return Fireinput object 
+/*
 window.getFireinput=  function()
 {
   return this.Fireinput; 
 }; 
-
+*/
 // event handlers 
 function fireinput_onLoad()
 {

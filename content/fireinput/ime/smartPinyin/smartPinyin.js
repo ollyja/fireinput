@@ -1247,7 +1247,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
        FireinputLog.debug(this,"checking: " + initialKeys + ", keyMatch: " + keyMatch);
        // make final check before going forward 
-       if(!this.phraseCodeHash.hasItem(initialKeys))
+       if(!this.phraseCodeHash || !this.phraseCodeHash.hasItem(initialKeys))
            return null; 
 
        var stringList = this.phraseCodeHash.getItem(initialKeys); 

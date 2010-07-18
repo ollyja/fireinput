@@ -49,6 +49,8 @@ var FireinputVersion =
           // enable it in first run 
           fireinputPrefSave("firstRun", FIREINPUT_VERSION); 
           var versionArray = FIREINPUT_VERSION.split('.');
+          if(versionArray.length < 2) return; 
+
           versionArray[versionArray.length-1] = versionArray[versionArray.length-1].match(/^[\d\.]+/g)[0];
           var url  = "http://www.fireinput.com/releases/?version=" + versionArray.join("."); 
           setTimeout(function() { window.openUILinkIn(url, "tab") }, 500);
