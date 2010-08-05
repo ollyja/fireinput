@@ -47,7 +47,7 @@ var FireinputXPC =
     },
 
     getService: function(cName, ifaceName)
-    {
+    { 
        if(ifaceName)
           return this.CC(cName).getService(this.CI(ifaceName));
        else 
