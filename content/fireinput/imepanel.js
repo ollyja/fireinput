@@ -129,15 +129,19 @@ var FireinputIMEPanel =
        var fontsize = fireinputPrefGetDefault("inputboxFontsize"); 
 
        /*This might need to be handled differently if it works on win/mac */
-       handle.style.color = color; 
-       handle.style.fontSize = fontsize + "pt"; 
+       if(color)
+         handle.style.color = color; 
+       if(fontsize)
+         handle.style.fontSize = fontsize + "pt"; 
 
        handle = document.getElementById("fireinputIMEList"); 
        color = fireinputPrefGetDefault("wordselectionFontcolor"); 
-       handle.style.color = color; 
+       if(color)
+         handle.style.color = color; 
 
        handle = document.getElementById("fireinputLongPanel"); 
-       handle.style.color = color; 
+       if(color)
+         handle.style.color = color; 
       
     },
 

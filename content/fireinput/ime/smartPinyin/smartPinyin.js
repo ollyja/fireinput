@@ -1163,8 +1163,8 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        // free it 
        wordList = null; 
 
-       // FireinputLog.debug(this,"wordArray: " + this.getKeyWord(wordArray));
-       //FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
+       FireinputLog.debug(this,"wordArray: " + this.getKeyWord(wordArray));
+       FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
        if(userArray.length <= 0)
        {
           wordArray.sort(this.sortCodeArray); 

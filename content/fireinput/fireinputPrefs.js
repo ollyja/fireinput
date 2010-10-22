@@ -58,7 +58,7 @@ const prefNames =
 
     /* popup gui css */
     {name: "inputboxFontcolor", type: "STRING", value: "#123456"},
-    {name: "inputboxFontsize", type: "INT", value: 9},
+    {name: "inputboxFontsize", type: "INT", value: 12},
     {name: "wordselectionFontcolor", type: "STRING", value: "#080D13"},
     {name: "wordselectionFontsize", type: "INT", value: 10},
     {name: "wordselectionNum", type: "INT", value: 9},

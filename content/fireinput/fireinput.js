@@ -1525,9 +1525,7 @@ top.Fireinput = {
             var ypos = 0;
             if (target.boxObject) {
                var id = document.getElementById("fireinputIMEContainer");
-               xpos = target.boxObject.screenX;
-               ypos = target.boxObject.screenY + target.boxObject.height + 10;
-               id.showPopup(document.documentElement, xpos, ypos, "popup", null, null);
+               id.openPopup(target, "after_pointer", 0, 5);
             }
             else if (!documentTarget) {
                // HTML input/textarea element 
@@ -1538,9 +1536,7 @@ top.Fireinput = {
 
                // get FF header height/position 
                var h = document.getElementById("navigator-toolbox");
-               xpos += h.boxObject.screenX;
-               ypos += h.boxObject.screenY + h.boxObject.height + 10;
-
+               ypos += h.boxObject.height;
                // care about tab header 
                if (gBrowser.getStripVisibility()) {
                   if (typeof(gBrowser.mStrip.boxObject) != 'undefined') {
@@ -1551,20 +1547,23 @@ top.Fireinput = {
                   // FF 4.0 or above won't need ajustment 
                }
 
+               // handle notification panel height
+               if(gBrowser.getNotificationBox()) {
+                  var aNotification = gBrowser.getNotificationBox(); 
+                  var notifications = aNotification.allNotifications;
+                  for (var n = notifications.length - 1; n >= 0; n--) {
+                     if(typeof(notifications[n].boxObject) != 'undefined')
+                       ypos += notifications[n].boxObject.height; 
+                  }
+               }
+
                //	        if(ypos > (window.innerHeight - 20))
                //                   ypos = window.innerHeight - 20; 
                if (ypos <= 20) ypos = 20;
                //FireinputLog.debug(this,"xpos:" + xpos); 
                //FireinputLog.debug(this,"ypos:" + ypos); 
-               //FireinputLog.debug(this,"window.screenY:" + window.screenY); 
-               //FireinputLog.debug(this,"window.screenX: " + window.screenX); 
-               //FireinputLog.debug(this,"window.innerHeight:" + window.innerHeight); 
-               //FireinputLog.debug(this,"window.innerWidth:" + window.innerWidth); 
-               //FireinputLog.debug(this,"window.outerHeight:" + window.outerHeight); 
-               //FireinputLog.debug(this,"window.outerWidth:" + window.outerWidth); 
                var id = document.getElementById("fireinputIMEContainer");
-               id.showPopup(document.documentElement, xpos, ypos, "popup", null, null);
-
+               id.openPopup(document.documentElement, "after_pointer", xpos, ypos);
             }
             else {
                // rich editor 
@@ -1572,13 +1571,15 @@ top.Fireinput = {
 
                xpos = FireinputUtils.findPosX(p);
                ypos = FireinputUtils.findPosY(p);
-
+dump("ypos: " + ypos + "\n");
                // FireinputLog.debug(this, "p: " + p + ", tagname: " + p.tagName + ", id: " + p.id);
                // some iframes are inside of another iframe. To get the top iframe, we need to 
                // loop through the parentNode to find out whic one is first iframe. Not sure what the 
                // best way to do here 
+dump("p: " + p + ", tagname: " + p.tagName + ", id: " + p.id + "\n");
                var parentNode = p ? p.parentNode : null;
                while (parentNode) {
+dump("p: " + parentNode + ", tagname: " + parentNode.tagName + ", id: " + parentNode.id + "\n");
                   // document node 
                   if (parentNode.nodeType == 9) {
                      parentNode = parentNode.defaultView.frameElement;
@@ -1593,6 +1594,10 @@ top.Fireinput = {
 
                }
 
+               xpos += window.screenX;
+               ypos += window.screenY;
+dump("ypos: " + ypos + "\n");
+
                // gmail main body is built of iframe. So we need to check both ownerDocument and contentDocument 
                // scroll attribute to ajust popup position 
                if (p != target.frameElement) {
@@ -1601,29 +1606,32 @@ top.Fireinput = {
                }
                else {
                   xpos -= FireinputUtils.getDocumentScrollLeft(p.ownerDocument);
-                  ypos -= FireinputUtils.getDocumentScrollTop(p.ownerDocument);
+//                  ypos -= FireinputUtils.getDocumentScrollTop(p.ownerDocument);
                }
+dump("ypos: " + ypos + "\n");
 
                // var frameHeight = p.contentDocument.height; 
                // ypos += p.clientHeight; 
                // get FF header height/position 
                var h = document.getElementById("navigator-toolbox");
-               xpos += h.boxObject.screenX;
-               ypos += h.boxObject.screenY + h.boxObject.height;
+               ypos += h.boxObject.height;
 
+dump("ypos: " + ypos + "\n");
                // care about tab header 
                if (gBrowser.getStripVisibility()) {
                   if (typeof(gBrowser.mStrip.boxObject) != 'undefined') 
                      ypos += gBrowser.mStrip.boxObject.height;
                }
+dump("ypos: " + ypos + "\n");
 
                // most of rich editors have toolbar on top, put popup on top of toolbar 
-               ypos -= 30;
+               // ypos -= 30;
 
                if (ypos <= 20) ypos = 20;
 
                var id = document.getElementById("fireinputIMEContainer");
-               id.showPopup(document.documentElement, xpos, ypos, "popup", null, null);
+//               id.openPopup(document.documentElement, "after_pointer", xpos, ypos);
+               id.openPopupAtScreen(xpos, ypos);
             }
 
             // we have to set this true immediately after showPopup as the onpopupshown handler might be slow to catch 

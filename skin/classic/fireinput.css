@@ -1,5 +1,4 @@
 /* same as menuitem-non-iconic but make it's easy for all menuitems */
-@import "chrome://fireinput-os/skin/fireinput.css";
 #fireinputHelp menuitem {
     -moz-binding: url("chrome://global/content/bindings/menu.xml#menubutton-item");
 }
@@ -150,6 +149,7 @@ textbox.keyinputbox {
 
 #mainPopupSet, #fireinputIMEContainer {
   -moz-user-focus: normal !important;
+  background-color: white; 
 }
 
 #inputMethod, #fireinputMenu, #fireinputSpecialCharMenu,#fireinputEmotionMenu {
@@ -341,7 +341,7 @@ textbox.keyinputbox {
     margin: 0;
     border: none; 
     background: transparent !important; 
-    padding: 3px 0 1px 3px;
+    padding: 1px 0 1px 3px;
     font: icon;
     font-size: 15px;
     min-width: 100px;

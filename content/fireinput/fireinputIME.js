@@ -1,9 +1,10 @@
 
+const HALF_LETTER_MODE = 1;
+const FULL_LETTER_MODE = 2;
+const HALF_PUNCT_MODE = 3;
+const FULL_PUNCT_MODE = 4;
+
 var FireinputIME = function() {
-    const HALF_LETTER_MODE = 1;
-    const FULL_LETTER_MODE = 2;
-    const HALF_PUNCT_MODE = 3;
-    const FULL_PUNCT_MODE = 4;
 }; 
 
 FireinputIME.prototype = 
@@ -11,8 +12,8 @@ FireinputIME.prototype =
     codeHash: null,
     phraseCodeHash: null, 
     name: null, 
-    letterMode: this.HALF_LETTER_MODE, 
-    punctMode: this.HALF_PUNCT_MODE, 
+    letterMode: HALF_LETTER_MODE, 
+    punctMode: HALF_PUNCT_MODE, 
 
     getName: function ()
     {
@@ -199,32 +200,32 @@ FireinputIME.prototype =
 
     isHalfLetterMode: function()
     {
-       return this.letterMode == this.HALF_LETTER_MODE; 
+       return this.letterMode == HALF_LETTER_MODE; 
     }, 
 
     setHalfLetterMode: function()
     {
-       this.letterMode = this.HALF_LETTER_MODE; 
+       this.letterMode = HALF_LETTER_MODE; 
     },
 
     setFullLetterMode: function()
     {
-       this.letterMode = this.FULL_LETTER_MODE; 
+       this.letterMode = FULL_LETTER_MODE; 
     },
 
     isHalfPunctMode: function()
     {
-       return this.punctMode == this.HALF_PUNCT_MODE;
+       return this.punctMode == HALF_PUNCT_MODE;
     },
   
     setHalfPunctMode: function()
     {
-       this.punctMode = this.HALF_PUNCT_MODE;
+       this.punctMode = HALF_PUNCT_MODE;
     },
 
     setFullPunctMode: function()
     {
-       this.punctMode = this.FULL_PUNCT_MODE;    
+       this.punctMode = FULL_PUNCT_MODE;    
     },
 
     getMaxAllowedKeys: function()

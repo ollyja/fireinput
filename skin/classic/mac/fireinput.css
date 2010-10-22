@@ -1,3 +1,5 @@
+/* same as menuitem-non-iconic but make it's easy for all menuitems */
+@import "chrome://fireinput/skin/fireinput.css";
 
 .charinputlabel {
     text-align: left; 
@@ -22,9 +24,10 @@
     -moz-border-right-colors: #7F7357 !important;
     -moz-border-bottom-colors: #7F7357 !important;
     -moz-border-left-colors: #7F7357 !important;
-    padding: 3px 0 1px 3px;
-    background: #E4E7EB;
-    font-family: SimSun, Arial,Tahoma; 
-    font-size: 25px;
+    padding: 1px 0 1px 3px;
+    background-color: white;
+    font: icon;
+    font-size: 15px;
     min-width: 100px; 
 }
+

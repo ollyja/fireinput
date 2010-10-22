@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <?xml-stylesheet href="chrome://fireinput/content/browserOverlay.css" type="text/css"?>
-<?xml-stylesheet href="chrome://fireinput/skin/fireinput.css" type="text/css"?>
+<?xml-stylesheet href="chrome://fireinput-os/skin/fireinput.css" type="text/css"?>
 
 <overlay id="fireinputOverlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
@@ -53,11 +53,11 @@
 
 <popupset id="mainPopupSet">
     <popup id="fireinputIMEContainer" ignorekeys="true" onpopupshowing="Fireinput.IMEWindowShowing()" onpopuphidden="Fireinput.IMEWindowHidden();" onpopupshown="Fireinput.IMEWindowShown();">
-      <vbox id="fireinputIMEContainerBox" style="padding: 0px; margin:0px">
+      <vbox id="fireinputIMEContainerBox" style="padding: 1px; margin:0px; background-color: lightgrey">
         <hbox style="margin: 1px 0px; padding:0px;">
          <hbox id="fireinputComposeField" style="margin-right:1px;">
          </hbox>
-         <textbox id="fireinputField" rows="1" flex="1" value="" 
+         <textbox id="fireinputField" rows="1" flex="1" value=""
            onmousedown="FireinputIMEPanel.IMEInputFieldMouseEvent(event)" 
            onfocus="FireinputIMEPanel.IMEInputFieldFocusEvent(event)" />
          <image style="cursor:pointer" src="chrome://fireinput/skin/search.png" tooltiptext="Alt+Enter" onclick="FireinputWebSearch.load()"/>
