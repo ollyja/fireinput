@@ -284,6 +284,8 @@ var FireinputUtils =
              else  
                target.scrollTop = target.scrollHeight;
           }
+
+          return;
        }
        else if(element.documentTarget)
        {

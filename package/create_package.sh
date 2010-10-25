@@ -40,8 +40,8 @@ create_platform_style()
   for platform in $platforms 
   do 
      # zip files 
-     (cd xpi/platform/$platform/; zip -r fireinput.jar skin; rm -rf skin; mv fireinput.jar chrome/); 
-     (cd xpi/platform/$platform/; mv chrome.manifest.real chrome.manifest); 
+#     (cd xpi/platform/$platform/; zip -r fireinput.jar skin; rm -rf skin; mv fireinput.jar chrome/); 
+     (cd xpi/platform/$platform/; mv chrome.manifest chrome.manifest); 
   done 
 }
  
@@ -114,15 +114,16 @@ create_package()
   create_platform_style
 
   # zip files 
-  (cd xpi/chrome/; zip -r fireinput.jar content locale skin); 
+#  (cd xpi/chrome/; zip -r fireinput.jar content locale skin); 
 
   # remove files part of jar 
-  rm -rf xpi/chrome/content; 
-  rm -rf xpi/chrome/locale; 
-  rm -rf xpi/chrome/skin; 
+#  rm -rf xpi/chrome/content; 
+#  rm -rf xpi/chrome/locale; 
+#  rm -rf xpi/chrome/skin; 
 
   # create xpi 
-  (cd xpi; zip -r $package_name chrome.manifest install.rdf defaults platform components chrome/data chrome/fireinput.jar); 
+#  (cd xpi; zip -r $package_name chrome.manifest install.rdf defaults platform components chrome/data chrome/fireinput.jar); 
+  (cd xpi; zip -r $package_name chrome.manifest install.rdf defaults platform components chrome/data chrome); 
   cp xpi/$package_name . 
 }
 
