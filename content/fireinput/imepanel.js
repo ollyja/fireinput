@@ -124,8 +124,13 @@ var FireinputIMEPanel =
 
     initPanelUI: function()
     {
-       var handle = document.getElementById("fireinputField"); 
-       var color = fireinputPrefGetDefault("inputboxFontcolor"); 
+       var handle = document.getElementById("fireinputIMEContainerBox");
+       var color = fireinputPrefGetDefault("inputboxBgcolor"); 
+       if(color)
+         handle.style.backgroundColor = color; 
+
+       handle = document.getElementById("fireinputField"); 
+       color = fireinputPrefGetDefault("inputboxFontcolor"); 
        var fontsize = fireinputPrefGetDefault("inputboxFontsize"); 
 
        /*This might need to be handled differently if it works on win/mac */

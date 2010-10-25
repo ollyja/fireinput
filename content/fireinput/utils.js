@@ -244,8 +244,8 @@ var FireinputUtils =
           // setFocus before set any values to avoid being reset by target onfocus event -  normally happens to textfield or textarea  
           this.setFocus(element.target); 
 
-	  var start = element.selectionStart; 
-	  var end   = element.selectionEnd; 
+	       var start = element.selectionStart; 
+          var end   = element.selectionEnd; 
           var target = element.target; 
 
           // hack: the onfocus event will select all. We try to avoid this. 
@@ -284,31 +284,6 @@ var FireinputUtils =
              else  
                target.scrollTop = target.scrollHeight;
           }
-
-          // some target might have oninput event. Since the value is changed by script programmatically, 
-          // this event won't fire 
-          // Why do this way: the oninput won't show up as item of target. It must go to DOM tree to find 
-          // the attribute. Unfortunately if it's added by addEventListener, it won't be executed 
-          // The following code has security issue 
-          /* 
-          if(target.id != '')
-          {
-             var win = target.ownerDocument.defaultView; 
-             while (win.parent != win)
-                win = window.parent;
-
-             if(win.document)
-             {
-                 var node = win.document.getElementById(target.id); 
-                 if(node.hasAttribute("oninput"))
-                 {
-                     var f = node.getAttribute("oninput"); 
-                     try {
-                     } catch(e) { }
-                 }
-             }
-          }
-          */
        }
        else if(element.documentTarget)
        {
@@ -344,28 +319,23 @@ var FireinputUtils =
                 var parentNode = beforeNode.parentNode;
                 parentNode.insertBefore(imgNode, beforeNode);
                 selection.collapse(beforeNode, 0); 
+                return; 
              }
-             else 
-             {
-                var endOffset = selection.focusOffset;
-                var nodeValue = selection.focusNode.nodeValue; 
-
-                nodeValue = nodeValue.substr(0,endOffset) + text + 
-                          nodeValue.substr(endOffset, nodeValue.length); 
-                selection.focusNode.nodeValue = nodeValue; 
-                selection.collapse(selection.focusNode, endOffset+text.length); 
-             }
-
           }
-          else
-          {
-             this.insertAtSelection(selection, text, sourceType);
-          }
-       }
-       else 
-       {
-          element.target.value += text;
-       }
+        }
+        // complex document. It's highly possible that the editor is not using designMode. 
+        // As such we emulate keypress event to send out text value. By doing this way, 
+        // google doc works great 
+             
+        Fireinput.setEventDispathMode(true);
+        for(var i=0; i<text.length; i++) {
+            var newEvent = document.createEvent("KeyEvents")
+            newEvent.initKeyEvent("keypress", true, true, document.defaultView,
+                        element.event.ctrlKey, element.event.altKey, element.event.shiftKey,
+                        element.event.metaKey, 0, text.charCodeAt(i));
+            element.event.target.dispatchEvent(newEvent)             
+        }
+        Fireinput.setEventDispathMode(false);
     },
 
     setCaretTo: function (obj, pos) 

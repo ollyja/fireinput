@@ -11,8 +11,8 @@ statusbarpanel#fireinputStatusBar {
 }
 
 toolbar[iconsize="small"] #fireinput-toolbarbutton > .toolbarbutton-icon {
-  list-style-image: url("chrome://fireinput/skin/fireinput16.png");
-  width: 16px;
-  height: 16px;
+  list-style-image: url("chrome://fireinput/skin/fireinput18.png");
+  width: 18px;
+  height: 18px;
 }
 

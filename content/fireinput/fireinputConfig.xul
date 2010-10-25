@@ -49,9 +49,20 @@
            <column/>
         </columns>
         <rows id="fontsRows">
+            <row id="bgrow">
+                <hbox align="center">
+                   <label value="背景颜色" control="fireinput.inputbox.bgcolor"/>
+                   <colorpicker type="button" id="fireinput.inputbox.bgcolor" palettename="standard" color="#E7F2FB" 
+                                 option="inputboxBgcolor"/>
+                </hbox>
+            </row>    
             <row id="fontRow">
                 <hbox align="center">
-                  <label control="fireinput.inputbox.fontsize" value="字体大小"/>
+                   <label value="字体颜色" control="fireinput.inputbox.fontcolor"/>
+                   <spacer flex="1"/>
+                   <colorpicker type="button" id="fireinput.inputbox.fontcolor" palettename="standard" color="#123456" 
+                                 option="inputboxFontcolor"/>
+                  <label control="fireinput.inputbox.fontsize" value="大小"/>
                   <menulist id="fireinput.inputbox.fontsize" option="inputboxFontsize">
                     <menupopup onpopuphidden=''>
                       <menuitem value="9" label="9"/>
@@ -69,10 +80,6 @@
                       <menuitem value="21" label="21"/>
                     </menupopup>
                    </menulist> 
-                   <label value="颜色" control="fireinput.inputbox.fontcolor"/>
-                   <spacer flex="1"/>
-                   <colorpicker type="button" id="fireinput.inputbox.fontcolor" palettename="standard" color="#999999" 
-                                 option="inputboxFontcolor"/>
                  </hbox>                
               </row>
           </rows>
@@ -89,7 +96,11 @@
         <rows id="fontsRows">
             <row id="fontRow">
                 <hbox align="center">
-                  <label control="fireinput.wordselection.fontsize" value="字体大小"/>
+                   <label value="字体颜色" control="fireinput.wordselection.fontcolor"/>
+                   <spacer flex="1"/>
+                   <colorpicker type="button" id="fireinput.wordselection.fontcolor" palettename="standard" color="#080D13" 
+                                 option="wordselectionFontcolor"/>
+                  <label control="fireinput.wordselection.fontsize" value="大小"/>
                   <menulist id="fireinput.wordselection.fontsize" option="wordselectionFontsize">
                     <menupopup onpopuphidden=''>
                       <menuitem value="9" label="9"/>
@@ -107,10 +118,6 @@
                       <menuitem value="21" label="21"/>
                     </menupopup>
                    </menulist> 
-                   <label value="颜色" control="fireinput.wordselection.fontcolor"/>
-                   <spacer flex="1"/>
-                   <colorpicker type="button" id="fireinput.wordselection.fontcolor" palettename="standard" color="#999999" 
-                                 option="wordselectionFontcolor"/>
                  </hbox>                
               </row>
           </rows>
@@ -121,7 +128,7 @@
     <caption label="候选词数量"/>
         <rows id="fontsRows">
             <row id="fontRow">
-                <hbox>
+                <hbox align="center">
                   <label control="fireinput.wordselection.num" value="显示个数"/>
                   <menulist id="fireinput.wordselection.num" option="wordselectionNum">
                     <menupopup>

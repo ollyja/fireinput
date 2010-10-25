@@ -53,7 +53,7 @@
 
 <popupset id="mainPopupSet">
     <popup id="fireinputIMEContainer" ignorekeys="true" onpopupshowing="Fireinput.IMEWindowShowing()" onpopuphidden="Fireinput.IMEWindowHidden();" onpopupshown="Fireinput.IMEWindowShown();">
-      <vbox id="fireinputIMEContainerBox" style="padding: 1px; margin:0px; background-color: lightgrey">
+      <vbox id="fireinputIMEContainerBox" style="padding: 1px; margin:0px;">
         <hbox style="margin: 1px 0px; padding:0px;">
          <hbox id="fireinputComposeField" style="margin-right:1px;">
          </hbox>
@@ -108,8 +108,14 @@
 <toolbarpalette id="BrowserToolbarPalette">
       <toolbarbutton id="fireinput-toolbarbutton" label="Fireinput(火输)"
                      class="chromeclass-toolbar-additional"
-                     observes="Fireinput.toggleFireinput()" tooltiptext="Chinese Input Engine For Firefox"/>
+                     oncommand="Fireinput.toggleFireinput()" tooltiptext="Fireinput Chinese IME For Firefox"/>
 </toolbarpalette>
+
+<toolbar id="TabsToolbar">
+      <toolbarbutton id="fireinput-toolbarbutton" label="Fireinput(火输)"
+                     class="toolbarbutton-1 chromeclass-toolbar-additional" insertafter="alltabs-button"
+                     oncommand="Fireinput.toggleFireinput()" tooltiptext="Fireinput Chinese IME For Firefox"/>
+</toolbar> 
 
 <toolbox id="navigator-toolbox">
    <toolbar id="fireinputIMEBar_top" hidden="true" align="center" fullscreentoolbar="true">

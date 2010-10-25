@@ -210,7 +210,7 @@ top.Fireinput = {
    // caret focus event 
    myEvent: null,
    // caret focus target 
-   myTarget: null,
+   myTarget: {},
 
    // save user typing history 
    mySaveHistory: true,
@@ -235,6 +235,9 @@ top.Fireinput = {
 
    // a list of enabled IME 
    myEnabledIME: [],
+
+   // event dispatch mode. 
+   myEventDispatch: false, 
 
    // fireinput init function. 
    initialize: function () {
@@ -702,6 +705,10 @@ top.Fireinput = {
       return this.myEvent;
    },
 
+   setEventDispathMode: function(b) {
+      this.myEventDispatch = b; 
+   },
+
    isIMESchemaEnabled: function () {
       if (!this.myIME) return;
       if (!this.myIME.isSchemaEnabled()) {
@@ -1123,7 +1130,10 @@ top.Fireinput = {
          else {
             var twin = document.commandDispatcher.focusedWindow;
             if (twin) {
-               var editingSession = twin.QueryInterface(Components.interfaces.nsIInterfaceRequestor).getInterface(Components.interfaces.nsIWebNavigation).QueryInterface(Components.interfaces.nsIInterfaceRequestor).getInterface(Components.interfaces.nsIEditingSession);
+               var editingSession = twin.QueryInterface(Components.interfaces.nsIInterfaceRequestor).
+                                    getInterface(Components.interfaces.nsIWebNavigation).
+                                    QueryInterface(Components.interfaces.nsIInterfaceRequestor).
+                                    getInterface(Components.interfaces.nsIEditingSession);
                if (!editingSession.windowIsEditable(twin)) return {
                   target: target,
                   valid: false,
@@ -1154,8 +1164,17 @@ top.Fireinput = {
 
    },
 
+   mouseDownListener: function (event) {
+      if (!this.myRunStatus || this.myIMEInputBarStatus) return;
+
+      this.myTarget.screenX = event.screenX; 
+      this.myTarget.screenY = event.screenY; 
+   },
+
    keyUpListener: function (event) {
       if (!this.myRunStatus || this.myIMEInputBarStatus) return;
+
+      if (this.myEventDispatch) return; 
 
       if (event.keyCode == FireinputKeyBinding.getKeyActionCode("quickToggleIMEKey")) {
          if (this.myChangeIMEModeEvent) {
@@ -1170,6 +1189,8 @@ top.Fireinput = {
    },
 
    keyDownListener: function (event) {
+      if (this.myEventDispatch) return; 
+
       // FireinputLog.debug(this, "this.myRunStatus: " + this.myRunStatus +", this.myIMEInputBarStatus: " + this.myIMEInputBarStatus); 
       // monitor key which has action associated. For those keys without action associated, 
       // it will be handled individually.  
@@ -1447,6 +1468,7 @@ top.Fireinput = {
 
    keyPressListener: function (event) {
       if (!this.myRunStatus) return;
+      if (this.myEventDispatch) return; 
 
       var keyCode = event.keyCode;
       var charCode = event.charCode;
@@ -1469,7 +1491,7 @@ top.Fireinput = {
 
       // if it's not printable char, just return here 
       if (charCode == 0) return;
-
+ 
       var targetInfo = this.isValidTarget(event);
       if (!targetInfo.valid) return;
 
@@ -1480,12 +1502,11 @@ top.Fireinput = {
       // if(this.myTarget && this.myTarget.target != target)
       //   this.setIMEMode(IME_MODE_ZH);
       // keep the real event and target if inputfield has been focused 
-      if (!FireinputIMEPanel.getIMEInputFieldFocusedStatus() && !FireinputIMEPanel.getComposeEnabled() && (!this.myTarget || (this.myTarget.target != target))) {
+      if (!FireinputIMEPanel.getIMEInputFieldFocusedStatus() && !FireinputIMEPanel.getComposeEnabled() && (this.myTarget.target != target)) {
          this.myEvent = event;
-         this.myTarget = {
-            target: target,
-            documentTarget: documentTarget
-         };
+         this.myTarget.event = event;
+         this.myTarget.target = target; 
+         this.myTarget.documentTarget = documentTarget; 
       }
 
       // remember the caret position before focus switch 
@@ -1517,6 +1538,7 @@ top.Fireinput = {
          }
 
          event.preventDefault();
+         event.stopPropagation();
          // open IME input window 
          if (!this.myIMEInputBarStatus) {
             // reset popupNode to fix inputbar popup position issue 
@@ -1571,15 +1593,12 @@ top.Fireinput = {
 
                xpos = FireinputUtils.findPosX(p);
                ypos = FireinputUtils.findPosY(p);
-dump("ypos: " + ypos + "\n");
                // FireinputLog.debug(this, "p: " + p + ", tagname: " + p.tagName + ", id: " + p.id);
                // some iframes are inside of another iframe. To get the top iframe, we need to 
                // loop through the parentNode to find out whic one is first iframe. Not sure what the 
                // best way to do here 
-dump("p: " + p + ", tagname: " + p.tagName + ", id: " + p.id + "\n");
                var parentNode = p ? p.parentNode : null;
                while (parentNode) {
-dump("p: " + parentNode + ", tagname: " + parentNode.tagName + ", id: " + parentNode.id + "\n");
                   // document node 
                   if (parentNode.nodeType == 9) {
                      parentNode = parentNode.defaultView.frameElement;
@@ -1596,7 +1615,6 @@ dump("p: " + parentNode + ", tagname: " + parentNode.tagName + ", id: " + parent
 
                xpos += window.screenX;
                ypos += window.screenY;
-dump("ypos: " + ypos + "\n");
 
                // gmail main body is built of iframe. So we need to check both ownerDocument and contentDocument 
                // scroll attribute to ajust popup position 
@@ -1606,9 +1624,8 @@ dump("ypos: " + ypos + "\n");
                }
                else {
                   xpos -= FireinputUtils.getDocumentScrollLeft(p.ownerDocument);
-//                  ypos -= FireinputUtils.getDocumentScrollTop(p.ownerDocument);
+                  ypos -= FireinputUtils.getDocumentScrollTop(p.ownerDocument);
                }
-dump("ypos: " + ypos + "\n");
 
                // var frameHeight = p.contentDocument.height; 
                // ypos += p.clientHeight; 
@@ -1616,13 +1633,21 @@ dump("ypos: " + ypos + "\n");
                var h = document.getElementById("navigator-toolbox");
                ypos += h.boxObject.height;
 
-dump("ypos: " + ypos + "\n");
                // care about tab header 
                if (gBrowser.getStripVisibility()) {
                   if (typeof(gBrowser.mStrip.boxObject) != 'undefined') 
                      ypos += gBrowser.mStrip.boxObject.height;
                }
-dump("ypos: " + ypos + "\n");
+
+               // handle notification panel height
+               if(gBrowser.getNotificationBox()) {
+                  var aNotification = gBrowser.getNotificationBox(); 
+                  var notifications = aNotification.allNotifications;
+                  for (var n = notifications.length - 1; n >= 0; n--) {
+                     if(typeof(notifications[n].boxObject) != 'undefined')
+                       ypos += notifications[n].boxObject.height; 
+                  }
+               }
 
                // most of rich editors have toolbar on top, put popup on top of toolbar 
                // ypos -= 30;
@@ -1630,8 +1655,10 @@ dump("ypos: " + ypos + "\n");
                if (ypos <= 20) ypos = 20;
 
                var id = document.getElementById("fireinputIMEContainer");
-//               id.openPopup(document.documentElement, "after_pointer", xpos, ypos);
-               id.openPopupAtScreen(xpos, ypos);
+               if(!this.myTarget.screenX)
+                  id.openPopupAtScreen(xpos, ypos);
+               else 
+                  id.openPopupAtScreen(this.myTarget.screenX, this.myTarget.screenY+10);
             }
 
             // we have to set this true immediately after showPopup as the onpopupshown handler might be slow to catch 
@@ -1707,12 +1734,14 @@ dump("ypos: " + ypos + "\n");
          var fullLetter = this.myIME.convertLetter(charCode);
          if (typeof(fullLetter) == "object") {
             event.preventDefault();
+            event.stopPropagation();
             for (var s in fullLetter) {
                FireinputUtils.insertCharAtCaret(this.myTarget, fullLetter[s]);
             }
          }
          else if (typeof(fullLetter) != "undefined") {
             event.preventDefault();
+            event.stopPropagation();
             FireinputUtils.insertCharAtCaret(this.myTarget, fullLetter);
          }
 
@@ -1826,6 +1855,7 @@ dump("ypos: " + ypos + "\n");
 // Create event listener.
 window.addEventListener('load', fireinput_onLoad, false);
 window.addEventListener('keydown', fireinput_onKeyDown, true);
+window.addEventListener('mousedown', fireinput_onMouseDown, true);
 
 // Add a function to window object to return Fireinput object 
 /*
@@ -1854,6 +1884,10 @@ function fireinput_onKeyPress(event) {
 
 function fireinput_onPopupShowing(event) {
    Fireinput.fireinputContext(event);
+}
+
+function fireinput_onMouseDown(event) {
+   Fireinput.mouseDownListener(event);
 }
 
 // monitor page loads and switches 

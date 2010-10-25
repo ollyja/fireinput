@@ -57,6 +57,7 @@ const prefNames =
     {name: "serverGuestId", type: "STRING", value: ''}, 
 
     /* popup gui css */
+    {name: "inputboxBgcolor", type: "STRING", value: "#E7F2FB"},
     {name: "inputboxFontcolor", type: "STRING", value: "#123456"},
     {name: "inputboxFontsize", type: "INT", value: 12},
     {name: "wordselectionFontcolor", type: "STRING", value: "#080D13"},

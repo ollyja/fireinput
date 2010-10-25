@@ -149,7 +149,7 @@ var FireinputConfig =
              el.selectedItem  = element; 
        }
 
-       ids = ["fireinput.inputbox.fontcolor", "fireinput.wordselection.fontcolor"]; 
+       ids = ["fireinput.inputbox.bgcolor", "fireinput.inputbox.fontcolor", "fireinput.wordselection.fontcolor"]; 
        for(var i=0; i<ids.length; i++)
        {
           var el = document.getElementById(ids[i]); 
@@ -167,7 +167,7 @@ var FireinputConfig =
           fireinputPrefSave(el.getAttribute("option"), el.value); 
        }
 
-       ids = ["fireinput.inputbox.fontcolor", "fireinput.wordselection.fontcolor"];
+       ids = ["fireinput.inputbox.bgcolor", "fireinput.inputbox.fontcolor", "fireinput.wordselection.fontcolor"];
        for(var i=0; i<ids.length; i++)
        {
           var el = document.getElementById(ids[i]);
