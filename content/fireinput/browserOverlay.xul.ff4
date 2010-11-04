@@ -1,0 +1,479 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://fireinput/content/browserOverlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://fireinput-os/skin/fireinput.css" type="text/css"?>
+
+<overlay id="fireinputOverlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<stringbundleset id="stringbundleset">
+        <stringbundle id="strings_fireinput" src="chrome://fireinput/locale/fireinput.properties"/>
+</stringbundleset>
+
+<script type="application/x-javascript" src="chrome://fireinput/content/version.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/debug.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/constant.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/utils.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/lib.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/stream.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/store/storeword.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/store/storelong.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/store/storeemotion.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/fireinputIME.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/encoder.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/composer.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/websearch.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/theme.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/ime/smartPinyin/longTable.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/ime/smartPinyin/encoding.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/ime/smartPinyin/fullLetter.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/ime/smartPinyin/schema.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/ime/smartPinyin/smartPinyin.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/ime/wubi/wubi.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/ime/cangjie/cangjie.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/ime/zhengma/zhengma.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/keybinding.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/fireinputPrefs.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/imepanel.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/fireinput.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/specialChar.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/emotion.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/table.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/help.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/md5.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/plugins/contextReader/readerThread.js"/>
+
+<commandset id="mainCommandSet">
+	<command id="cmd_focusSearchBox" oncommand="FireinputWebSearch.focusSearchbox();"/>
+</commandset>
+
+<keyset id="mainKeyset">
+        <key id="key_focusSearchBox" keycode="VK_F4" modifiers=""
+                command="cmd_focusSearchBox"/>
+</keyset>
+
+<popupset id="mainPopupSet">
+    <popup id="fireinputIMEContainer" ignorekeys="true" onpopupshowing="Fireinput.IMEWindowShowing()" onpopuphidden="Fireinput.IMEWindowHidden();" onpopupshown="Fireinput.IMEWindowShown();">
+      <vbox id="fireinputIMEContainerBox" style="padding: 1px; margin:0px;">
+        <hbox style="margin: 1px 0px; padding:0px;">
+         <hbox id="fireinputComposeField" style="margin-right:1px;">
+         </hbox>
+         <textbox id="fireinputField" rows="1" flex="1" value=""
+           onmousedown="FireinputIMEPanel.IMEInputFieldMouseEvent(event)" 
+           onfocus="FireinputIMEPanel.IMEInputFieldFocusEvent(event)" />
+         <image style="cursor:pointer" src="chrome://fireinput/skin/search.png" tooltiptext="Alt+Enter" onclick="FireinputWebSearch.load()"/>
+        </hbox>
+        <hbox style="margin: 1px 0px; padding:0px; border-bottom: 1px solid #AEA48E;"/>
+        <hbox id="fireinputWordList" style="margin: 0px; padding:0;min-width:500px">
+           <hbox id="fireinputIMEList" style="margin-top:2px;" flex="10">
+           </hbox>
+           <toolbarbutton id="fireinputPrevSelButton" tooltiptext=""
+                       oncommand="FireinputIMEPanel.prevSel();" disabled="true"/>
+           <toolbarbutton id="fireinputNextSelButton" tooltiptext=""
+                       oncommand="FireinputIMEPanel.nextSel();" disabled="true"/>
+        </hbox>
+        <vbox id="fireinputLongPanel" style="display: none">
+           <menuseparator style="margin: 0px; padding: 0px"/>
+        </vbox>
+      </vbox>
+   </popup>
+</popupset>
+    
+<popup id="contentAreaContextMenu">
+  <menuseparator/>
+      <menuitem
+        id="fireinputContextEnableIME"
+        label=""
+        oncommand="Fireinput.toggleFireinput(true);"
+      />
+      <menuitem
+        id="fireinputContextSelectImage"
+        label=""
+        oncommand="FireinputEmotions.addContextSelectedImage();"
+      />
+      <menuitem
+        id="fireinputContextEnhanceWordTable"
+        label=""
+        oncommand="FireinputLongTable.addSelectionIntoTable();"
+      />
+      <menu id="fireinputContextSwitchEncoding" label="">
+        <menupopup>
+          <menuitem id="fireinputContextSwitchZHToBG" label="" value="0"
+                   oncommand="FireinputEncoding.switchToBig5()"/>
+          <menuitem id="fireinputContextSwitchBGToZH" label="" value="0"
+                   oncommand="FireinputEncoding.switchToZH()"/>
+        </menupopup>
+      </menu>
+</popup>
+
+<toolbarpalette id="BrowserToolbarPalette">
+      <toolbarbutton id="fireinput-toolbarbutton" label="Fireinput(火输)"
+                     class="chromeclass-toolbar-additional"
+                     oncommand="Fireinput.toggleFireinput()" tooltiptext="Fireinput Chinese IME For Firefox"/>
+</toolbarpalette>
+
+<toolbar id="TabsToolbar">
+      <toolbarbutton id="fireinput-toolbarbutton" label="Fireinput(火输)"
+                     class="toolbarbutton-1 chromeclass-toolbar-additional" insertafter="alltabs-button"
+                     oncommand="Fireinput.toggleFireinput()" tooltiptext="Fireinput Chinese IME For Firefox"/>
+</toolbar> 
+
+<toolbox id="navigator-toolbox">
+   <toolbar id="fireinputIMEBar_top" hidden="true" align="center" fullscreentoolbar="false" insertafter="nav-bar">
+      <hbox id="fireinputOptionBox">
+        <toolbarbutton id="fireinputMenu" tooltiptext="Fireinput menu">
+            <menupopup id="fireinputMenuItems" position="after_pointer">
+              <menuitem id="helpMenuEditor" label="" oncommand="FireinputHelp.openEditor()"/>
+              <menuseparator/>
+              <menu id="fireinputSettingMenu" label="">
+                 <menupopup position="end_before" onpopupshowing="return fireinputPrefShowing(this);">
+                   <menu id="fireinputDefaultIMEBarPos" label="">
+                      <menupopup onpopupshowing="return fireinputPrefShowing(this);">
+                        <menuitem id="fireinputIMEBarPosTop" type="radio" label="" value="top"
+                            oncommand="fireinputPrefSave(this)" option="IMEBarPosition"/>
+                        <menuitem id="fireinputIMEBarPosBottom" type="radio" label="" value="bottom"
+                            oncommand="fireinputPrefSave(this)" option="IMEBarPosition"/>
+                      </menupopup>
+                   </menu>
+                   <menuseparator/>
+                   <menuitem id="fireinputConfigInputWindow" label="" oncommand="Fireinput.showInputSettingWindow()"/>
+                   <menu id="fireinputDefaultInputMethod" label="">
+                      <menupopup onpopupshowing="return fireinputPrefShowing(this);">
+                        <menuitem id="imePinyinQuan" type="radio" label="" value="1"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+
+                        <menuitem id="imePinyinShuangZiGuang" type="radio" label="" value="2"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+
+                        <menuitem id="imePinyinShuangMS" type="radio" label="" value="3"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+
+                        <menuitem id="imePinyinShuangChineseStar" type="radio" label="" value="4"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+
+                        <menuitem id="imePinyinShuangSmartABC" type="radio" label="" value="5"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+
+                        <menuitem id="imeWubi86" type="radio" label="" value="6"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+                        <menuitem id="imeWubi98" type="radio" label="" value="7"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+                        <menuitem id="imeCangjie5" type="radio" label="" value="8"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+                        <menuitem id="imeZhengma" type="radio" label="" value="9"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+                        <menuitem id="imeAdvancedConfig" label="" oncommand="Fireinput.showInputMethodSetting()"/>
+                      </menupopup>
+                   </menu>
+
+                   <menu id="fireinputAMB" label="">
+                      <menupopup onpopupshowing="return fireinputPrefShowing(this);">
+                        <menuitem id="fireinputAMBZh" type="checkbox" label="zh z" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBZh"/>
+                        <menuitem id="fireinputAMBSh" type="checkbox" label="sh s" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBSh"/>
+                        <menuitem id="fireinputAMBCh" type="checkbox" label="ch c" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBCh"/>
+                        <menuitem id="fireinputAMBAng" type="checkbox" label="ang an" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBAng"/>
+                        <menuitem id="fireinputAMBEng" type="checkbox" label="eng en" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBEng"/>
+                        <menuitem id="fireinputAMBIng" type="checkbox" label="ing in" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBIng"/>
+                        <menuitem id="fireinputKeyExactMatch" type="checkbox" label="" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="inputKeyExactMatch"/>
+                      </menupopup>
+                   </menu>
+
+                   <menuitem id="configHotKey" label="" oncommand="Fireinput.showkeyConfigWindow()"/>
+
+                   <menuseparator/>
+
+                   <menuitem id="autoInsert" label="" type="checkbox" checked="true" tooltiptext=""
+                           oncommand="fireinputPrefSave(this)" option="autoInsert"/>
+
+                   <menuitem id="updateFreq" label="" type="checkbox" checked="true" tooltiptext=""
+                           oncommand="fireinputPrefSave(this)" option="updateFreq"/>
+
+                   <menuitem id="saveHistory" label="" type="checkbox" checked="true"
+                           oncommand="fireinputPrefSave(this)" option="saveHistory"/>
+
+                   <menuitem id="autoLoad" label="" type="checkbox" checked="true"
+                           oncommand="fireinputPrefSave(this)" option="autoLoad"/>
+                </menupopup>
+              </menu>
+
+              <menu id="fireinputThemeMenu" label="">
+                 <menupopup id="fireinputThemeMenus" position="end_before">
+                    <menuitem id="fireinputThemeUser" label="" class="menuitem-non-iconic"
+                           oncommand="FireinputThemes.userChooseTheme()"/>
+                    <menuseparator id="themeOpenSeparator"/>
+                    <menuseparator id="themeCloseSeparator"/>
+                    <menuitem id="fireinputThemeDefault" label="" class="menuitem-non-iconic"
+                           oncommand="FireinputThemes.applyDefault(event)"/>
+                 </menupopup>
+              </menu>
+              <menuitem id="fireinputTableManagement" label="Table management" oncommand="FireinputTable.showDialog()"/>
+              <menuseparator/>
+              <menu id="fireinputHelp" label="">
+                 <menupopup id="fireinputHelpPopup" position="end_before">
+                   <menuitem id="helpNewRelease" label="" oncommand="FireinputHelp.showRelease()" style="display: none"/>
+                   <menuitem id="helpMenuHome" label="" oncommand="FireinputHelp.showSite('home')"/>
+                   <menuitem id="helpMenuDoc" label="" oncommand="FireinputHelp.showSite('docs')"/>
+                   <menuitem id="helpMenuKey" label="" oncommand="FireinputHelp.showSite('shortkey')"/>
+                   <menuitem id="helpMenuAbout" label="" oncommand="FireinputHelp.showAbout()"/>
+                 </menupopup>
+              </menu>
+              <menuseparator/>
+              <menuitem id="helpMenuDonate" label="" oncommand="FireinputHelp.showSite('contribute')"/>
+            </menupopup>
+        </toolbarbutton>
+        <toolbarseparator collapsed="false"/> 
+        <toolbarbutton id="inputMethod" label="" tooltiptext="" class="toolbarbuttonStyle">
+          <menupopup position="after_pointer">
+              <menuitem id="menuPinyinQuan" label="" value="1" oncommand="fireinputPrefSave('defaultInputMethod', 1)"/>
+              <menuitem id="menuPinyinShuangZiGuang" label="" value="2" oncommand="fireinputPrefSave('defaultInputMethod', 2)"/>
+              <menuitem id="menuPinyinShuangMS" label="" value="3" oncommand="fireinputPrefSave('defaultInputMethod', 3)"/>
+              <menuitem id="menuPinyinShuangChineseStar" label="" value="4" oncommand="fireinputPrefSave('defaultInputMethod', 4)"/>
+              <menuitem id="menuPinyinShuangSmartABC" label="" value="5" oncommand="fireinputPrefSave('defaultInputMethod', 5)"/>
+              <menuitem id="menuWubi86" label="" value="6" oncommand="fireinputPrefSave('defaultInputMethod', 6)"/>
+              <menuitem id="menuWubi98" label="" value="7" oncommand="fireinputPrefSave('defaultInputMethod', 7)"/>
+              <menuitem id="menuCangjie5" label="" value="8" oncommand="fireinputPrefSave('defaultInputMethod', 8)"/>
+              <menuitem id="menuZhengma" label="" value="9" oncommand="fireinputPrefSave('defaultInputMethod', 9)"/>
+          </menupopup>
+        </toolbarbutton>
+        <toolbarbutton id="fireinputToggleIMEButton" label="" tooltiptext="" oncommand="Fireinput.toggleInputMode();"/>
+        <toolbarbutton id="fireinputToggleHalfButton" tooltiptext="" oncommand="Fireinput.toggleHalfMode();"/>
+        <toolbarbutton id="fireinputTogglePunctButton" tooltiptext="" oncommand="Fireinput.togglePunctMode();"/>
+
+        <toolbarbutton id="fireinputSpecialCharMenu" label="" class="toolbarbuttonStyle">
+           <menupopup id="fireinputSpecialCharMenuItems" position="after_pointer"/>
+        </toolbarbutton>
+
+        <toolbarbutton id="fireinputEmotionMenu" label="" class="toolbarbuttonStyle">
+           <menupopup id="fireinputEmotionMenuItems" position="after_pointer"/>
+        </toolbarbutton>
+
+        <toolbarseparator collapsed="true"/> 
+ 
+        <toolbarseparator collapsed="false" style="margin-left:5px; margin-right: 5px"/> 
+        <label id="fireinputSearchButton" value="" onclick="FireinputWebSearch.searchWeb()"/>
+        <textbox id="fireinputSearchbox" class="fireinputSearchbox"
+                     onfocus="FireinputWebSearch.searchboxOnFocus(event)" 
+                     onkeypress="FireinputWebSearch.goSearchbox(event)"/>
+        <toolbarseparator collapsed="false" style="margin-left:5px"/> 
+        <toolbarbutton id="fireinputIMEBarCloseButton" class="toolbarbutton-icon" tooltiptext="" oncommand="Fireinput.toggleFireinput();"/>
+        <hbox id="fireinputNewVersionPanel" style="margin-left:5px; display: none">
+          <toolbarseparator collapsed="false"/> 
+          <toolbarbutton id="fireinputNewVersion" label="sss" oncommand="FireinputHelp.showRelease()"/>
+        </hbox>
+        <hbox id="fireinputTableUpdatePanel" style="margin-left:5px; display: none">
+          <toolbarseparator collapsed="false"/> 
+          <toolbarbutton id="fireinputTableUpdate" label="" oncommand="FireinputTable.openUpdateLink()"/>
+        </hbox>
+        <hbox id="fireinputMessagePanel" style="margin-left:5px; display: none">
+          <toolbarseparator collapsed="false"/> 
+          <toolbarbutton id="fireinputMessage" label=""/>
+        </hbox>
+      </hbox>
+  </toolbar>
+</toolbox>
+
+
+<vbox id="appcontent">
+   <toolbar id="fireinputIMEBar_bottom" hidden="true" align="center" fullscreentoolbar="true">
+      <hbox id="fireinputOptionBox">
+        <toolbarbutton id="fireinputMenu" tooltiptext="Fireinput menu">
+            <menupopup id="fireinputMenuItems" position="before_start">
+              <menuitem id="helpMenuEditor" label="" oncommand="FireinputHelp.openEditor()" key="key_openEditor"/>
+              <menuseparator/>
+              <menu id="fireinputSettingMenu" label="">
+                 <menupopup position="end_after" onpopupshowing="return fireinputPrefShowing(this);">
+                   <menu id="fireinputDefaultIMEBarPos" label="">
+                      <menupopup onpopupshowing="return fireinputPrefShowing(this);">
+                        <menuitem id="fireinputIMEBarPosTop" type="radio" label="" value="top"
+                            oncommand="fireinputPrefSave(this)" option="IMEBarPosition"/>
+                        <menuitem id="fireinputIMEBarPosBottom" type="radio" label="" value="bottom"
+                            oncommand="fireinputPrefSave(this)" option="IMEBarPosition"/>
+                      </menupopup>
+                   </menu>
+                   <menuseparator/>
+                   <menuitem id="fireinputConfigInputWindow" label="" oncommand="Fireinput.showInputSettingWindow()"/>
+                   <menu id="fireinputDefaultInputMethod" label="">
+                      <menupopup onpopupshowing="return fireinputPrefShowing(this);">
+                        <menuitem id="imePinyinQuan" type="radio" label="" value="1"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+
+                        <menuitem id="imePinyinShuangZiGuang" type="radio" label="" value="2"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+
+                        <menuitem id="imePinyinShuangMS" type="radio" label="" value="3"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+
+                        <menuitem id="imePinyinShuangChineseStar" type="radio" label="" value="4"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+
+                        <menuitem id="imePinyinShuangSmartABC" type="radio" label="" value="5"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+
+                        <menuitem id="imeWubi86" type="radio" label="" value="6"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+                        <menuitem id="imeWubi98" type="radio" label="" value="7"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+                        <menuitem id="imeCangjie5" type="radio" label="" value="8"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+                        <menuitem id="imeZhengma" type="radio" label="" value="9"
+                            oncommand="fireinputPrefSave(this)" option="defaultInputMethod"/>
+                        <menuitem id="imeAdvancedConfig" label="" oncommand="Fireinput.showInputMethodSetting()"/>
+                      </menupopup>
+                   </menu>
+
+                   <menu id="fireinputAMB" label="">
+                      <menupopup onpopupshowing="return fireinputPrefShowing(this);">
+                        <menuitem id="fireinputAMBZh" type="checkbox" label="zh z" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBZh"/>
+                        <menuitem id="fireinputAMBSh" type="checkbox" label="sh s" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBSh"/>
+                        <menuitem id="fireinputAMBCh" type="checkbox" label="ch c" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBCh"/>
+                        <menuitem id="fireinputAMBAng" type="checkbox" label="ang an" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBAng"/>
+                        <menuitem id="fireinputAMBEng" type="checkbox" label="eng en" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBEng"/>
+                        <menuitem id="fireinputAMBIng" type="checkbox" label="ing in" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="fireinputAMBIng"/>
+                        <menuitem id="fireinputKeyExactMatch" type="checkbox" label="" checked="false"
+                            oncommand="fireinputPrefSave(this)" option="inputKeyExactMatch"/>
+                      </menupopup>
+                   </menu>
+
+                   <menuitem id="configHotKey" label="" oncommand="Fireinput.showkeyConfigWindow()"/>
+
+                   <menuseparator/>
+
+                   <menuitem id="autoInsert" label="" type="checkbox" checked="true" tooltiptext=""
+                           oncommand="fireinputPrefSave(this)" option="autoInsert"/>
+
+                   <menuitem id="updateFreq" label="" type="checkbox" checked="true" tooltiptext=""
+                           oncommand="fireinputPrefSave(this)" option="updateFreq"/>
+
+                   <menuitem id="saveHistory" label="" type="checkbox" checked="true"
+                           oncommand="fireinputPrefSave(this)" option="saveHistory"/>
+
+                   <menuitem id="autoLoad" label="" type="checkbox" checked="true"
+                           oncommand="fireinputPrefSave(this)" option="autoLoad"/>
+                </menupopup>
+              </menu>
+
+              <menu id="fireinputThemeMenu" label="">
+                 <menupopup id="fireinputThemeMenus" position="end_after">
+                    <menuitem id="fireinputThemeUser" label="" class="menuitem-non-iconic"
+                           oncommand="FireinputThemes.userChooseTheme()"/>
+                    <menuseparator id="themeOpenSeparator"/>
+                    <menuseparator id="themeCloseSeparator"/>
+                    <menuitem id="fireinputThemeDefault" label="" class="menuitem-non-iconic"
+                           oncommand="FireinputThemes.applyDefault(event)"/>
+                 </menupopup>
+              </menu>
+              <menuitem id="fireinputTableManagement" label="Table management" oncommand="FireinputTable.showDialog()"/>
+              <menuseparator/>
+              <menu id="fireinputHelp" label="">
+                 <menupopup id="fireinputHelpPopup" position="end_after">
+                   <menuitem id="helpNewRelease" label="" oncommand="FireinputHelp.showRelease()" style="display: none"/>
+                   <menuitem id="helpMenuHome" label="" oncommand="FireinputHelp.showSite('home')"/>
+                   <menuitem id="helpMenuDoc" label="" oncommand="FireinputHelp.showSite('docs')"/>
+                   <menuitem id="helpMenuKey" label="" oncommand="FireinputHelp.showSite('shortkey')"/>
+                   <menuitem id="helpMenuAbout" label="" oncommand="FireinputHelp.showAbout()"/>
+                 </menupopup>
+              </menu>
+              <menuseparator/>
+              <menuitem id="helpMenuDonate" label="" oncommand="FireinputHelp.showSite('contribute')"/>
+            </menupopup>
+        </toolbarbutton>
+        <toolbarseparator collapsed="false"/> 
+        <toolbarbutton id="inputMethod" label="" tooltiptext="" class="toolbarbuttonStyle">
+          <menupopup position="before_start">
+              <menuitem id="menuPinyinQuan" label="" value="1" oncommand="fireinputPrefSave('defaultInputMethod', 1)"/>
+              <menuitem id="menuPinyinShuangZiGuang" label="" value="2" oncommand="fireinputPrefSave('defaultInputMethod', 2)"/>
+              <menuitem id="menuPinyinShuangMS" label="" value="3" oncommand="fireinputPrefSave('defaultInputMethod', 3)"/>
+              <menuitem id="menuPinyinShuangChineseStar" label="" value="4" oncommand="fireinputPrefSave('defaultInputMethod', 4)"/>
+              <menuitem id="menuPinyinShuangSmartABC" label="" value="5" oncommand="fireinputPrefSave('defaultInputMethod', 5)"/>
+              <menuitem id="menuWubi86" label="" value="6" oncommand="fireinputPrefSave('defaultInputMethod', 6)"/>
+              <menuitem id="menuWubi98" label="" value="7" oncommand="fireinputPrefSave('defaultInputMethod', 7)"/>
+              <menuitem id="menuCangjie5" label="" value="8" oncommand="fireinputPrefSave('defaultInputMethod', 8)"/>
+              <menuitem id="menuZhengma" label="" value="9" oncommand="fireinputPrefSave('defaultInputMethod', 9)"/>
+          </menupopup>
+        </toolbarbutton>
+        <toolbarbutton id="fireinputToggleIMEButton" label="" tooltiptext="" oncommand="Fireinput.toggleInputMode();"/>
+        <toolbarbutton id="fireinputToggleHalfButton" tooltiptext="" oncommand="Fireinput.toggleHalfMode();"/>
+        <toolbarbutton id="fireinputTogglePunctButton" tooltiptext="" oncommand="Fireinput.togglePunctMode();"/>
+
+        <toolbarbutton id="fireinputSpecialCharMenu" label="" class="toolbarbuttonStyle">
+           <menupopup id="fireinputSpecialCharMenuItems" position="before_start"/>
+        </toolbarbutton>
+
+        <toolbarbutton id="fireinputEmotionMenu" label="" class="toolbarbuttonStyle">
+           <menupopup id="fireinputEmotionMenuItems" position="before_start"/>
+        </toolbarbutton>
+
+        <toolbarseparator collapsed="true"/> 
+ 
+        <toolbarseparator collapsed="false" style="margin-left:5px; margin-right: 5px"/> 
+        <label id="fireinputSearchButton" value="" onclick="FireinputWebSearch.searchWeb()"/>
+        <textbox id="fireinputSearchbox" class="fireinputSearchbox"
+                     onfocus="FireinputWebSearch.searchboxOnFocus(event)" 
+                     onkeypress="FireinputWebSearch.goSearchbox(event)"/>
+        <toolbarseparator collapsed="false" style="margin-left:5px"/> 
+        <toolbarbutton id="fireinputIMEBarCloseButton" class="toolbarbutton-icon" tooltiptext="" oncommand="Fireinput.toggleFireinput();"/>
+        <hbox id="fireinputNewVersionPanel" style="margin-left:5px; display: none">
+          <toolbarseparator collapsed="false"/> 
+          <toolbarbutton id="fireinputNewVersion" style="cursor: pointer; color: red;" label="" oncommand="FireinputHelp.showRelease()"/>
+        </hbox>
+        <hbox id="fireinputTableUpdatePanel" style="margin-left:5px; display: none">
+          <toolbarseparator collapsed="false"/> 
+          <toolbarbutton id="fireinputTableUpdate" label="" oncommand="FireinputTable.openUpdateLink()"/>
+        </hbox>
+        <hbox id="fireinputMessagePanel" style="margin-left:5px; display: none">
+          <toolbarseparator collapsed="false"/> 
+          <toolbarbutton id="fireinputMessage" label=""/>
+        </hbox>
+      </hbox>
+    </toolbar>
+
+</vbox>
+
+<!-- <stack id="browser-stack">  -->
+    <hbox id="browser" flex="1">
+        <splitter id="fireinputDebuggerSplitter" class="chromeclass-extrachrome" hidden="true"/>
+        <vbox id="fireinputDebuggerPanel" hidden="true" style="width: 2em; max-width: 32em;">
+        <hbox> 
+          <button label="Close" oncommand="FireinputLog.closeDebug();"/>
+          <button label="Clear" oncommand="FireinputLog.clearDebug();"/>
+        </hbox>
+        <textbox id="fireinputDebugger" _no_cjk_input="true" value="" style="font-size: 9px" multiline="true" width="150" flex="1" overflow="scrolling"/> 
+        </vbox>
+    </hbox>
+<!-- </stack> -->
+
+<statusbar id="status-bar">
+  <statusbarpanel
+    class="statusbarpanel-iconic"
+    id="fireinputStatusBar"
+    context="fireinputStatusContextMenu"
+    onmouseup="Fireinput.onClickStatusIcon(event);"
+  />
+  <menupopup id="fireinputStatusContextMenu" onpopupshowing="return fireinputPrefShowing(this);">
+         <menu id="fireinputInterfaceLanguage" label="">
+              <menupopup onpopupshowing="return fireinputPrefShowing(this);">
+                 <menuitem id="fireinputLanguageChinese" type="radio" label="" value="zh"
+                   oncommand="fireinputPrefSave(this)"
+                   option="interfaceLanguage"/>
+
+                 <menuitem id="fireinputLanguageEnglish" type="radio" label="" value=""
+                   oncommand="fireinputPrefSave(this)"
+                   option="interfaceLanguage"/>
+              </menupopup>
+         </menu>
+  </menupopup>
+</statusbar>
+
+</overlay>
