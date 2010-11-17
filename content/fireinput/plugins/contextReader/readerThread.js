@@ -34,12 +34,20 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
+/* get history/bookmark util */
+try {
+  Components.utils.import("resource://gre/modules/PlacesUtils.jsm");
+} catch(ex) {
+  Components.utils.import("resource://gre/modules/utils.js");
+}
+
 var readerMainThread = FireinputXPC.getService("@mozilla.org/thread-manager;1").currentThread; 
 
 var contextReader = {
 
     maxStep: 30000,
     maxPhraseLen: 20, 
+    beginTime: 0, 
 
     run: function(tab)
     {
@@ -50,6 +58,9 @@ var contextReader = {
        /* only run contextReader when IME is SMART_PINYIN */
        if(FireinputUtils.getCurrentIME().getIMEType() != SMART_PINYIN)
           return; 
+
+       if(this.beginTime <= 0)
+          this.beginTime = Date.now() * 1000; // now in microseconds 
 
        /*FIXME: do we need to use a different thread id ? */
        if(contextReader.validContext(tab)) 
@@ -63,6 +74,7 @@ var contextReader = {
         */
        if (window && (wintype == "navigator:browser") && window.content && window.content.document)
        {
+
           var docCharset = tab.defaultView.content.document.characterSet.toUpperCase();
           if(docCharset == "UTF-8" || docCharset == "GB2312" || docCharset =="GB18030" ||
              /^(GBK|X-GBK)$/.test(docCharset) || docCharset == "HZ" || docCharset == "ISO-2022-CN" || 
@@ -70,6 +82,11 @@ var contextReader = {
           {
              // valid charset. If the content length is too small, don't do any processing  
              try {
+                uri = makeURI(tab.defaultView.location.href); 
+                // ignore if the url has been visited recently 
+                if(this.hasVisited(uri))
+                   return false; 
+
                 if(tab.defaultView.document.body.innerHTML.length > 100)
                    return true; 
              } catch(e) { }
@@ -79,6 +96,31 @@ var contextReader = {
 
        return false; 
     }, 
+
+    hasVisited: function(uri) {
+
+       var query = PlacesUtils.history.getNewQuery();
+       var options = PlacesUtils.history.getNewQueryOptions();
+
+       options.queryType  = options.QUERY_TYPE_HISTORY;
+       options.resultType = options.RESULTS_AS_VISIT; 
+       query.beginTime = this.beginTime; 
+       query.beginTimeReference = query.TIME_RELATIVE_EPOCH; 
+       query.endTime = Date.now() * 1000 - 30 * 60 * 1000000; // 30 minutes ago 
+       query.endTimeReference = query.TIME_RELATIVE_EPOCH; 
+       query.uri = uri; 
+       try {
+
+          var result = PlacesUtils.history.executeQuery(query, options);
+          result.root.containerOpen = true;
+          var count = result.root.childCount; 
+          result.root.containerOpen = false; 
+          /* if the visit count is larger than 0, ignore this uri */
+          return (count > 0 ? true : false); 
+      } catch(e) { }
+
+      return false; 
+    },
 
     start: function(str)
     {

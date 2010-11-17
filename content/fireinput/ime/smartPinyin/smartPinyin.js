@@ -1382,7 +1382,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
                 }
              }
 
-	     if(typeof(phraseList[encodedWord]) == 'undefined')
+             if(typeof(phraseList[encodedWord]) == 'undefined')
              {
 
                 phraseList[encodedWord] = ""; 
