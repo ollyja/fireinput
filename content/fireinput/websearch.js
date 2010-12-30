@@ -35,7 +35,7 @@
  */
 var FireinputWebSearch = 
 {
-    debug: 0, 
+    debug: 1, 
 
     load: function()
     {

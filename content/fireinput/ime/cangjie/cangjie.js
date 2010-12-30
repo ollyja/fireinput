@@ -86,7 +86,7 @@ Cangjie.prototype = extend(new FireinputIME(),
     // the entrance function to load all related tables
     loadTable: function()
     {
-       letterConverter = new FullLetterConverter();
+       this.letterConverter = new FullLetterConverter();
 
        // setTimeout to not block firefox start
        var self = this;
@@ -116,25 +116,34 @@ Cangjie.prototype = extend(new FireinputIME(),
        var datafile = "";
        if (this.cangjieSchema == CANGJIE_5)
        {
-           datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
+           datafile = ios.newURI(path + this.getCangjie5File(), null, null);
        }
 
        this.keyCangjieHash = new FireinputHash();
 
-       if (!datafile.exists())
-       {
-           datafile = this.getNetCangjie5File(); 
-           if(!datafile.exists()) {
-       	    this.engineDisabled = true;
-       	    return;
-           }
-  
-       }
+       var checkExists = function() {
+          if(this.keyCangjieHash.length <= 0) {
+            var datafile = this.getNetCangjie5File();
+            if(!datafile.exists()) {
+              this.engineDisabled = true; 
+              return;
+            }
+
+            var options = {
+               caller: this,
+               oncomplete:this.loadUserTable,
+               onavailable: this.getCodeLine
+            };
+            FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+          }
+          else
+            this.loadUserTable();
+       };
 
        var options =
        {
        	  caller: this,
-       	  oncomplete: this.loadUserTable,
+       	  oncomplete: checkExists,
        	  onavailable: this.getCodeLine
        };
 
@@ -185,6 +194,7 @@ Cangjie.prototype = extend(new FireinputIME(),
 
     loadUserTable: function()
     {
+       var ios = FireinputXPC.getIOService(); 
        var datafile = this.getUserDataFile();
 
        if (!datafile.exists()) return;
@@ -197,41 +207,17 @@ Cangjie.prototype = extend(new FireinputIME(),
        	  onavailable: this.getUserCodeLine
        };
 
-       FireinputStream.loadDataAsync(datafile, options);
-    },
-
-    isEnabled: function()
-    {
-       if (this.engineDisabled) return false;
-
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-       	.QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-       var path = this.getDataPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
-
-       if (!datafile.exists()) {
-          /* check whether there is network version */
-          datafile = this.getNetCangjie5File(); 
-          if(!datafile.exists())
-            return false;
-          else
-            return true; 
-       }  
-       else
-       	  return true; 
+       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
     },
 
     hasTableFile: function()
     {
        var ios = FireinputXPC.getIOService();
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
        var path = this.getDataPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getCangjie5File());
+       var datafile = ios.newURI(path + this.getCangjie5File(), null, null);
 
-       return datafile.exists() ? true : false;
+       return FireinputStream.checkAccess(datafile); 
     },
 
     hasNetTableFile: function()
@@ -243,7 +229,7 @@ Cangjie.prototype = extend(new FireinputIME(),
 
     isSchemaEnabled: function()
     {
-       return this.isEnabled();
+       return this.hasTableFile() || this.hasNetTableFile();
     },
 
     canComposeNew: function()
@@ -297,7 +283,7 @@ Cangjie.prototype = extend(new FireinputIME(),
           (!this.isHalfPunctMode() &&
            !((code > 47 && code < 58) ||
             (code > 64 && code < 91))))
-          return letterConverter.toFullLetter(String.fromCharCode(code));
+          return this.letterConverter.toFullLetter(String.fromCharCode(code));
 
        return String.fromCharCode(code);
     },

@@ -48,18 +48,11 @@ PinyinEncodingTable.prototype = extend(new FireinputIME(),
     initialize: function()
     {
        var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-
        var path = this.getDataPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getPinyinTransformFile());
+       var datafile = ios.newURI(path + this.getPinyinTransformFile(), null, null);
 
        this.big5EncodingHash = new FireinputHash();
        this.simpEncodingHash = new FireinputHash();
-       if(!datafile.exists())
-       {
-          return; 
-       }
 
        var options = {
           caller: this,

@@ -38,7 +38,7 @@ const composerFieldTag = "composerfield_";
 
 var FireinputComposer = 
 {
-    debug: 1, 
+    debug: 0, 
 
     composedNumber: 0, 
 

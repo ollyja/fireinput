@@ -87,11 +87,10 @@ var FireinputStream =
         return null; 
     }, 
 
-    loadDataAsync: function(url, user)
+    loadDataAsync: function(uri, user)
     {
        var ioService = FireinputXPC.getIOService(); 
 
-       var uri = ioService.newFileURI(url);
        var channel = ioService.newChannelFromURI(uri);
        function processCallback(line)
        {
@@ -108,7 +107,13 @@ var FireinputStream =
                func.call(caller);
        }
        var observer = new StreamObserver(processCallback, completeCallback, DATA_TEXT);
-       channel.asyncOpen(observer, null);
+       try {
+         channel.asyncOpen(observer, null);
+       }
+       catch(e) { 
+         completeCallback();
+       }; 
+  
     },
 
     loadXHTMLDataAsync: function(url, user)
@@ -133,6 +138,23 @@ var FireinputStream =
        }
        var observer = new StreamObserver(processCallback, completeCallback, DATA_XML);
        channel.asyncOpen(observer, null);
+    },
+
+    checkAccess: function(uri)
+    {
+       var ioService = FireinputXPC.getIOService();
+
+       var channel = ioService.newChannelFromURI(uri);
+       var ret = false; 
+       try {
+         var stream = channel.open(); 
+         if(stream) {
+            ret = true; 
+            stream.close(); 
+         }
+       } catch(e) { }
+
+       return ret; 
     }
 
 };

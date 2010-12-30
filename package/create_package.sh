@@ -229,25 +229,25 @@ generate_update_rdf "update.large.rdf" "${package_version}l"
 clean
 
 # create wubi package 
-copy_wubi_package
-pre_build_processing "${package_version}wubi" 6 "6,7" ${package_buildate}
-create_package "fireinput-${package_version}wubi.xpi"
-generate_update_rdf "update.wubi.rdf" "${package_version}wubi"
-clean
+#copy_wubi_package
+#pre_build_processing "${package_version}wubi" 6 "6,7" ${package_buildate}
+#create_package "fireinput-${package_version}wubi.xpi"
+#generate_update_rdf "update.wubi.rdf" "${package_version}wubi"
+#clean
 
 # create cangjie5 package 
-copy_cangjie5_package
-pre_build_processing "${package_version}cangjie5" 8 8 ${package_buildate}
-create_package "fireinput-${package_version}cangjie5.xpi"
-generate_update_rdf "update.cangjie5.rdf" "${package_version}cangjie5"
-clean
+#copy_cangjie5_package
+#pre_build_processing "${package_version}cangjie5" 8 8 ${package_buildate}
+#create_package "fireinput-${package_version}cangjie5.xpi"
+#generate_update_rdf "update.cangjie5.rdf" "${package_version}cangjie5"
+#clean
 
 # create zhengma package 
-copy_zhengma_package
-pre_build_processing "${package_version}zhengma" 9 9 ${package_buildate}
-create_package "fireinput-${package_version}zhengma.xpi"
-generate_update_rdf "update.zhengma.rdf" "${package_version}zhengma"
-clean
+#copy_zhengma_package
+#pre_build_processing "${package_version}zhengma" 9 9 ${package_buildate}
+#create_package "fireinput-${package_version}zhengma.xpi"
+#generate_update_rdf "update.zhengma.rdf" "${package_version}zhengma"
+#clean
 
 # create net package 
 copy_net_package

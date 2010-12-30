@@ -14,6 +14,7 @@ FireinputIME.prototype =
     name: null, 
     letterMode: HALF_LETTER_MODE, 
     punctMode: HALF_PUNCT_MODE, 
+    tabIndex: -1, 
 
     getName: function ()
     {
@@ -83,12 +84,6 @@ FireinputIME.prototype =
     {
        return "/chrome/data/zhengma_table";
     },
-
-    /* has table data file in package */
-    hasTableFile: function()
-    {
-
-    }, 
 
     /* has net table data file */
     hasNetTableFile: function()
@@ -232,6 +227,11 @@ FireinputIME.prototype =
     {
        // default unlimited for pinyin 
        return 0; 
+    }, 
+
+    setBrowserIndex: function(i)
+    {
+       this.tabIndex = i; 
     }
     
 };

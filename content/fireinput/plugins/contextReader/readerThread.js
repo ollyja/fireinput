@@ -49,6 +49,29 @@ var contextReader = {
     maxPhraseLen: 20, 
     beginTime: 0, 
 
+    init: function()
+    {
+       gBrowser.addEventListener("load", function (event) {
+            if (event.target.defaultView && !event.target.defaultView.frameElement) 
+               contextReader.run(event.originalTarget);
+       }, true);
+
+       // if tab is closed, remove all data from context reader to claim memory 
+       if(gBrowser.tabContainer) {
+          // FF 4 
+          gBrowser.tabContainer.addEventListener("TabClose", function(event) {
+            contextReader.remove(event.target);
+          }, false);
+       }
+       else {
+          // FF 3 or older  
+          gBrowser.addEventListener("TabClose", function(event) {
+            contextReader.remove(event.target);
+          }, false);
+       }
+    }, 
+
+
     run: function(tab)
     {
        /* if it's disabled from config, just return */
@@ -63,8 +86,13 @@ var contextReader = {
           this.beginTime = Date.now() * 1000; // now in microseconds 
 
        /*FIXME: do we need to use a different thread id ? */
+       /*FIXME: we use tab index here but the index is same for different window. Something need to be figured out how 
+        *       how to support multiple window opening  
+        */
        if(contextReader.validContext(tab)) 
-          readerMainThread.dispatch(new workingThread(1, tab.defaultView.document.body.innerHTML), readerMainThread.DISPATCH_NORMAL);
+          readerMainThread.dispatch(new workingThread(
+                  1,gBrowser.getBrowserIndexForDocument(tab.defaultView.content.document), tab.defaultView.document.documentElement.innerHTML),
+          readerMainThread.DISPATCH_NORMAL);
     }, 
        
     validContext: function(tab)
@@ -74,7 +102,6 @@ var contextReader = {
         */
        if (window && (wintype == "navigator:browser") && window.content && window.content.document)
        {
-
           var docCharset = tab.defaultView.content.document.characterSet.toUpperCase();
           if(docCharset == "UTF-8" || docCharset == "GB2312" || docCharset =="GB18030" ||
              /^(GBK|X-GBK)$/.test(docCharset) || docCharset == "HZ" || docCharset == "ISO-2022-CN" || 
@@ -82,12 +109,12 @@ var contextReader = {
           {
              // valid charset. If the content length is too small, don't do any processing  
              try {
-                uri = makeURI(tab.defaultView.location.href); 
+                var uri = makeURI(tab.defaultView.location.href); 
                 // ignore if the url has been visited recently 
                 if(this.hasVisited(uri))
                    return false; 
 
-                if(tab.defaultView.document.body.innerHTML.length > 100)
+                if(tab.defaultView.document.documentElement.textContent.length > 100)
                    return true; 
              } catch(e) { }
              
@@ -121,6 +148,10 @@ var contextReader = {
 
       return false; 
     },
+
+    remove: function(tab) {
+      FireinputImporter.removePhraseFromRemoteOnDemand(gBrowser.getBrowserIndexForDocument(tab)); 
+    }, 
 
     start: function(str)
     {
@@ -161,14 +192,14 @@ var contextReader = {
              phraseString = "";              
           }
        }
-
        return phraseList; 
     }
 
 }; 
 
-var workingThread = function(threadID, context) {
+var workingThread = function(threadID, tabindex, context) {
     this.threadID = threadID;
+    this.tabindex = tabindex; 
     this.context = context; 
     this.result = "";
 };
@@ -182,7 +213,7 @@ workingThread.prototype = {
 
           // When it's done, call back to the main thread to let it know
           // we're finished.
-          readerMainThread.dispatch(new mainThread(this.threadID, this.result), readerMainThread.DISPATCH_NORMAL);
+          readerMainThread.dispatch(new mainThread(this.threadID, this.result, this.tabindex), readerMainThread.DISPATCH_NORMAL);
 
           // okay, we are almost done, check to see if there are pending events
           try { 
@@ -205,9 +236,10 @@ workingThread.prototype = {
 };
 
 
-var mainThread = function(threadID, result) {
+var mainThread = function(threadID, result, tabindex) {
     this.threadID = threadID;
     this.result = result;
+    this.tabindex = tabindex; 
 };
 
 mainThread.prototype = {
@@ -218,7 +250,7 @@ mainThread.prototype = {
             return; 
 
          // it's up to importer to handle it now 
-         FireinputImporter.processPhraseFromRemoteOnDemand(this.result, this.result.length);
+         FireinputImporter.processPhraseFromRemoteOnDemand(this.tabindex, this.result, this.result.length);
 
       } catch(err) {
          Components.utils.reportError(err);

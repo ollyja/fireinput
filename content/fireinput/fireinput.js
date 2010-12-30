@@ -186,6 +186,7 @@ var imeInputModeValues = [{
    label: "fireinput.method.english.value"
 }];
 
+Components.utils.import("resource://fireinput/constant.js"); 
 
 top.Fireinput = {
    // debug: 0 disable, non-zero enable 
@@ -1069,10 +1070,13 @@ top.Fireinput = {
    isValidTarget: function (event) {
       var documentTarget = false;
       var target = event.explicitOriginalTarget;
+      var originalTarget = event.originalTarget; 
+
       if (target == null) target = event.target;
 
       if (target == null || (target && target.type == "password")) return {
          target: target,
+         originalTarget: originalTarget,
          valid: false,
          documentTarget: documentTarget
       };
@@ -1080,11 +1084,13 @@ top.Fireinput = {
       if (target instanceof XULElement && target.id == "urlbar") {
          if (fireinputPrefGetDefault("enableUrlbarInput")) return {
             target: target,
+            originalTarget: originalTarget,
             valid: true,
             documentTarget: documentTarget
          };
          else return {
             target: target,
+            originalTarget: originalTarget,
             valid: false,
             documentTarget: documentTarget
          };
@@ -1092,12 +1098,14 @@ top.Fireinput = {
 
       if (target.hasAttribute('_no_cjk_input') && (target.getAttribute('_no_cjk_input') == "true" || target.getAttribute('_no_cjk_input') == "1")) return {
          target: target,
+         originalTarget: originalTarget,
          valid: false,
          documentTarget: documentTarget
       };
 
       if (target.hasAttribute('noime') && (target.getAttribute('noime') == "true" || target.getAttribute('noime') == "1")) return {
          target: target,
+         originalTarget: originalTarget,
          valid: false,
          documentTarget: documentTarget
       };
@@ -1108,6 +1116,7 @@ top.Fireinput = {
          if (wrappedTarget instanceof HTMLInputElement || wrappedTarget instanceof HTMLTextAreaElement) {
             if (!this.isTargetATextBox(wrappedTarget)) return {
                target: target,
+               originalTarget: originalTarget,
                valid: false,
                documentTarget: documentTarget
             };
@@ -1116,11 +1125,13 @@ top.Fireinput = {
                wrappedTarget.boxObject = target.boxObject;
                if (wrappedTarget.type == 'password') return {
                   target: wrappedTarget,
+                  originalTarget: originalTarget,
                   valid: false,
                   documentTarget: documentTarget
                };
                else return {
                   target: wrappedTarget,
+                  originalTarget: originalTarget,
                   valid: true,
                   documentTarget: documentTarget
                };
@@ -1136,6 +1147,7 @@ top.Fireinput = {
                                     getInterface(Components.interfaces.nsIEditingSession);
                if (!editingSession.windowIsEditable(twin)) return {
                   target: target,
+                  originalTarget: originalTarget,
                   valid: false,
                   documentTarget: documentTarget
                };
@@ -1145,6 +1157,7 @@ top.Fireinput = {
             // oTarget is only will be used in editor mode 
             return {
                target: twin,
+               originalTarget: originalTarget,
                valid: true,
                documentTarget: documentTarget
             };
@@ -1152,12 +1165,14 @@ top.Fireinput = {
       }
       else if (target.readOnly) return {
          target: target,
+         originalTarget: originalTarget,
          valid: false,
          documentTarget: documentTarget
       };
 
       return {
          target: target,
+         originalTarget: originalTarget,
          valid: true,
          documentTarget: documentTarget
       };
@@ -1502,18 +1517,21 @@ top.Fireinput = {
       // if(this.myTarget && this.myTarget.target != target)
       //   this.setIMEMode(IME_MODE_ZH);
       // keep the real event and target if inputfield has been focused 
-      if (!FireinputIMEPanel.getIMEInputFieldFocusedStatus() && !FireinputIMEPanel.getComposeEnabled() && (this.myTarget.target != target)) {
+      if (!FireinputIMEPanel.getIMEInputFieldFocusedStatus() && !FireinputIMEPanel.getComposeEnabled() && 
+          (typeof(this.myTarget.target) == 'undefined' || this.myTarget.target != target)) {
          this.myEvent = event;
          this.myTarget.event = event;
          this.myTarget.target = target; 
+         this.myTarget.originalTarget = targetInfo.originalTarget;
          this.myTarget.documentTarget = documentTarget; 
       }
 
       // remember the caret position before focus switch 
       // only for HTMLInputElement or TextAreaElement 
-      if (target.setSelectionRange) {
+      if (this.myTarget.target.setSelectionRange) {
          this.myTarget.selectionStart = this.myTarget.target.selectionStart;
          this.myTarget.selectionEnd = this.myTarget.target.selectionEnd;
+
          if (typeof(this.myTarget.focused) == 'undefined') this.myTarget.focused = 0;
       }
 
@@ -1545,6 +1563,8 @@ top.Fireinput = {
             document.popupNode = null;
             var xpos = 0;
             var ypos = 0;
+
+            // for XBL element, use explicitOriginalTarget for alignment 
             if (target.boxObject) {
                var id = document.getElementById("fireinputIMEContainer");
                id.openPopup(target, "after_pointer", 0, 5);
@@ -1695,6 +1715,11 @@ top.Fireinput = {
          // FireinputLog.debug(this,"idf.value:" + idf.value);
          FireinputLog.debug(this, "call findChar when idf.value:" + idf.value);
          //The findchar has to invoked here to resolve the performance issue 
+         
+         //set tab index, so it has chance to take this browser's on-demand data as high priority 
+         var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
+         this.myIME.setBrowserIndex(tabIndex);
+
          FireinputIMEPanel.findChar(true);
          return;
       }
@@ -1809,6 +1834,8 @@ top.Fireinput = {
 
       var inputTarget = {
          target: target,
+         event: event, 
+         originalTarget: target,
          documentTarget: documentTarget,
          focused: 0
       };
@@ -1892,8 +1919,6 @@ function fireinput_onMouseDown(event) {
 
 // monitor page loads and switches 
 window.addEventListener("load", function (e) {
-   gBrowser.addEventListener("load", function (event) {
-
-      if (event.target.defaultView && !event.target.defaultView.frameElement) contextReader.run(event.target);
-   }, true);
+   contextReader.init();
 }, false);
+

@@ -65,6 +65,9 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     // the hash table for phrase 
     phraseCodeHash: null, 
 
+    // the hash table for on-demand phrase 
+    onDemandPhraseCodeHash: null, 
+
     // the hash table for user frequency 
     userCodeHash: null, 
 
@@ -95,7 +98,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     // the entrance function to load all related tables 
     loadTable: function()
     {
-       letterConverter = new FullLetterConverter(); 
+       this.letterConverter = new FullLetterConverter(); 
 
        for(var i=0; i<PinyinInitials.length; i++)
          this.pinyinInitials[PinyinInitials[i]] = PinyinInitials[i]; 
@@ -156,25 +159,35 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     loadPinyinTable: function()
     {
        var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
        var path = this.getDataPath(); 
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getPinyinDataFile()); 
-       if(!datafile.exists())
-       {
-           /* Check downloaded table file */
-           datafile = this.getNetPinyinDataFile(); 
-           if(!datafile.exists()) {
-              this.engineDisabled = true; 
-              return; 
-           }
-       }
+       var datafile = ios.newURI(path + this.getPinyinDataFile(),  null, null); 
 
        this.codePinyinHash = new FireinputHash();
+
+
+       var checkExists = function() {
+          if(this.codePinyinHash.length <= 0) {
+            var datafile = this.getNetPinyinDataFile(); 
+            if(!datafile.exists()) {
+              this.engineDisabled = true; 
+              return; 
+            }
+
+            var options = {
+               caller: this, 
+               oncomplete:this.loadPinyinPhrase,
+               onavailable: this.getCodeLine
+            }; 
+            FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+          }
+          else 
+            this.loadPinyinPhrase(); 
+       };
+ 
        var options = {
           caller: this, 
-          oncomplete: this.loadPinyinPhrase, 
+          oncomplete: checkExists,
           onavailable: this.getCodeLine
        }; 
 
@@ -195,30 +208,36 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     loadPinyinPhrase: function()
     {
        var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
        var path = this.getDataPath();
 
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getPinyinPhraseFile());
+       var datafile = ios.newURI(path + this.getPinyinPhraseFile(), null, null);
 
        this.phraseCodeHash = new FireinputHash(); 
 
-       if(!datafile.exists())
-       {
-          /* check download phrase table */
-          datafile = this.getNetPinyinPhraseFile(); 
-          if(!datafile.exists())
-          {
-             this.loadUserTable();
-             return; 
+       var checkExists = function() {
+          if(this.phraseCodeHash.length <= 0) {
+            var datafile = this.getNetPinyinPhraseFile();
+            if(!datafile.exists()) {
+              this.loadUserTable(); 
+              return;
+            }
+
+            var options = {
+               caller: this,
+               oncomplete:this.loadUserTable,
+               onavailable: this.getPhraseLine
+            };
+            FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
           }
-       }
+          else
+            this.loadUserTable(); 
+       };
 
        var options = {
           caller: this, 
           onavailable: this.getPhraseLine,
-          oncomplete: this.loadUserTable 
+          oncomplete: checkExists 
        }; 
 
        FireinputStream.loadDataAsync(datafile, options);
@@ -336,6 +355,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     loadUserTable: function()
     {
+       var ios = FireinputXPC.getIOService(); 
        var datafile = this.getUserDataFile();
        this.userCodeHash = new FireinputHash();
 
@@ -350,7 +370,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           onavailable: this.getUserCodeLine,
           oncomplete: this.loadExtPhraseTable
        }; 
-       FireinputStream.loadDataAsync(datafile, options); 
+       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options); 
     },
 
     getExtPhraseCodeLine: function(str)
@@ -377,48 +397,28 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     loadExtPhraseTable: function()
     {
        var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
        var datafile = this.getExtDataFile();
-       if(!datafile.exists())
-          return; 
 
        var options = {
           caller: this, 
           onavailable: this.getExtPhraseCodeLine
        }; 
-       FireinputStream.loadDataAsync(datafile, options); 
+       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options); 
     },
-
-    isEnabled: function()
-    {
-       if(this.engineDisabled)
-          return false; 
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-
-       var path = this.getDataPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getPinyinDataFile());
-       if(!datafile.exists()) {
-          /* check whether there is network version */
-          datafile = this.getNetPinyinDataFile(); 
-          return datafile.exists() ? true : false; 
-       }
-       return true; 
-    }, 
 
     hasTableFile: function()
     {
-       var ios = FireinputXPC.getIOService();
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+       if(this.engineDisabled)
+         return false; 
 
-       var path = this.getDataPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getPinyinDataFile());
+       var ios = FireinputXPC.getIOService(); 
 
-       return datafile.exists() ? true : false; 
+       var path = this.getDataPath(); 
+       var datafile = ios.newURI(path + this.getPinyinDataFile(),  null, null); 
+
+       return FireinputStream.checkAccess(datafile); 
+         
     }, 
 
     hasNetTableFile: function()
@@ -432,7 +432,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(this.engineDisabled)
           return false;
 
-       return this.isEnabled(); 
+       return this.hasTableFile() || this.hasNetTableFile();
     },
 
     canComposeNew: function()
@@ -490,7 +490,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           (!this.isHalfPunctMode() && 
            !((code > 47 && code < 58) ||
             (code > 64 && code < 91))))
-          return letterConverter.toFullLetter(String.fromCharCode(code)); 
+          return this.letterConverter.toFullLetter(String.fromCharCode(code)); 
 
        return String.fromCharCode(code); 
     }, 
@@ -1163,8 +1163,8 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        // free it 
        wordList = null; 
 
-       FireinputLog.debug(this,"wordArray: " + this.getKeyWord(wordArray));
-       FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
+       // FireinputLog.debug(this,"wordArray: " + this.getKeyWord(wordArray));
+       // FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
        if(userArray.length <= 0)
        {
           wordArray.sort(this.sortCodeArray); 
@@ -1234,25 +1234,49 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
        initialKeys = initialKeys.ikey; 
 
+       // ondemand phrase will be preappended 
+       var onDemandPhrase = this.searchOnDemandPhrase(initialKeys); 
+       FireinputLog.debug(this,"checking: " + initialKeys);
+
        // fast lookup for longer chars 
        if(initialKeys.length >=4)
        {
           initialKeys = initialKeys.substring(0, 4);
+          // update onDemand if it's null after initialKeys is reduced 
+          if(!onDemandPhrase)
+               onDemandPhrase =  this.searchOnDemandPhrase(initialKeys); 
+
           // some user phrases have been re-hashed by 3 init key 
           if(!this.phraseCodeHash.hasItem(initialKeys))
           {
+
              initialKeys = initialKeys.substring(0,3); 
+             /* if ondemand is false, retry with new initial keys */
+             if(!onDemandPhrase)
+                  onDemandPhrase = this.searchOnDemandPhrase(initialKeys);
           }
        }
 
        FireinputLog.debug(this,"checking: " + initialKeys + ", keyMatch: " + keyMatch);
+
+       var stringList = onDemandPhrase; 
+       // merge strings from both phrase 
+       if(this.phraseCodeHash || onDemandPhrase) {
+         if(this.phraseCodeHash.hasItem(initialKeys)) {
+            if(stringList)
+               stringList += "," + this.phraseCodeHash.getItem(initialKeys);
+            else 
+               stringList = this.phraseCodeHash.getItem(initialKeys);
+         }
+       }
+ 
        // make final check before going forward 
-       if(!this.phraseCodeHash || !this.phraseCodeHash.hasItem(initialKeys))
+       if(!stringList) 
            return null; 
 
-       var stringList = this.phraseCodeHash.getItem(initialKeys); 
        //FireinputLog.debug(this, "currentInex: " + currentIndex);
-       //FireinputLog.debug(this,"stringList: " + FireinputUnicode.getUnicodeString(stringList));
+       FireinputLog.debug(this,"demandList: " + FireinputUnicode.getUnicodeString(onDemandPhrase));
+       // FireinputLog.debug(this,"stringList: " + FireinputUnicode.getUnicodeString(stringList));
  
        var stringArray = stringList.split(","); 
        //FireinputLog.debug(this,"stringArray.length: " + stringArray.length);
@@ -1429,9 +1453,12 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        //FireinputLog.debug(this,"phraseArray.length: " + phraseArray.length);
        //FireinputLog.debug(this,"userArray.length: " + userArray.length);
        //FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
+       FireinputLog.debug(this,"phraseArray: " + this.getKeyWord(phraseArray));
+       //FIXME: how to sort it 
        //FireinputLog.debug(this,"exactPhraseArray: " + this.getKeyWord(exactPhraseArray));
        if(userArray.length <= 0)
        {
+          phraseArray.sort(this.sortCodeArray);
           if(exactPhraseArray.length > 0)
              arrayInsert(exactPhraseArray, exactPhraseArray.length, phraseArray.slice(0, phraseArray.length)); 
        }
@@ -1671,6 +1698,80 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
        FireinputLog.debug(this, "phrase: " + phrase + ", freq: " + freq);
        this.updatePhraseTable(phrase, keys, freq, initialKey, false);
+    },
+
+    searchOnDemandPhrase: function(initialKeys) 
+    {
+      if(this.onDemandPhraseCodeHash && this.onDemandPhraseCodeHash.hasItem(this.tabIndex)) {
+          var phraseHash = this.onDemandPhraseCodeHash.getItem(this.tabIndex);
+          var nowPhrase = phraseHash.getItem(initialKeys);
+          return nowPhrase;
+      }
+      return null; 
+    }, 
+
+    storeOnDemandPhrase: function(phrase, keys, freq, initialKey, signature)
+    {
+       if(!initialKey)
+          initialKey = this.getPhraseInitKey(keys);
+
+       // FireinputLog.debug(this, "signature: " + signature + ", phrase: " + FireinputUnicode.getUnicodeString(phrase) + ", initialKey: " + initialKey);
+
+       if(!this.userCodeHash)
+          this.userCodeHash = new FireinputHash();
+
+
+       if(this.userCodeHash.hasItem(phrase + ":" + keys))
+          return;
+
+       if(this.phraseCodeHash && this.phraseCodeHash.hasItem(initialKey))
+       {
+          // the new phrase is already in phrase table, don't add it in
+          var nowPhrase = this.phraseCodeHash.getItem(initialKey);
+          var regex = new RegExp(phrase + "\\d+", "g");
+          var matched = nowPhrase.match(regex);
+          if(matched)
+             return; 
+       }
+
+       // move on to ondemand phrase hash 
+       if(!this.onDemandPhraseCodeHash)
+          this.onDemandPhraseCodeHash = new FireinputHash();
+
+       // check the ondemand phrase hash to see if the phrase is already in 
+       if(this.onDemandPhraseCodeHash.hasItem(signature)) {
+          
+          // the signature is also pointing to a hash 
+          var phraseHash = this.onDemandPhraseCodeHash.getItem(signature); 
+          var nowPhrase = phraseHash.getItem(initialKey);
+          if(!nowPhrase) {
+            phraseHash.setItem(initialKey, keys + "=>" + phrase+freq);
+            return; 
+          }
+
+          // FireinputLog.debug(this, "nowPhrase: " + FireinputUnicode.getUnicodeString(nowPhrase) + ", initialKey: " + initialKey);
+          var regex = new RegExp(phrase + "\\d+", "g");
+          var matched = nowPhrase.match(regex);
+          if(matched)
+             return;
+          else 
+             phraseHash.setItem(initialKey, keys + "=>" + phrase+freq + "," + nowPhrase); 
+       }
+       else {
+          var phraseHash = new FireinputHash(); 
+          phraseHash.setItem(initialKey, keys + "=>" + phrase+freq);
+          this.onDemandPhraseCodeHash.setItem(signature, phraseHash); 
+       }
+
+    },
+
+    removeOnDemandPhrase: function(signature)
+    {
+       if(!this.onDemandPhraseCodeHash)
+          return; 
+
+       if(this.onDemandPhraseCodeHash.hasItem(signature))
+          this.onDemandPhraseCodeHash.setItem(signature, null); 
     },
 
     getWordPinyin: function(word)

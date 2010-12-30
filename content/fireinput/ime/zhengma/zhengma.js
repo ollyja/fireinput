@@ -39,7 +39,7 @@ var Zhengma = function()  {};
 Zhengma.prototype =  extend(new FireinputIME(), 
 {
     // 0 to disable debug or non zero to enable debug 
-    debug: 1, 
+    debug: 0, 
 
     // the name of IME 
     name: IME_ZHENGMA,
@@ -89,7 +89,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
     // the entrance function to load all related tables 
     loadTable: function()
     {
-       letterConverter = new FullLetterConverter(); 
+       this.letterConverter = new FullLetterConverter(); 
 
        // setTimeout to not block firefox start
        var self = this; 
@@ -171,32 +171,39 @@ Zhengma.prototype =  extend(new FireinputIME(),
     loadZhengmaTable: function()
     {
        var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
        var path = this.getDataPath(); 
-       var datafile = ""; 
-       datafile = fileHandler.getFileFromURLSpec(path + this.getZhengmaFile()); 
+       var datafile = ios.newURI(path + this.getZhengmaFile(), null, null); 
        
        this.keyZhengmaHash = new FireinputHash();
        this.keyMapTable = new FireinputHash(); 
 
-       if(!datafile.exists())
-       {
-            /* The download file might exist */
-            datafile = this.getNetZhengmaFile(); 
+       var checkExists = function() {
+          if(this.keyZhengmaHash.length <= 0) {
+            var datafile = this.getNetZhengmaFile();
             if(!datafile.exists()) {
-              //this.engineDisabled = true; 
-              this.loadUserTable(); 
-              return; 
+              this.loadUserTable();
+              return;
             }
-       }
+
+            var options = {
+               caller: this,
+               oncomplete: bind(function() { this.sortKeyMapTable(); this.loadUserTable(); }, this),
+               onavailable: this.getCodeLine
+            };
+            FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+          }
+          else {
+            this.sortKeyMapTable();
+            this.loadUserTable();
+          }
+       };
 
        var options = {
-          caller: this, 
-          oncomplete: bind(function() { this.sortKeyMapTable(); this.loadUserTable(); }, this), 
+          caller: this,
+          oncomplete: checkExists,
           onavailable: this.getCodeLine
-       }; 
+       };
 
        FireinputStream.loadDataAsync(datafile, options);
     },
@@ -245,6 +252,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
 
     loadUserTable: function()
     {
+       var ios = FireinputXPC.getIOService(); 
        var datafile = this.getUserDataFile();
        if(!datafile.exists())
        {
@@ -260,7 +268,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
           oncomplete: this.loadExtPhraseTable
           
        }; 
-       FireinputStream.loadDataAsync(datafile, options); 
+       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options); 
     },
 
     getExtPhraseCodeLine: function(str)
@@ -286,8 +294,6 @@ Zhengma.prototype =  extend(new FireinputIME(),
     loadExtPhraseTable: function()
     {
        var ios = FireinputXPC.getIOService();
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
        var datafile = this.getExtDataFile();
        if(!datafile.exists())
@@ -298,42 +304,15 @@ Zhengma.prototype =  extend(new FireinputIME(),
           caller: this,
           onavailable: this.getExtPhraseCodeLine
        };
-       FireinputStream.loadDataAsync(datafile, options);
+       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
     },
-
-    isEnabled: function()
-    {
-       if(this.engineDisabled)
-          return false; 
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-
-       var path = this.getDataPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getZhengmaFile());
-       if(!datafile.exists())
-       {
-          /* check whether there is network version */
-          datafile = this.getNetZhengmaFile();
-          if(!datafile.exists())
-            return false;
-          else
-            return true; 
-       }
-
-       return true; 
-    }, 
 
     hasTableFile: function()
     {
        var ios = FireinputXPC.getIOService();
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
        var path = this.getDataPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getZhengmaFile());
-
-       return datafile.exists() ? true : false;
+       return FireinputStream.checkAccess(ios.newURI(path + this.getZhengmaFile(), null, null));
     },
 
     hasNetTableFile: function()
@@ -344,7 +323,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
 
     isSchemaEnabled: function()
     {
-       return this.isEnabled(); 
+       return this.hasTableFile() || this.hasNetTableFile(); 
     },
 
     canComposeNew: function()
@@ -398,7 +377,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
           (!this.isHalfPunctMode() && 
            !((code > 47 && code < 58) ||
             (code > 64 && code < 91))))
-          return letterConverter.toFullLetter(String.fromCharCode(code)); 
+          return this.letterConverter.toFullLetter(String.fromCharCode(code)); 
 
        return String.fromCharCode(code); 
     }, 

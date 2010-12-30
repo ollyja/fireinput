@@ -1,4 +1,5 @@
 content fireinput chrome/content/fireinput/
+resource fireinput chrome/content/fireinput/
 skin    fireinput classic chrome/skin/classic/
 skin    fireinput-os classic  chrome/skin/classic/linux/ os=Linux
 skin    fireinput-os classic  chrome/skin/classic/win/ os=WINNT

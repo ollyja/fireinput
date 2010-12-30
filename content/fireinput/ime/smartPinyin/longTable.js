@@ -38,7 +38,7 @@ const MaxSelectionLen = 20;
  
 var FireinputLongTable = 
 {
-    debug: 1, 
+    debug: 0, 
 
     // current target 
     currentTarget: null, 

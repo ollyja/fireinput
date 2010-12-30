@@ -358,7 +358,7 @@ var EmotionMgr =
           oncomplete: this.showCurrentEmotions,
           onavailable: this.getUserEmotionURL
        };
-       FireinputStream.loadDataAsync(datafile, options);
+       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
     },
 
     showCurrentEmotions: function()

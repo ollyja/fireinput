@@ -11,7 +11,6 @@
 
 <script type="application/x-javascript" src="chrome://fireinput/content/version.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/debug.js"/>
-<script type="application/x-javascript" src="chrome://fireinput/content/constant.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/utils.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/lib.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/stream.js"/>
@@ -258,7 +257,6 @@
         <toolbarseparator collapsed="false" style="margin-left:5px; margin-right: 5px"/> 
         <label id="fireinputSearchButton" value="" onclick="FireinputWebSearch.searchWeb()"/>
         <textbox id="fireinputSearchbox" class="fireinputSearchbox"
-                     onfocus="FireinputWebSearch.searchboxOnFocus(event)" 
                      onkeypress="FireinputWebSearch.goSearchbox(event)"/>
         <toolbarseparator collapsed="false" style="margin-left:5px"/> 
         <toolbarbutton id="fireinputIMEBarCloseButton" class="toolbarbutton-icon" tooltiptext="" oncommand="Fireinput.toggleFireinput();"/>

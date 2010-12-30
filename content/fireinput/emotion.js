@@ -160,7 +160,7 @@ var FireinputEmotions =
           oncomplete: this.addUserEmotionMenu, 
           onavailable: this.getUserEmotionURL
        };
-       FireinputStream.loadDataAsync(datafile, options);
+       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
     }, 
 
     getUserEmotionURL: function(str)

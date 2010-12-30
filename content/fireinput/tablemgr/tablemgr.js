@@ -1256,7 +1256,7 @@ var FireinputTableMgr =
          if(ime != null && $("#ime" + id).css("display") == "none") {
             ime.setSchema(id);
             if(ime.hasNetTableFile()) {
-               $("#ime" + id + " input").attr("value", "卸载").css("color", "red").attr("schema", id).unbind("click").click(function(e) {
+               $("#ime" + id + " input").attr("value", "已安装, 卸载?").css("color", "red").attr("schema", id).unbind("click").click(function(e) {
                   FireinputTableMgr.uninstallNetTable(e);
                }); 
             }

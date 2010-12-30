@@ -178,7 +178,7 @@ var FireinputTable =
           var now =  new Date().getTime();
           var timeout = intervalInHour * 3600 * 1000 - (now - last);
           timeout = (!force && timeout > 0) ? timeout: 1000; // give 1 seconds window 
-          lastupdatetime = last / 1000;
+          var lastupdatetime = last / 1000;
 
           FireinputLog.debug(this, "lastupdatetime: " + lastupdatetime + ", timeout: " + timeout);
           this.updateTimer = setTimeout(function() { FireinputTable.startTableUpdate(lastupdatetime); }, timeout);
@@ -425,7 +425,7 @@ var FireinputImporter = {
           onavailable: this.getExtPhraseCodeLine,
           oncomplete: function() { callback(); }
        };
-       FireinputStream.loadDataAsync(datafile, options);
+       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
     },
 
     getExtPhraseCodeLine: function(str)
@@ -598,7 +598,7 @@ var FireinputImporter = {
     }, 
 
    
-    getPhraseWordLine: function(line, signature)
+    getPhraseWordLine: function(line, signature, ondemand)
     {
        if(!line || line.length <= 1)
           return; 
@@ -667,16 +667,26 @@ var FireinputImporter = {
               for(var i=0; i<keys.length; i++)
               {
                  var initialKey = ime.getPhraseInitKey(keys[i]);
-                 ime.storeOneUpdatePhraseWithFreq(phrase, keys[i], freq, initialKey); 
-                 // add it to ext phrase list
-                 // only update ext hash when signature is set. This is not true for on-demand processing 
-                 if(signature)
-                    this.addOneExtPhrase(phrase, keys[i], freq, initialKey, ime.getIMEType(), signature);
+                 if(ondemand && ime.getIMEType() == SMART_PINYIN) {
+                    // if the signature is not given, it means the phrase is from on-demand, and the engine must flush it out 
+                    // once the url is closed or after a certain amount of time 
+                    ime.storeOnDemandPhrase(phrase, keys[i], freq, initialKey, signature);
+                 }
+                 else 
+                 if(signature) {
+                    ime.storeOneUpdatePhraseWithFreq(phrase, keys[i], freq, initialKey); 
+                    // add it to ext phrase list
+                    // only update ext hash when signature is set. This is not true for on-demand processing 
+                    if(signature)
+                       this.addOneExtPhrase(phrase, keys[i], freq, initialKey, ime.getIMEType(), signature);
+                 }
+ 
               }
 
            }
            else
            {
+              // on-demand processing should never reach here
               var initialKey = ime.getPhraseInitKey(pinyinkey);
               ime.storeOneUpdatePhraseWithFreq(FireinputUnicode.convertFromUnicode(phrase), pinyinkey, freq, initialKey);         
               // only update ext hash when signature is set. This is not true for on-demand processing 
@@ -721,11 +731,20 @@ var FireinputImporter = {
     }, 
  
     /* It's on demand processing which requires in-memory process only */
-    processPhraseFromRemoteOnDemand: function(lines, totalsize)
+    processPhraseFromRemoteOnDemand: function(tabindex, lines, totalsize)
     {
        this.storePhrasePercent = 0; 
        // process any insertion after loading is completed 
-       this.processPhraseFromLocal(lines, 0, totalsize);
+       this.processPhraseFromLocal(lines, 0, totalsize, tabindex, true);
+    }, 
+    /* remove on demand phrase to save memory if the tab is closed */
+    removePhraseFromRemoteOnDemand: function(signature)
+    {
+       var ime = FireinputUtils.getCurrentIME(); 
+       if(ime.getIMEType() != SMART_PINYIN)
+         return; 
+
+       ime.removeOnDemandPhrase(signature); 
     }, 
 
     /* The phrases will be saved into ext phrase table. */
@@ -738,7 +757,7 @@ var FireinputImporter = {
        }); 
     }, 
 
-    processPhraseFromLocal: function(lines, totalread, totalsize, signature)
+    processPhraseFromLocal: function(lines, totalread, totalsize, signature, ondemand)
     {
        var linenum =0;
        if(totalread <= 0)
@@ -747,7 +766,7 @@ var FireinputImporter = {
        while(lines.length > 0)
        {
            var l = lines.shift();
-           this.getPhraseWordLine(l, signature);
+           this.getPhraseWordLine(l, signature, ondemand);
            linenum++;
            totalread += l.length;
            this.storePhrasePercent = parseInt((totalread * 100)/totalsize);
@@ -755,7 +774,7 @@ var FireinputImporter = {
            {
               // give it a short break;
               var self = this; 
-              setTimeout(function() { self.processPhraseFromLocal(lines, totalread, totalsize, signature); }, 500);
+              setTimeout(function() { self.processPhraseFromLocal(lines, totalread, totalsize, signature, ondemand); }, 500);
               break;
            }
 

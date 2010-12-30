@@ -34,6 +34,7 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
+Components.utils.import("resource://fireinput/constant.js");
 var FireinputEncoding = 
 {
     // debug option 

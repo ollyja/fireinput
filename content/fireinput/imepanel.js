@@ -694,7 +694,7 @@ var FireinputIMEPanel =
           var newvalue = (autoCompKeys+this.myInputChar).substr(result.validInputKey.length, autoCompKeys.length + this.myInputChar.length); 
           this.insertCharToComposer(null, 1, "true");
           var idf = document.getElementById("fireinputField");
-	  FireinputLog.debug(this,"newvalue:" + newvalue + ", idf.value: " + idf.value + ", this.myInputChar: " + this.myInputChar);
+          FireinputLog.debug(this,"newvalue:" + newvalue + ", idf.value: " + idf.value + ", this.myInputChar: " + this.myInputChar);
           idf.value = newvalue + idf.value.replace(this.myInputChar, ""); 
           FireinputUtils.setCaretTo(idf, newvalue.length); 
           this.myInputChar = newvalue; 

@@ -39,7 +39,7 @@ var Wubi = function()  {};
 Wubi.prototype =  extend(new FireinputIME(), 
 {
     // 0 to disable debug or non zero to enable debug 
-    debug: 1, 
+    debug: 0, 
 
     // the name of IME 
     name: IME_WUBI,
@@ -89,7 +89,7 @@ Wubi.prototype =  extend(new FireinputIME(),
     // the entrance function to load all related tables 
     loadTable: function()
     {
-       letterConverter = new FullLetterConverter(); 
+       this.letterConverter = new FullLetterConverter(); 
 
        // setTimeout to not block firefox start
        var self = this; 
@@ -164,42 +164,44 @@ Wubi.prototype =  extend(new FireinputIME(),
     loadWubiTable: function()
     {
        var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
        var path = this.getDataPath(); 
        var datafile = ""; 
 
        if(this.wubiSchema == WUBI_86) {
-          datafile = fileHandler.getFileFromURLSpec(path + this.getWubi86File());
-          if(!datafile.exists())
-          {
-            datafile = this.getNetWubi86File();
-          }
+          datafile = ios.newURI(path + this.getWubi86File(), null, null);
        }
        else if(this.wubiSchema == WUBI_98) {
-          datafile = fileHandler.getFileFromURLSpec(path + this.getWubi98File());
-          if(!datafile.exists())
-          {
-            datafile = this.getNetWubi98File();
-          }
-
+          datafile = ios.newURI(path + this.getWubi98File(), null, null);
        }
 
-       
        this.keyWubiHash = new FireinputHash();
        this.keyMapTable = new FireinputHash(); 
 
-       if(!datafile.exists())
-       {
-           //this.engineDisabled = true; 
-           this.loadUserTable(); 
-           return; 
-       }
+       var checkExists = function() {
+          if(this.keyWubiHash.length <= 0) {
+            var datafile = this.wubiSchema == WUBI_98 ? this.getNetWubi98File() : this.getNetWubi86File(); 
+            if(!datafile.exists()) {
+              this.loadUserTable(); 
+              return;
+            }
+
+            var options = {
+               caller: this,
+               oncomplete: bind(function() { this.sortKeyMapTable(); this.loadUserTable(); }, this),
+               onavailable: this.getCodeLine
+            };
+            FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+          }
+          else {
+            this.sortKeyMapTable();
+            this.loadUserTable();
+          }
+       };
 
        var options = {
           caller: this, 
-          oncomplete: bind(function() { this.sortKeyMapTable(); this.loadUserTable(); }, this), 
+          oncomplete: checkExists, 
           onavailable: this.getCodeLine
        }; 
 
@@ -250,6 +252,7 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     loadUserTable: function()
     {
+       var ios = FireinputXPC.getIOService(); 
        var datafile = this.getUserDataFile();
        if(!datafile.exists())
        {
@@ -265,7 +268,7 @@ Wubi.prototype =  extend(new FireinputIME(),
           oncomplete: this.loadExtPhraseTable
           
        }; 
-       FireinputStream.loadDataAsync(datafile, options); 
+       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options); 
     },
 
     getExtPhraseCodeLine: function(str)
@@ -290,6 +293,7 @@ Wubi.prototype =  extend(new FireinputIME(),
 
     loadExtPhraseTable: function()
     {
+       var ios = FireinputXPC.getIOService(); 
        var datafile = this.getExtDataFile();
        if(!datafile.exists())
        {
@@ -299,50 +303,20 @@ Wubi.prototype =  extend(new FireinputIME(),
           caller: this,
           onavailable: this.getExtPhraseCodeLine
        };
-       FireinputStream.loadDataAsync(datafile, options);
+       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
     },
-
-    isEnabled: function()
-    {
-       if(this.engineDisabled)
-          return false; 
-       var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-
-       var path = this.getDataPath();
-       var datafile = fileHandler.getFileFromURLSpec(path + this.getWubi86File());
-       if(!datafile.exists())
-       {
-          datafile = fileHandler.getFileFromURLSpec(path + this.getWubi98File());
-          if(!datafile.exists()) {
-            datafile = this.getNetWubi86File();
-            if(!datafile.exists()) {
-               datafile = this.getNetWubi98File();
-               if(!datafile.exists())
-                  return false; 
-            }
-          }
-       }
-
-       return true; 
-    }, 
 
     hasTableFile: function()
     {
        var ios = FireinputXPC.getIOService();
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
        var path = this.getDataPath();
        if(this.wubiSchema == WUBI_86) {
-          var datafile = fileHandler.getFileFromURLSpec(path + this.getWubi86File());
-          return datafile.exists() ? true : false;
+          return FireinputStream.checkAccess(ios.newURI(path + this.getWubi86File(), null, null));
        }
 
        if(this.wubiSchema == WUBI_98) {
-          var datafile = fileHandler.getFileFromURLSpec(path + this.getWubi98File());
-          return datafile.exists() ? true : false;
+          return FireinputStream.checkAccess(ios.newURI(path + this.getWubi86File(), null, null));
        }
 
        return false; 
@@ -367,27 +341,28 @@ Wubi.prototype =  extend(new FireinputIME(),
     {
        if(this.engineDisabled)
           return false;
+
        var ios = FireinputXPC.getIOService(); 
-       var fileHandler = ios.getProtocolHandler("file")
-                         .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
  
        var datafile = null; 
        var path = this.getDataPath();
        if(this.wubiSchema == WUBI_86) {
-          datafile = fileHandler.getFileFromURLSpec(path + this.getWubi86File()); 
-          if(!datafile.exists())
+          if(!FireinputStream.checkAccess(ios.newURI(path + this.getWubi86File(), null, null)))
           {
             datafile = this.getNetWubi86File(); 
           }
        }
        else if(this.wubiSchema == WUBI_98) {
-          datafile = fileHandler.getFileFromURLSpec(path + this.getWubi98File()); 
-          if(!datafile.exists())
+          if(!FireinputStream.checkAccess(ios.newURI(path + this.getWubi98File(), null, null)))
           {
             datafile = this.getNetWubi98File(); 
           }
 
        }  
+
+       /* datafile is not set which means the internal data file is there */
+       if(!datafile)
+          return true; 
 
        /* finally check data file */
        if(!datafile.exists())
@@ -449,7 +424,7 @@ Wubi.prototype =  extend(new FireinputIME(),
           (!this.isHalfPunctMode() && 
            !((code > 47 && code < 58) ||
             (code > 64 && code < 91))))
-          return letterConverter.toFullLetter(String.fromCharCode(code)); 
+          return this.letterConverter.toFullLetter(String.fromCharCode(code)); 
 
        return String.fromCharCode(code); 
     }, 

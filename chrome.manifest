@@ -1,4 +1,5 @@
 content fireinput content/fireinput/
+resource fireinput content/fireinput/
 skin    fireinput classic skin/classic/
 skin    fireinput-os classic  skin/classic/linux/ os=Linux
 skin    fireinput-os classic  skin/classic/win/ os=WINNT

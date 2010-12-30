@@ -34,6 +34,11 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
+var EXPORTED_SYMBOLS = [
+   "FireinputXPC", "FireinputEnv", "FireinputPref", "FireinputUnicode",
+   "FireinputUtils", "FireinputHash", "Ajax", "FireinputTime"
+]; 
+
 var FireinputXPC = 
 {
     CC: function(cName)
@@ -244,46 +249,22 @@ var FireinputUtils =
           // setFocus before set any values to avoid being reset by target onfocus event -  normally happens to textfield or textarea  
           this.setFocus(element.target); 
 
-	       var start = element.selectionStart; 
-          var end   = element.selectionEnd; 
-          var target = element.target; 
-
-          // hack: the onfocus event will select all. We try to avoid this. 
-          if(element.focused == 0 && start != end && end == target.value.length)
-          {
-             start = end; 
-          }
-
-          var scrollTop = target.scrollTop;
-          var scrollLeft = target.scrollLeft; 
-          var isBottom = (scrollTop + target.clientHeight) == target.scrollHeight;
           if(typeof(sourceType) != 'undefined' && sourceType == IMAGE_SOURCE_TYPE)
           {
              if(insertMode == IMAGE_INSERT_BBCODE_URL) 
       	        text = "[img]" + text + "[/img]"; 
           }
 
-	  if(start != null) 
-	  {
-	     target.value = target.value.substr(0, start) 
-			   + text + target.value.substr(end, target.value.length);
-	     this.setCaretTo(target, start + text.length);
-	  }
-          else 
-   	  {
-	     target.value += text;
-	     this.setCaretTo(target, target.value.length);
-	  }
-          
-          if(typeof(scrollLeft) != "undefined")
-             target.scrollLeft = scrollLeft;
-          if(typeof(scrollTop) != "undefined")
-          {
-             if(!isBottom)
-               target.scrollTop = scrollTop;
-             else  
-               target.scrollTop = target.scrollHeight;
+          // trigger custom-event 
+          Fireinput.setEventDispathMode(true);
+          for(var i=0; i<text.length; i++) {
+            var newEvent = document.createEvent("KeyEvents")
+            newEvent.initKeyEvent("keypress", true, true, window,
+                        element.event.ctrlKey, element.event.altKey, element.event.shiftKey,
+                        element.event.metaKey, 0, text.charCodeAt(i));
+            element.originalTarget.dispatchEvent(newEvent)
           }
+          Fireinput.setEventDispathMode(false);
 
           return;
        }
@@ -296,10 +277,10 @@ var FireinputUtils =
           if(!selection.focusNode)
              return; 
 
-          //FireinputLog.debug(this, "selection.focusNode.nodeType: " + selection.focusNode.nodeType); 
-          //FireinputLog.debug(this, "selection.focusNode.name: " + selection.focusNode.nodeName); 
-          //FireinputLog.debug(this, "selection.focusNode.value: " + selection.focusNode.nodeValue); 
-          //FireinputLog.debug(this, "selection.focusOffset: " + selection.focusOffset); 
+          // FireinputLog.debug(this, "selection.focusNode.nodeType: " + selection.focusNode.nodeType); 
+          // FireinputLog.debug(this, "selection.focusNode.name: " + selection.focusNode.nodeName); 
+          // FireinputLog.debug(this, "selection.focusNode.value: " + selection.focusNode.nodeValue); 
+          // FireinputLog.debug(this, "selection.focusOffset: " + selection.focusOffset); 
 
           // get the first range of the selection
           // delete content if the collpase is not true 
@@ -307,7 +288,7 @@ var FireinputUtils =
           if(!range.collapsed)
               range.deleteContents();
 
-          if (selection.focusNode.nodeType == Node.TEXT_NODE)
+          if (selection.focusNode.nodeType==Node.ELEMENT_NODE || selection.focusNode.nodeType == Node.TEXT_NODE)
           {
 
              if(typeof(sourceType) != 'undefined' && sourceType == IMAGE_SOURCE_TYPE)
@@ -317,10 +298,15 @@ var FireinputUtils =
 
                 var startContainer = range.startContainer;
                 var startOffset = range.startOffset;
-                var beforeNode = startContainer.splitText(startOffset);
-                var parentNode = beforeNode.parentNode;
-                parentNode.insertBefore(imgNode, beforeNode);
-                selection.collapse(beforeNode, 0); 
+                if(startContainer.nodeType == Node.TEXT_NODE) {
+                  var beforeNode = startContainer.splitText(startOffset);
+                  var parentNode = beforeNode.parentNode;
+                  parentNode.insertBefore(imgNode, beforeNode);
+                  selection.collapse(beforeNode, 0); 
+                }
+                else {
+                  startContainer.appendChild(imgNode); 
+                }
                 return; 
              }
           }
@@ -335,6 +321,7 @@ var FireinputUtils =
             newEvent.initKeyEvent("keypress", true, true, document.defaultView,
                         element.event.ctrlKey, element.event.altKey, element.event.shiftKey,
                         element.event.metaKey, 0, text.charCodeAt(i));
+            // don't use element.target since it's originalTarget which won't work 
             element.event.target.dispatchEvent(newEvent)             
         }
         Fireinput.setEventDispathMode(false);
@@ -489,11 +476,12 @@ var FireinputUtils =
 			
           var path = chromeRegistry.convertChromeURL(uri);
           if (typeof(path) == "object") path = path.spec
-
+/*
           if (path.length >= 4 && path.substr(0, 4) == "jar:") 
           {
              path = path.substring(4); // remove "jar:" at the beginning
           }
+*/
 
           return path; 
        }
