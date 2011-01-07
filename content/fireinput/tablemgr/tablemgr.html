@@ -11,6 +11,7 @@
 <link href="chrome://fireinput/skin/jquery.tabs.css" rel="stylesheet" type="text/css">
 <link href="chrome://fireinput/skin/emotionmgr.css" rel="stylesheet" type="text/css">
 <link href="chrome://fireinput/skin/common.css" rel="stylesheet" type="text/css">
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/ns.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/utils.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/md5.js"></script>
@@ -42,12 +43,12 @@
 
 <script type="text/javascript">
 $(function() {
-   FireinputTableMgr.init(); 
-   FireinputTableMgr.initNetTableInstall();
+   Fireinput.tableMgr.init(); 
+   Fireinput.tableMgr.initNetTableInstall();
    $('#topTabMenu').tabs({
 	fxSpeed: 'fast',
         onShow: function (){
-          FireinputTableMgr.initTab($(this).activeTab()); 
+          Fireinput.tableMgr.initTab($(this).activeTab()); 
         }
    });
 });
@@ -61,7 +62,7 @@ $(function() {
         <span id="logonUserBox" style="margin-left:25px">
           <span id="logonUser" style="color: blue;margin-right: 10px;"></span>
         </span>
-        <span id='logonLink' class="textLink logonLink" onclick="FireinputServerLogin.toggleLogonForm(event)">登录</span>
+        <span id='logonLink' class="textLink logonLink" onclick="Fireinput.serverLogin.toggleLogonForm(event)">登录</span>
       </div>
  
       <!-- logon form -->
@@ -71,10 +72,10 @@ $(function() {
           <form onsubmit="javascript:return false;">
             <table>
                  <tr><td style="vertical-align:top">注册邮箱:</td><td><input id="logonEmail" type="text" /></td></tr>
-                 <tr><td style="text-align:right">密码:</td><td><input id="logonPasswd" type="password" onkeypress="FireinputServerLogin.logon(event)"/></td></tr>
+                 <tr><td style="text-align:right">密码:</td><td><input id="logonPasswd" type="password" onkeypress="Fireinput.serverLogin.logon(event)"/></td></tr>
                  <tr><td><input id="logonSeed" type="hidden" value=""/></td></tr>
-                 <tr><td></td><td><input type="button" id="logonButton" value="登录" onclick="FireinputServerLogin.logon()"/>&nbsp;&nbsp;
-                 <input type="button" id="cancelLogonButton" value="取消" onclick="FireinputServerLogin.toggleLogonForm(event)"/></td></tr>
+                 <tr><td></td><td><input type="button" id="logonButton" value="登录" onclick="Fireinput.serverLogin.logon()"/>&nbsp;&nbsp;
+                 <input type="button" id="cancelLogonButton" value="取消" onclick="Fireinput.serverLogin.toggleLogonForm(event)"/></td></tr>
 
            </table>
           </form>
@@ -116,7 +117,7 @@ $(function() {
      </div>
      <div style="margin: 5px 3px 0">
             <span>自动更新频率:</span>  
-            <select id="tableUpdateInterval" onchange='FireinputTableMgr.changeAutomaticUpdateInterval(this.value)'>
+            <select id="tableUpdateInterval" onchange='Fireinput.tableMgr.changeAutomaticUpdateInterval(this.value)'>
                <option value="6">6 小时</option>
                <option value="12">12 小时</option>
                <option value="18">18 小时</option>
@@ -133,7 +134,7 @@ $(function() {
      <div style="margin-right: 3px">
         <div id="updateForm" style="padding-left: 3px">
             <span>最近一次更新发生在：</span><span id='lastTableUpdate' class="helpMsg"></span>
-            <input id='updateNowButton' class="textInputButton" style="margin-left: 10px" type="button" onclick='FireinputTableMgr.updateTableNow(this)' value="立即更新"/><img id="updateNowImg" style='display: none' src="chrome://fireinput/skin/loading.gif"/>
+            <input id='updateNowButton' class="textInputButton" style="margin-left: 10px" type="button" onclick='Fireinput.tableMgr.updateTableNow(this)' value="立即更新"/><img id="updateNowImg" style='display: none' src="chrome://fireinput/skin/loading.gif"/>
         </div>
      </div>
 
@@ -162,7 +163,7 @@ $(function() {
         <tr>
             <td width=120 valign="top">词组: </td>
             <td style="background-color: #eee; border-top: 1px solid #FFFFF0">
-                 <input type="text" id="inputword" name="inputword" onblur="FireinputTableMgr.showKeySuggestion()" size="60" maxlength="10"/>
+                 <input type="text" id="inputword" name="inputword" onblur="Fireinput.tableMgr.showKeySuggestion()" size="60" maxlength="10"/>
                  <p class="exampleHint">至少两个字. 例如: 火输很好</p>
             </td>
        </tr>
@@ -206,7 +207,7 @@ $(function() {
                  </table>
                </div>
                <div id="inputkey">
-                 <input type="text" _no_cjk_input="true" name="inputkey" size="60" maxlength="700" onfocus="FireinputTableMgr.showKeySuggestion()" maxlength="700" />
+                 <input type="text" _no_cjk_input="true" name="inputkey" size="60" maxlength="700" onfocus="Fireinput.tableMgr.showKeySuggestion()" maxlength="700" />
                  <input type="hidden" name="hiddennumtoneinputkey"/>
                  <input type="hidden" name="hiddenchartoneinputkey"/>
                  <p class="exampleHint">例如: hua shu hen hao</p>
@@ -216,8 +217,8 @@ $(function() {
          <tr>
               <td></td>
               <td>
-                <input id="addNewLocal" type="submit" name="submit" value="加入本地火输" onclick="return FireinputTableMgr.addToLocal()"/>
-                <input id="addNewServer" type="submit" name="submit" value="加入网络共享" onclick="return FireinputTableMgr.addToServer()"/>
+                <input id="addNewLocal" type="submit" name="submit" value="加入本地火输" onclick="return Fireinput.tableMgr.addToLocal()"/>
+                <input id="addNewServer" type="submit" name="submit" value="加入网络共享" onclick="return Fireinput.tableMgr.addToServer()"/>
               </td>
           </tr>
          </table>
@@ -261,7 +262,7 @@ $(function() {
               </tr>
               <tr>
                   <td></td>
-                  <td><input type="button" value="导入" onclick="return FireinputTableMgr.importToLocal()"></td>
+                  <td><input type="button" value="导入" onclick="return Fireinput.tableMgr.importToLocal()"></td>
               </tr>
            </table>
          </div>
@@ -291,7 +292,7 @@ $(function() {
      <div id="installTableHelp" style="text-align:left;padding-left: 5px;">
        火输输入法词库网络安装. 所有输入法必須先安装词库, 才能使用。
        <p/>
-       如想取消不用的输入法, 请点击 <a href="#" onclick="FireinputTableMgr.showInputMethodSetting(); return false">输入法高级</a>
+       如想取消不用的输入法, 请点击 <a href="#" onclick="Fireinput.tableMgr.showInputMethodSetting(); return false">输入法高级</a>
      </div>
      <div style="margin-top: 20px">
            <table cellspacing=5 cellpadding=7 border=0 valign="middle">

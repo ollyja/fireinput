@@ -28,9 +28,9 @@
           <span id="logonUser" style="color: blue;margin-right: 10px;"></span>
         </span>
         <span id="shareFileCommand">
-          <span id="uploadLink" class="textLink logonLink" onclick="EmotionMgr.toggleUploadForm()">上传</span>
+          <span id="uploadLink" class="textLink logonLink" onclick="Fireinput.emotionMgr.toggleUploadForm()">上传</span>
         </span>
-        <span id="logonLink">|<span class="textLink logonLink" onclick="EmotionMgr.toggleLogonForm(event)">登录</span></span>
+        <span id="logonLink">|<span class="textLink logonLink" onclick="Fireinput.emotionMgr.toggleLogonForm(event)">登录</span></span>
       </div>
  
       <!-- logon form -->
@@ -40,9 +40,9 @@
           <form onsubmit="javascript:return false;">
             <table>
                  <tr><td style="vertical-align:top">注册邮箱:</td><td><input id="logonEmail" type="text" /></td></tr>
-                 <tr><td style="text-align:right">密码:</td><td><input id="logonPasswd" type="password" onkeypress="EmotionMgr.logon(event)"/></td></tr>
+                 <tr><td style="text-align:right">密码:</td><td><input id="logonPasswd" type="password" onkeypress="Fireinput.emotionMgr.logon(event)"/></td></tr>
                  <tr><td><input id="logonSeed" type="hidden" value=""/></td></tr>
-                 <tr><td></td><td><input type="button" id="logonButton" value="登录" onclick="EmotionMgr.logon()"/></td></tr>
+                 <tr><td></td><td><input type="button" id="logonButton" value="登录" onclick="Fireinput.emotionMgr.logon()"/></td></tr>
            </table>
           </form>
         </div>
@@ -53,19 +53,19 @@
       <div id="uploadLinkBox" style="margin-right: 5px">
         <br/>
         <div id="uploadFileHelp" style="text-align:left; padding-left: 5px;">
-        想上传您的图片? 点击"Browser..."按钮选择您想上传的图案，然后点击上传按钮。 <span id="needLogonHelp" style="display:none">如果您想管理所上传的图案，请到<a href="javascript:void(0)" class="textLink" onclick="EmotionMgr.goToPage('http://www.fireinput.com/account/create_user.php')">www.fireinput.com</a>去注册。如果您已经注册，请先登录。非注册用户依然可以上传，但将不能够管理所上传图案</span>
+        想上传您的图片? 点击"Browser..."按钮选择您想上传的图案，然后点击上传按钮。 <span id="needLogonHelp" style="display:none">如果您想管理所上传的图案，请到<a href="javascript:void(0)" class="textLink" onclick="Fireinput.emotionMgr.goToPage('http://www.fireinput.com/account/create_user.php')">www.fireinput.com</a>去注册。如果您已经注册，请先登录。非注册用户依然可以上传，但将不能够管理所上传图案</span>
         </div>
      </div> <!-- Upload part --> 
 
      <br/>
      <div style="margin-right: 3px">
         <div id="uploadForm" style="padding-left: 5px;">
-          <form enctype="multipart/form-data" action="http://www.fireinput.com/emotions/uploadem.php" method="POST" onsubmit="return EmotionMgr.uploadFile(this)">
+          <form enctype="multipart/form-data" action="http://www.fireinput.com/emotions/uploadem.php" method="POST" onsubmit="return Fireinput.emotionMgr.uploadFile(this)">
             <div>
-            <input id="uploadFileValue" type="file" name="NewFile" size="50" onchange="EmotionMgr.addFileOnInput()"/>
+            <input id="uploadFileValue" type="file" name="NewFile" size="50" onchange="Fireinput.emotionMgr.addFileOnInput()"/>
             </div>
             <div style="margin-top: 10px">
-            <input id="uploadFileValue" type="file" name="NewFile" size="50" onchange="EmotionMgr.addFileOnInput()"/>
+            <input id="uploadFileValue" type="file" name="NewFile" size="50" onchange="Fireinput.emotionMgr.addFileOnInput()"/>
             </div>
           </form>
         </div>
@@ -91,7 +91,7 @@
       <br/>
       <div style="margin-left: 50px">图案只有在上面显示后方能成功加入</div>
       <div style="margin-left: 50px; margin-top: 10px">
-           <input type="button" id="updateButton" value="保存" onclick="EmotionMgr.saveFileToList()"/>
+           <input type="button" id="updateButton" value="保存" onclick="Fireinput.emotionMgr.saveFileToList()"/>
            <span id="saveFileMessage" style="margin-left: 5px; color: green;"></span>
       </div>
 

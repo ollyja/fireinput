@@ -34,15 +34,15 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var SmartPinyin = function()  {}; 
+Fireinput.smartPinyinEngine = function()  {}; 
 
-SmartPinyin.prototype =  extend(new FireinputIME(), 
+Fireinput.smartPinyinEngine.prototype =  Fireinput.extend(new Fireinput.imeEngine(), 
 {
     // 0 to disable debug or non zero to enable debug 
     debug: 1, 
 
     // the name of IME 
-    name: IME_SMART_PINYIN, 
+    name: Fireinput.IME_SMART_PINYIN, 
 
     // pinyin Initial list 
     pinyinInitials: [],
@@ -81,7 +81,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     pinyinSchema: null, 
 
     // encoding mode. Either simplified or big5. Simplified default. 
-    encodingMode: ENCODING_ZH, 
+    encodingMode: Fireinput.ENCODING_ZH, 
 
     // engine enabled 
     engineDisabled: false, 
@@ -98,20 +98,20 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     // the entrance function to load all related tables 
     loadTable: function()
     {
-       this.letterConverter = new FullLetterConverter(); 
+       this.letterConverter = new Fireinput.fullLetterConverter(); 
 
-       for(var i=0; i<PinyinInitials.length; i++)
-         this.pinyinInitials[PinyinInitials[i]] = PinyinInitials[i]; 
+       for(var i=0; i<Fireinput.PinyinInitials.length; i++)
+         this.pinyinInitials[Fireinput.PinyinInitials[i]] = Fireinput.PinyinInitials[i]; 
 
-       for(var i=0; i<PinyinFinals.length; i++)
-         this.pinyinFinals[PinyinFinals[i]] = PinyinFinals[i]; 
+       for(var i=0; i<Fireinput.PinyinFinals.length; i++)
+         this.pinyinFinals[Fireinput.PinyinFinals[i]] = Fireinput.PinyinFinals[i]; 
 
        // setTimeout to not block firefox start
        var self = this; 
        setTimeout(function() { return self.loadPinyinTable(); }, 500); 
 
        // init encoding table 
-       FireinputEncoding.init(); 
+       Fireinput.encoding.init(); 
     },
 
     getCodeLine: function(str)
@@ -158,12 +158,12 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     loadPinyinTable: function()
     {
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
 
        var path = this.getDataPath(); 
        var datafile = ios.newURI(path + this.getPinyinDataFile(),  null, null); 
 
-       this.codePinyinHash = new FireinputHash();
+       this.codePinyinHash = new Fireinput.util.hash();
 
 
        var checkExists = function() {
@@ -179,7 +179,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
                oncomplete:this.loadPinyinPhrase,
                onavailable: this.getCodeLine
             }; 
-            FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+            Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options);
           }
           else 
             this.loadPinyinPhrase(); 
@@ -191,7 +191,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           onavailable: this.getCodeLine
        }; 
 
-       FireinputStream.loadDataAsync(datafile, options);
+       Fireinput.stream.loadDataAsync(datafile, options);
     },
 
 
@@ -207,13 +207,13 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     loadPinyinPhrase: function()
     {
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
 
        var path = this.getDataPath();
 
        var datafile = ios.newURI(path + this.getPinyinPhraseFile(), null, null);
 
-       this.phraseCodeHash = new FireinputHash(); 
+       this.phraseCodeHash = new Fireinput.util.hash(); 
 
        var checkExists = function() {
           if(this.phraseCodeHash.length <= 0) {
@@ -228,7 +228,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
                oncomplete:this.loadUserTable,
                onavailable: this.getPhraseLine
             };
-            FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+            Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options);
           }
           else
             this.loadUserTable(); 
@@ -240,7 +240,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           oncomplete: checkExists 
        }; 
 
-       FireinputStream.loadDataAsync(datafile, options);
+       Fireinput.stream.loadDataAsync(datafile, options);
     },
 
     updateUserCodeValue: function(key, initKey, word, freq)
@@ -355,9 +355,9 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     loadUserTable: function()
     {
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
        var datafile = this.getUserDataFile();
-       this.userCodeHash = new FireinputHash();
+       this.userCodeHash = new Fireinput.util.hash();
 
        if(!datafile.exists())
        {
@@ -370,7 +370,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           onavailable: this.getUserCodeLine,
           oncomplete: this.loadExtPhraseTable
        }; 
-       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options); 
+       Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options); 
     },
 
     getExtPhraseCodeLine: function(str)
@@ -396,7 +396,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     loadExtPhraseTable: function()
     {
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
 
        var datafile = this.getExtDataFile();
 
@@ -404,7 +404,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           caller: this, 
           onavailable: this.getExtPhraseCodeLine
        }; 
-       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options); 
+       Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options); 
     },
 
     hasTableFile: function()
@@ -412,12 +412,12 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(this.engineDisabled)
          return false; 
 
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
 
        var path = this.getDataPath(); 
        var datafile = ios.newURI(path + this.getPinyinDataFile(),  null, null); 
 
-       return FireinputStream.checkAccess(datafile); 
+       return Fireinput.stream.checkAccess(datafile); 
          
     }, 
 
@@ -447,18 +447,18 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
     getIMEType: function()
     {
-       return SMART_PINYIN; 
+       return Fireinput.SMART_PINYIN; 
     }, 
   
     setSchema: function(schema)
     {
        if(!this.pinyinSchema)
-          this.pinyinSchema = new PinyinSchema(); 
+          this.pinyinSchema = new Fireinput.pinyinSchema(); 
 
        if(!this.pinyinSchema)
           return; 
 
-       //FireinputLog.debug(this, "Set schema: " + schema);
+       //Fireinput.log.debug(this, "Set schema: " + schema);
        this.pinyinSchema.setSchema(schema); 
     }, 
 
@@ -498,7 +498,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     find: function(inputChar, singleWord, keyMatch)
     {
        var result = null;
-       //FireinputLog.debug(this, "find, inputChar: " + inputChar); 
+       //Fireinput.log.debug(this, "find, inputChar: " + inputChar); 
        // use current schema 
        result = this.findBySchema(inputChar, false, singleWord, keyMatch);
        if(!result)
@@ -517,10 +517,10 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        var _keymatch = keyMatch; 
 
        // here we will do searching on inputChar by length -1 every time if retArray is null 
-       // FireinputLog.debug(this, "Send original key=" + inputChar);
+       // Fireinput.log.debug(this, "Send original key=" + inputChar);
        while(s.length > 0)
        {
-          // FireinputLog.debug(this, "findBySchema: searchAll\n"); 
+          // Fireinput.log.debug(this, "findBySchema: searchAll\n"); 
           var result=this.searchAll(s, useDefaultSchema, singleWord, keyMatch); 
           if(!result)
              break; 
@@ -530,7 +530,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
              break; 
           }
 
-          //FireinputLog.debug(this, "findBySchema: _keymatch " + _keymatch + ", keyMatch " + keyMatch + ", s => " + s);
+          //Fireinput.log.debug(this, "findBySchema: _keymatch " + _keymatch + ", keyMatch " + keyMatch + ", s => " + s);
           /*  
            * If the keyMatch from upper level is true, it's not necessary for loop 
            */
@@ -542,7 +542,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           keyMatch = true; 
           result.keySize = result.keySize >0 ? result.keySize : 1;  
           s = s.substr(0, s.length - result.keySize); 
-          // FireinputLog.debug(this, "Send key after reduced=" + s);
+          // Fireinput.log.debug(this, "Send key after reduced=" + s);
 
           // remove last single quot if it presents.  
           if(s.substr(s.length-1, 1) == "'")
@@ -572,7 +572,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        var keySet = null; 
        var keyArray = this.pinyinSchema.getComposeKey(inputChar, useDefaultSchema); 
 
-       //FireinputLog.debug(this, "keyArray=" + keyArray);
+       //Fireinput.log.debug(this, "keyArray=" + keyArray);
        if(typeof(keyArray) == "string")
        {
           keySet = this.parseKeys(inputChar); 
@@ -607,8 +607,8 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           if(this.charArray != null)
           {
              // the first set of word value is ready. We issue an asynchronous to get next list of values 
-             this.currLookupEnv = {table: PINYIN_WORD_LOOKUP, keyArray: keySet, keyMatch: keyMatch}; 
-             // FireinputLog.debug(this, "findNext before PINYIN_WORD_LOOKUP\n"); 
+             this.currLookupEnv = {table: Fireinput.PINYIN_WORD_LOOKUP, keyArray: keySet, keyMatch: keyMatch}; 
+             // Fireinput.log.debug(this, "findNext before Fireinput.PINYIN_WORD_LOOKUP\n"); 
              this.findNext(); 
              return {charArray: this.charArray.slice(0,this.numSelection), keySize: 0};
 
@@ -617,7 +617,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           {
              /* If the last input is FINAL, there might be more input coming, return null to wait
               * if the keymatch is set, take the input as completed pinyin  
-             if(keySet[keySet.length-1].type == KEY_FINAL && !keyMatch)
+             if(keySet[keySet.length-1].type == Fireinput.KEY_FINAL && !keyMatch)
                 return null; 
              else 
               */
@@ -634,8 +634,8 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
            {
                for (var j=0; j<keyArray[i].length; j++)
                {       
-                   // FireinputLog.debug(this, "keyArray[" + i + "][" + j + "].type=" + keyArray[i][j].type);
-                   // FireinputLog.debug(this, "keyArray[" + i + "][" + j + "].key=" + keyArray[i][j].key);
+                   // Fireinput.log.debug(this, "keyArray[" + i + "][" + j + "].type=" + keyArray[i][j].type);
+                   // Fireinput.log.debug(this, "keyArray[" + i + "][" + j + "].key=" + keyArray[i][j].key);
                }
            }
 */
@@ -649,7 +649,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
                }
                else if(this.charArray != null && charArray != null)
                {
-                   arrayInsert(this.charArray, this.charArray.length, charArray); 
+                   Fireinput.arrayInsert(this.charArray, this.charArray.length, charArray); 
                    this.charArray.sort(this.sortCodeArray); 
                }
 
@@ -660,8 +660,8 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
              return {charArray: null, keySize: 1};
 
            // the first set of word phrase is ready. We issue an asynchronous to get next list of values 
-           // FireinputLog.debug(this, "findNext before PINYIN_PHRASE_LOOKUP\n"); 
-           this.currLookupEnv = {table: PINYIN_PHRASE_LOOKUP, keyArray: keyArray, keyMatch: keyMatch}; 
+           // Fireinput.log.debug(this, "findNext before Fireinput.PINYIN_PHRASE_LOOKUP\n"); 
+           this.currLookupEnv = {table: Fireinput.PINYIN_PHRASE_LOOKUP, keyArray: keyArray, keyMatch: keyMatch}; 
            this.findNext(); 
 
            return {charArray: this.charArray.slice(0,this.numSelection), keySize: 1}; 
@@ -681,7 +681,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(keys == null || keys.length <= 0)
           return null; 
 
-       //FireinputLog.debug(this, "coodLookup keys.length=" + keys.length);
+       //Fireinput.log.debug(this, "coodLookup keys.length=" + keys.length);
        // a valid charArray consist of {key:key, word: word}
        if(keys.length <= 1)
        { 
@@ -695,7 +695,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           if(ikey)
           {   
              ikey = ikey.ikey; 
-             charArray = FireinputSpecialChar.getIMode(ikey); 
+             charArray = Fireinput.specialChar.getIMode(ikey); 
           }
        }
        else 
@@ -724,7 +724,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
                 charArray = tmpCharArray; 
              else if(charArray != null && tmpCharArray != null)
              {
-                arrayInsert(charArray, charArray.length, tmpCharArray); 
+                Fireinput.arrayInsert(charArray, charArray.length, tmpCharArray); 
                 charArray.sort(this.sortCodeArray); 
              }
 
@@ -742,8 +742,8 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(!this.charArray)
           return null; 
 
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
-       // FireinputLog.debug(this,"this.charArray: " + this.charArray.length);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charArray: " + this.charArray.length);
        // if the next this.numSelection are already displayed, return null
        if((this.charIndex+this.numSelection) >= this.charArray.length)
           return null; 
@@ -763,7 +763,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        // when charArray.length is larger than k+1 but shorter than k+2. Please note the charArray.length may not be exactly 
        // number of times of (numSelection+1) as userArray is included  
        var k = this.charIndex / this.numSelection; 
-       // FireinputLog.debug(this,"next, this.charIndex: " + this.charIndex + ", this.charArray.length: "+ this.charArray.length);
+       // Fireinput.log.debug(this,"next, this.charIndex: " + this.charIndex + ", this.charArray.length: "+ this.charArray.length);
        if(k*(this.numSelection+1) <= this.charArray.length && (k+2)*(this.numSelection+1) >= this.charArray.length)
        { 
            this.findNext(); 
@@ -774,7 +774,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
            this.findNextAsync(this.charArray); 
        }
 
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
        return {charArray:this.charArray.slice(this.charIndex, this.charIndex+this.numSelection), validInputKey: this.validInputKey}; 
     }, 
 
@@ -782,7 +782,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     {
        if(!this.charArray)
           return null; 
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
        // if the previous this.numSelection are already displayed, return null
        if((this.charIndex-this.numSelection) < 0)
           return null; 
@@ -792,17 +792,17 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        else
           this.charIndex = 0; 
        
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
        return {charArray: this.charArray.slice(this.charIndex, this.charIndex+this.numSelection), validInputKey: this.validInputKey};
     }, 
 
     findNext: function()
     {
-      // FireinputLog.debug(this,"find next, this.charArray.length: "+ this.charArray.length);
+      // Fireinput.log.debug(this,"find next, this.charArray.length: "+ this.charArray.length);
        if(this.isEnd())
        {
           // there are not enough left to be searched 
-          // FireinputLog.debug(this,"find next, reach end");
+          // Fireinput.log.debug(this,"find next, reach end");
           return; 
        }
 
@@ -823,7 +823,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           return; 
 
        var nextCharArray = null; 
-       if(this.currLookupEnv.table == PINYIN_WORD_LOOKUP)
+       if(this.currLookupEnv.table == Fireinput.PINYIN_WORD_LOOKUP)
        {
           nextCharArray = this.codeLookup(this.currLookupEnv.keyArray, this.currLookupEnv.keyMatch, charArray.length); 
        }
@@ -838,7 +838,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
                }
                else if(nextCharArray != null && tmpCharArray != null)
                {
-                   arrayInsert(nextCharArray, nextCharArray.length, tmpCharArray);
+                   Fireinput.arrayInsert(nextCharArray, nextCharArray.length, tmpCharArray);
                    nextCharArray.sort(this.sortCodeArray);
                }
           }
@@ -846,10 +846,10 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
        if(nextCharArray && charArray)
        {
-           arrayInsert(charArray, charArray.length, nextCharArray);
+           Fireinput.arrayInsert(charArray, charArray.length, nextCharArray);
        }
    
-       // FireinputLog.debug(this,"charArray: " + this.getKeyWord(charArray));
+       // Fireinput.log.debug(this,"charArray: " + this.getKeyWord(charArray));
 
     }, 
 
@@ -871,11 +871,11 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     getKeyType: function(key)
     {
        if(typeof(this.pinyinFinals[key]) != 'undefined')
-          return KEY_FINAL; 
+          return Fireinput.KEY_FINAL; 
        else if (typeof(this.pinyinInitials[key]) != 'undefined') 
-          return KEY_INITIAL; 
+          return Fireinput.KEY_INITIAL; 
        else
-          return KEY_FULL; 
+          return Fireinput.KEY_FULL; 
     }, 
 
     parseOneKey: function (keyInitial, keyFinal, sFlag)
@@ -888,15 +888,15 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
          {
             // if sFlag is true, these two keys will be recognized as separated keys 
             if(keyInitialLen >0)
-               return ({key: keyInitial, type: KEY_INITIAL, pos: keyInitialLen}); 
+               return ({key: keyInitial, type: Fireinput.KEY_INITIAL, pos: keyInitialLen}); 
             else
-               return ({key: keyFinal, type: KEY_FINAL, pos: keyFinal.length}); 
+               return ({key: keyFinal, type: Fireinput.KEY_FINAL, pos: keyFinal.length}); 
          }
          else 
          {
             var pinyinKey = {}; 
             pinyinKey.key = keyInitial + keyFinal; 
-            pinyinKey.type = keyInitialLen>0 ? KEY_FULL : KEY_FINAL; 
+            pinyinKey.type = keyInitialLen>0 ? Fireinput.KEY_FULL : Fireinput.KEY_FINAL; 
             pinyinKey.pos = keyInitialLen + keyFinal.length; 
             return pinyinKey; 
          }
@@ -910,7 +910,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
              { 
                 var pinyinKey = {}; 
                 pinyinKey.key = keyInitial + subFinal; 
-                pinyinKey.type = keyInitialLen>0 ? KEY_FULL : KEY_FINAL; 
+                pinyinKey.type = keyInitialLen>0 ? Fireinput.KEY_FULL : Fireinput.KEY_FINAL; 
                 pinyinKey.pos = keyInitialLen + i; 
                 return pinyinKey; 
              }
@@ -920,7 +920,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        // When we reach here, it means the engine might encounter the unsupported input chars. 
        // let move to next but ignore this keyFinal chars 
        keyInitialLen = keyInitialLen>0 ? keyInitialLen : keyFinal.length; 
-       return ({key: keyInitial, type: KEY_INITIAL, pos: keyInitialLen}); 
+       return ({key: keyInitial, type: Fireinput.KEY_INITIAL, pos: keyInitialLen}); 
     },
 
 
@@ -937,7 +937,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           {
              var retArray = this.parseKeySteps(keyListArray[i], sFlag);
              if(retArray != null) 
-                arrayInsert(keys, keys.length, retArray.slice(0, retArray.length)); 
+                Fireinput.arrayInsert(keys, keys.length, retArray.slice(0, retArray.length)); 
           }
 
           return keys; 
@@ -960,26 +960,26 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
               var finals = keyList.substr(i+2, 4); 
               if(finals.length <= 0)
               {
-                 keys.push({key: key2, type: KEY_INITIAL}); 
+                 keys.push({key: key2, type: Fireinput.KEY_INITIAL}); 
                  break; 
               }
               var pinyinKey = this.parseOneKey(key2, finals, sFlag); 
-              if(pinyinKey.type == KEY_INITIAL)
+              if(pinyinKey.type == Fireinput.KEY_INITIAL)
               {
                  // No finals. Store them each one as Initial 
-                 keys.push({key: key2, type: KEY_INITIAL}); 
+                 keys.push({key: key2, type: Fireinput.KEY_INITIAL}); 
               } 
               else 
               {
                  // for char as g, n and r, if the followings are finals, 
                  // then g/n should not be part of this key 
                  var lastChar = pinyinKey.key.substr(pinyinKey.key.length-1, 1); 
-                 if(pinyinKey.type == KEY_FULL && (lastChar == "n" || lastChar == "g" || lastChar == "r"))
+                 if(pinyinKey.type == Fireinput.KEY_FULL && (lastChar == "n" || lastChar == "g" || lastChar == "r"))
                  {
                     var followingKey = this.parseOneKey("", keyList.substr(i+pinyinKey.pos, 4), sFlag);
-                    if(followingKey.type == KEY_FINAL)
+                    if(followingKey.type == Fireinput.KEY_FINAL)
                     { 
-                       pinyinKey.type = KEY_SWING; 
+                       pinyinKey.type = Fireinput.KEY_SWING; 
                     }
                  }
 
@@ -993,19 +993,19 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
               var finals = keyList.substr(i+1, 4);
               if(finals.length <= 0)
               {
-                 keys.push({key: key1, type: KEY_INITIAL});
+                 keys.push({key: key1, type: Fireinput.KEY_INITIAL});
                  break; 
               }
               var pinyinKey = this.parseOneKey(key1, finals, sFlag);
               // for char as g/n/r, if the followings are finals, 
               // then g/n/r might not be part of this key 
               var lastChar = pinyinKey.key.substr(pinyinKey.key.length-1, 1); 
-              if(pinyinKey.type == KEY_FULL && (lastChar == "n" || lastChar == "g" || lastChar == "r"))
+              if(pinyinKey.type == Fireinput.KEY_FULL && (lastChar == "n" || lastChar == "g" || lastChar == "r"))
               {
                  var followingKey = this.parseOneKey("", keyList.substr(i+pinyinKey.pos, 4), sFlag);
-                 if(followingKey.type == KEY_FINAL)
+                 if(followingKey.type == Fireinput.KEY_FINAL)
                  { 
-                    pinyinKey.type = KEY_SWING; 
+                    pinyinKey.type = Fireinput.KEY_SWING; 
                  }
               }
 
@@ -1021,7 +1021,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
                  break;
               }
               var pinyinKey = this.parseOneKey("", finals, sFlag);
-              keys.push({key: pinyinKey.key, type: KEY_FINAL});
+              keys.push({key: pinyinKey.key, type: Fireinput.KEY_FINAL});
               i += pinyinKey.pos;
           }
        }
@@ -1038,12 +1038,12 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        var foundone = -1; 
        for (var i =0; i<keys.length; i++)
        {
-          if(foundone !=-1 || keys[i].type != KEY_SWING)
+          if(foundone !=-1 || keys[i].type != Fireinput.KEY_SWING)
             keySet.push({key: keys[i].key, type: keys[i].type}); 
           else 
           {
             foundone = i; 
-            keySet.push({key: keys[i].key, type: KEY_FULL}); 
+            keySet.push({key: keys[i].key, type: Fireinput.KEY_FULL}); 
           }
        }
        
@@ -1052,8 +1052,8 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           // found one, move the swing key to next chars before return 
           keys[foundone+1].key = keys[foundone].key.substr(keys[foundone].key.length-1, 1) + 
                                  keys[foundone+1].key; 
-          keys[foundone+1].type = KEY_FULL; 
-          keys[foundone].type = KEY_FULL; 
+          keys[foundone+1].type = Fireinput.KEY_FULL; 
+          keys[foundone].type = Fireinput.KEY_FULL; 
           keys[foundone].key = keys[foundone].key.substr(0, keys[foundone].key.length-1); 
 
           return {keys: keys, keyset: keySet}; 
@@ -1075,7 +1075,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        var key = keys[0].key; 
        var keyType = keys[0].type; 
 
-       // FireinputLog.debug(this, "key: " + key + ", keyType: " + keyType);
+       // Fireinput.log.debug(this, "key: " + key + ", keyType: " + keyType);
        
        var keyInitial = key.substring(0, 1); 
        var keyInitial2 = key.substring(0, 2);
@@ -1094,7 +1094,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           return null; 
  
        var pinyinWordList = this.codePinyinHash.getItem(keyInitial); 
-       // FireinputLog.debug(this,"pinyinWordList: " + FireinputUnicode.getUnicodeString(pinyinWordList));
+       // Fireinput.log.debug(this,"pinyinWordList: " + Fireinput.util.unicode.getUnicodeString(pinyinWordList));
 
        var pinyinWordArray = pinyinWordList.split(","); 
 
@@ -1110,8 +1110,8 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           if(!pinyinWord || pinyinWord.length < 2)
              continue; 
 
-         // FireinputLog.debug(this,"pinyinWord: " + FireinputUnicode.getUnicodeString(pinyinWord)); 
-          if(keyType != KEY_INITIAL)
+         // Fireinput.log.debug(this,"pinyinWord: " + Fireinput.util.unicode.getUnicodeString(pinyinWord)); 
+          if(keyType != Fireinput.KEY_INITIAL)
           {
              if(!this.pinyinSchema.compareAMB(key, pinyinWord[0]) && pinyinWord[0] != key)
                 continue; 
@@ -1124,12 +1124,12 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           }        
           catch(e) {}
 
-         // FireinputLog.debug(this,"word: " + FireinputUnicode.getUnicodeString(word)); 
+         // Fireinput.log.debug(this,"word: " + Fireinput.util.unicode.getUnicodeString(word)); 
 
           if(word.length <= 0) 
              continue; 
 
-          var encodedWord = FireinputEncoding.getEncodedString(word, this.encodingMode);
+          var encodedWord = Fireinput.encoding.getEncodedString(word, this.encodingMode);
 
           // make sure the same word won't show up twice 
           if(typeof(wordList[encodedWord]) != 'undefined')
@@ -1137,8 +1137,8 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
           wordList[encodedWord] = 1; 
 
-          // FireinputLog.debug(this,"word: " + FireinputUnicode.getUnicodeString(word));
-          // FireinputLog.debug(this,"oldIndex: " + oldIndex +", currentIndex: " + currentIndex);
+          // Fireinput.log.debug(this,"word: " + Fireinput.util.unicode.getUnicodeString(word));
+          // Fireinput.log.debug(this,"oldIndex: " + oldIndex +", currentIndex: " + currentIndex);
           oldIndex++; 
           if(oldIndex <= currentIndex)
              continue; 
@@ -1163,8 +1163,8 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        // free it 
        wordList = null; 
 
-       // FireinputLog.debug(this,"wordArray: " + this.getKeyWord(wordArray));
-       // FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
+       // Fireinput.log.debug(this,"wordArray: " + this.getKeyWord(wordArray));
+       // Fireinput.log.debug(this,"userArray: " + this.getKeyWord(userArray));
        if(userArray.length <= 0)
        {
           wordArray.sort(this.sortCodeArray); 
@@ -1172,10 +1172,10 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        }
        else
        {
-          arrayInsert(userArray, userArray.length, wordArray.slice(0, wordArray.length)); 
+          Fireinput.arrayInsert(userArray, userArray.length, wordArray.slice(0, wordArray.length)); 
           userArray.sort(this.sortCodeArray); 
 
-          // FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
+          // Fireinput.log.debug(this,"userArray: " + this.getKeyWord(userArray));
           return userArray; 
        }
     },
@@ -1191,19 +1191,19 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
        for (var i =0; i<keys.length; i++)
        {
-          FireinputLog.debug(this,"keys[" + i + "]=" + keys[i].key); 
-          if(keys[i].type == KEY_INITIAL)
+          Fireinput.log.debug(this,"keys[" + i + "]=" + keys[i].key); 
+          if(keys[i].type == Fireinput.KEY_INITIAL)
           {
             hasInitialKey = true; 
             initialKeys += keys[i].key.substring(0,1); 
           }
-          else if(keys[i].type == KEY_FINAL)
+          else if(keys[i].type == Fireinput.KEY_FINAL)
             initialKeys += keys[i].key;
           else
             initialKeys += keys[i].key.substring(0, 1);
        }
 
-       FireinputLog.debug(this,"initialKeys: " + initialKeys);
+       Fireinput.log.debug(this,"initialKeys: " + initialKeys);
 
        return {ikey: initialKeys, hasInitial: hasInitialKey}; 
     },
@@ -1214,7 +1214,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           return null;
 
        var initialKeys = this.getInitialKeys(keys);
-       // FireinputLog.debug(this, "initialKeys=" + initialKeys);
+       // Fireinput.log.debug(this, "initialKeys=" + initialKeys);
        return this.getValidPhraseWithInitialKey(keys, initialKeys, keyMatch, currentIndex);
     },
 
@@ -1236,7 +1236,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
        // ondemand phrase will be preappended 
        var onDemandPhrase = this.searchOnDemandPhrase(initialKeys); 
-       FireinputLog.debug(this,"checking: " + initialKeys);
+       Fireinput.log.debug(this,"checking: " + initialKeys);
 
        // fast lookup for longer chars 
        if(initialKeys.length >=4)
@@ -1257,7 +1257,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           }
        }
 
-       FireinputLog.debug(this,"checking: " + initialKeys + ", keyMatch: " + keyMatch);
+       Fireinput.log.debug(this,"checking: " + initialKeys + ", keyMatch: " + keyMatch);
 
        var stringList = onDemandPhrase; 
        // merge strings from both phrase 
@@ -1274,12 +1274,12 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(!stringList) 
            return null; 
 
-       //FireinputLog.debug(this, "currentInex: " + currentIndex);
-       FireinputLog.debug(this,"demandList: " + FireinputUnicode.getUnicodeString(onDemandPhrase));
-       // FireinputLog.debug(this,"stringList: " + FireinputUnicode.getUnicodeString(stringList));
+       //Fireinput.log.debug(this, "currentInex: " + currentIndex);
+       Fireinput.log.debug(this,"demandList: " + Fireinput.util.unicode.getUnicodeString(onDemandPhrase));
+       // Fireinput.log.debug(this,"stringList: " + Fireinput.util.unicode.getUnicodeString(stringList));
  
        var stringArray = stringList.split(","); 
-       //FireinputLog.debug(this,"stringArray.length: " + stringArray.length);
+       //Fireinput.log.debug(this,"stringArray.length: " + stringArray.length);
  
        var oldIndex = 0; 
        for(var i=0; i<stringArray.length; i++)
@@ -1311,7 +1311,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           if(keyList.length != 1 && keyList.length < keys.length)
              continue; 
 
-          //FireinputLog.debug(this,"word: " + FireinputUnicode.getUnicodeString(phrase) + ", keyList.length: " + keyList.length); 
+          //Fireinput.log.debug(this,"word: " + Fireinput.util.unicode.getUnicodeString(phrase) + ", keyList.length: " + keyList.length); 
 
           // assume it's a exact Match with input char. Don't be confused with keyMatch here. 
           // the keyMatch is to make sure a selection has to be matched for inputkey length and key string.
@@ -1325,7 +1325,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           // do strict filtering. If keyList has only one entry, skip it as it must be from userword table 
           for (var j =0; j<keys.length && keyList.length>1; j++)
           {
-             if(keys[j].type == KEY_INITIAL)
+             if(keys[j].type == Fireinput.KEY_INITIAL)
              {
                 if(keyList[j].indexOf(keys[j].key) !=0)
                 {
@@ -1366,9 +1366,9 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
              // exactMatch false position 
              var exactMatchPos = keys.length; 
 
-             FireinputLog.debug(this,"word: " + FireinputUnicode.getUnicodeString(phrase) + ", exactMatch: " + exactMatch);
-             FireinputLog.debug(this,"exactMatchPos: " + exactMatchPos);
-             var encodedWord = FireinputEncoding.getEncodedString(phrase, this.encodingMode);
+             Fireinput.log.debug(this,"word: " + Fireinput.util.unicode.getUnicodeString(phrase) + ", exactMatch: " + exactMatch);
+             Fireinput.log.debug(this,"exactMatchPos: " + exactMatchPos);
+             var encodedWord = Fireinput.encoding.getEncodedString(phrase, this.encodingMode);
 
              // What we are trying to achieve here is that when exactMatch is false, we only copy the first few matched words 
              // into the list, and add the exact phrase after it
@@ -1376,12 +1376,12 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
              if(!exactMatch && exactMatchPos >= 2)
              {
                 var matchedWord = encodedWord.substring(0, exactMatchPos); 
-                FireinputLog.debug(this,"word: " + matchedWord);
+                Fireinput.log.debug(this,"word: " + matchedWord);
                 if(typeof(phraseList[matchedWord]) == 'undefined')
                 {
-                   var matchedPhrase = FireinputUnicode.convertFromUnicode(FireinputUnicode.getUnicodeString(phrase).substring(0, exactMatchPos));
+                   var matchedPhrase = Fireinput.util.unicode.convertFromUnicode(Fireinput.util.unicode.getUnicodeString(phrase).substring(0, exactMatchPos));
                    var matchedphraseKey = keyList.splice(0, exactMatchPos).join(" "); 
-                   FireinputLog.debug(this,"phraseKey: " + phraseKeyValue[0] + ", matched: " + matchedphraseKey);
+                   Fireinput.log.debug(this,"phraseKey: " + phraseKeyValue[0] + ", matched: " + matchedphraseKey);
                    phraseList[matchedWord] = ""; 
 
                    oldIndex++; 
@@ -1449,25 +1449,25 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           }
        }                    
 
-       //FireinputLog.debug(this,"exactPhraseArray.length: " + exactPhraseArray.length);
-       //FireinputLog.debug(this,"phraseArray.length: " + phraseArray.length);
-       //FireinputLog.debug(this,"userArray.length: " + userArray.length);
-       //FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
-       FireinputLog.debug(this,"phraseArray: " + this.getKeyWord(phraseArray));
+       //Fireinput.log.debug(this,"exactPhraseArray.length: " + exactPhraseArray.length);
+       //Fireinput.log.debug(this,"phraseArray.length: " + phraseArray.length);
+       //Fireinput.log.debug(this,"userArray.length: " + userArray.length);
+       //Fireinput.log.debug(this,"userArray: " + this.getKeyWord(userArray));
+       Fireinput.log.debug(this,"phraseArray: " + this.getKeyWord(phraseArray));
        //FIXME: how to sort it 
-       //FireinputLog.debug(this,"exactPhraseArray: " + this.getKeyWord(exactPhraseArray));
+       //Fireinput.log.debug(this,"exactPhraseArray: " + this.getKeyWord(exactPhraseArray));
        if(userArray.length <= 0)
        {
           phraseArray.sort(this.sortCodeArray);
           if(exactPhraseArray.length > 0)
-             arrayInsert(exactPhraseArray, exactPhraseArray.length, phraseArray.slice(0, phraseArray.length)); 
+             Fireinput.arrayInsert(exactPhraseArray, exactPhraseArray.length, phraseArray.slice(0, phraseArray.length)); 
        }
        else 
        {
-          arrayInsert(userArray, userArray.length, phraseArray.slice(0, phraseArray.length)); 
+          Fireinput.arrayInsert(userArray, userArray.length, phraseArray.slice(0, phraseArray.length)); 
           userArray.sort(this.sortCodeArray); 
           if(exactPhraseArray.length > 0)
-             arrayInsert(exactPhraseArray, exactPhraseArray.length, userArray.slice(0, userArray.length)); 
+             Fireinput.arrayInsert(exactPhraseArray, exactPhraseArray.length, userArray.slice(0, userArray.length)); 
        }
 
        return exactPhraseArray.length >0 ? exactPhraseArray : 
@@ -1478,7 +1478,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
     {
        if(this.userCodeHash && this.userTableChanged)
        {
-          FireinputSaver.saveUserData(this.userCodeHash);
+          Fireinput.phraseSaver.saveUserData(this.userCodeHash);
        }
     },
  
@@ -1490,7 +1490,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        var keyArray = this.parseKeys(keys.replace(/\d+/g, ''));
        for(var i=0; i<keyArray.length; i++)
        {
-          if(keyArray[i].type == KEY_FINAL)
+          if(keyArray[i].type == Fireinput.KEY_FINAL)
              validInitialKey += keyArray[i].key;
           else
              validInitialKey += keyArray[i].key.substring(0,1);
@@ -1522,11 +1522,11 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        else 
           freq = 0; 
 
-       FireinputLog.debug(this,"word: " + word);
+       Fireinput.log.debug(this,"word: " + word);
        var chars = word.match(/[\D\.]+/g)[0];
-       FireinputLog.debug(this,"chars: " + chars);
+       Fireinput.log.debug(this,"chars: " + chars);
        if(!this.userCodeHash)
-          this.userCodeHash = new FireinputHash();
+          this.userCodeHash = new Fireinput.util.hash();
  
        if(typeof(newPhrase) == "undefined")
           newPhrase = false; 
@@ -1553,7 +1553,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
               var keys = this.parseKeys(key); 
               for(var i=0; i<keys.length; i++)
               {
-                 if(keys[i].type == KEY_FINAL)
+                 if(keys[i].type == Fireinput.KEY_FINAL)
                     initKey += keys[i].key; 
                  else 
                     initKey += keys[i].key.substring(0,1); 
@@ -1602,16 +1602,16 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
           this.updateUserCodeValue(key, initKey, chars, freq);
        }
 
-       //FireinputLog.debug(this,"word: " + word);
-       //FireinputLog.debug(this,"chars: " + chars + ", freq: " + freq);
-       FireinputLog.debug(this,"chars: " + chars + ", key: " + key + ", initKey: " + initKey);
+       //Fireinput.log.debug(this,"word: " + word);
+       //Fireinput.log.debug(this,"chars: " + chars + ", freq: " + freq);
+       Fireinput.log.debug(this,"chars: " + chars + ", key: " + key + ", initKey: " + initKey);
        this.userTableChanged = true; 
        return freq; 
     },
 
     updatePhraseTable: function(phrase, keys, freq, validInitialKey, updateKey)
     {
-       FireinputLog.debug(this, "updatePhraseTable: " + phrase + ", freq: " + freq); 
+       Fireinput.log.debug(this, "updatePhraseTable: " + phrase + ", freq: " + freq); 
        if(!this.phraseCodeHash)
           return; 
 
@@ -1643,7 +1643,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(!userPhrase || userPhrase.length <= 0)
           return; 
 
-       // FireinputLog.debug(this,"userPhrase: " + this.getKeyWord(userPhrase));
+       // Fireinput.log.debug(this,"userPhrase: " + this.getKeyWord(userPhrase));
        var validInitialKey = "";
        var phrase = ""; 
        var keys = ""; 
@@ -1668,16 +1668,16 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(!freq)
           freq = 0; 
 
-       // FireinputLog.debug(this,"keys: " + keys + ", phrase: " + phrase);
+       // Fireinput.log.debug(this,"keys: " + keys + ", phrase: " + phrase);
        if(!this.userCodeHash)
-          this.userCodeHash = new FireinputHash();
+          this.userCodeHash = new Fireinput.util.hash();
 
        if(this.userCodeHash.hasItem(phrase + ":" + keys))
           return; 
 
        freq = this.updateFrequency(phrase+freq, keys, initialKey, (typeof(newPhrase) != 'undefined' ? newPhrase : true)); 
-       // FireinputLog.debug(this,"freq: " + freq);
-       FireinputLog.debug(this, "phrase: " + phrase + ", freq: " + freq); 
+       // Fireinput.log.debug(this,"freq: " + freq);
+       Fireinput.log.debug(this, "phrase: " + phrase + ", freq: " + freq); 
 
        this.updatePhraseTable(phrase, keys, freq, initialKey, true); 
     }, 
@@ -1687,16 +1687,16 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(!initialKey)
           initialKey = this.getPhraseInitKey(keys);
 
-       FireinputLog.debug(this, "phrase: " + phrase + ", initialKey: " + initialKey);
+       Fireinput.log.debug(this, "phrase: " + phrase + ", initialKey: " + initialKey);
 
        if(!this.userCodeHash)
-          this.userCodeHash = new FireinputHash();
+          this.userCodeHash = new Fireinput.util.hash();
 
        // if the usercode hash has this item, just return. The freq update is from being used  
        if(this.userCodeHash.hasItem(phrase + ":" + keys))
           return;
 
-       FireinputLog.debug(this, "phrase: " + phrase + ", freq: " + freq);
+       Fireinput.log.debug(this, "phrase: " + phrase + ", freq: " + freq);
        this.updatePhraseTable(phrase, keys, freq, initialKey, false);
     },
 
@@ -1715,10 +1715,10 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
        if(!initialKey)
           initialKey = this.getPhraseInitKey(keys);
 
-       // FireinputLog.debug(this, "signature: " + signature + ", phrase: " + FireinputUnicode.getUnicodeString(phrase) + ", initialKey: " + initialKey);
+       // Fireinput.log.debug(this, "signature: " + signature + ", phrase: " + Fireinput.util.unicode.getUnicodeString(phrase) + ", initialKey: " + initialKey);
 
        if(!this.userCodeHash)
-          this.userCodeHash = new FireinputHash();
+          this.userCodeHash = new Fireinput.util.hash();
 
 
        if(this.userCodeHash.hasItem(phrase + ":" + keys))
@@ -1736,7 +1736,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
 
        // move on to ondemand phrase hash 
        if(!this.onDemandPhraseCodeHash)
-          this.onDemandPhraseCodeHash = new FireinputHash();
+          this.onDemandPhraseCodeHash = new Fireinput.util.hash();
 
        // check the ondemand phrase hash to see if the phrase is already in 
        if(this.onDemandPhraseCodeHash.hasItem(signature)) {
@@ -1749,7 +1749,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
             return; 
           }
 
-          // FireinputLog.debug(this, "nowPhrase: " + FireinputUnicode.getUnicodeString(nowPhrase) + ", initialKey: " + initialKey);
+          // Fireinput.log.debug(this, "nowPhrase: " + Fireinput.util.unicode.getUnicodeString(nowPhrase) + ", initialKey: " + initialKey);
           var regex = new RegExp(phrase + "\\d+", "g");
           var matched = nowPhrase.match(regex);
           if(matched)
@@ -1758,7 +1758,7 @@ SmartPinyin.prototype =  extend(new FireinputIME(),
              phraseHash.setItem(initialKey, keys + "=>" + phrase+freq + "," + nowPhrase); 
        }
        else {
-          var phraseHash = new FireinputHash(); 
+          var phraseHash = new Fireinput.util.hash(); 
           phraseHash.setItem(initialKey, keys + "=>" + phrase+freq);
           this.onDemandPhraseCodeHash.setItem(signature, phraseHash); 
        }

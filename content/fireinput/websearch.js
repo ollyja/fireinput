@@ -33,7 +33,9 @@
  *
  * ***** END LICENSE BLOCK ***** 
  */
-var FireinputWebSearch = 
+Fireinput.namespace("Fireinput.webSearch");
+
+Fireinput.webSearch = 
 {
     debug: 1, 
 
@@ -41,13 +43,13 @@ var FireinputWebSearch =
     {
        var idf = document.getElementById("fireinputField");
 
-       var composeWord = FireinputComposer.getComposeWord(); 
+       var composeWord = Fireinput.composer.getComposeWord(); 
        this.loadWebSearch(composeWord.word + " " + idf.value);
     }, 
  
     loadByMouse: function(searchstr)
     {
-       // var composeWord = FireinputComposer.getComposeWord(); 
+       // var composeWord = Fireinput.composer.getComposeWord(); 
        this.loadWebSearch(searchstr);
     },
 
@@ -56,9 +58,9 @@ var FireinputWebSearch =
        var params = "cx=015497061412694894056:riuiwerbis0&q="+encodeURIComponent(searchstr);
        params += "&sa=Search";
        url = "http://www.google.com/cse?" + params;
-       FireinputLog.debug(this, url);
-       FireinputIMEPanel.hideAndCleanInput();
-       FireinputUtils.loadURI(url); 
+       Fireinput.log.debug(this, url);
+       Fireinput.imePanel.hideAndCleanInput();
+       Fireinput.util.loadURI(url); 
     },
 
     goSearchbox: function(event)

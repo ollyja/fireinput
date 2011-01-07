@@ -34,13 +34,13 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var FireinputSaver = 
+Fireinput.phraseSaver = 
 {
     debug: 1, 
 
     getUserDataFile: function()
     {
-       var IME = new FireinputIME(); 
+       var IME = new Fireinput.imeEngine(); 
        return IME.getUserDataFile(); 
     },
 
@@ -53,7 +53,7 @@ var FireinputSaver =
 
     getExtDataFile: function()
     {
-       var IME = new FireinputIME(); 
+       var IME = new Fireinput.imeEngine(); 
        return IME.getExtDataFile(); 
     }, 
 
@@ -145,7 +145,7 @@ var FireinputSaver =
          str += ":" + value.signature;
 
        str += "\n";
-       return FireinputUnicode.getUnicodeString(str); 
+       return Fireinput.util.unicode.getUnicodeString(str); 
     }  
 
 }; 

@@ -33,9 +33,8 @@
  *
  * ***** END LICENSE BLOCK ***** 
  */
-const EMOTION_URL = SERVER_URL + "/emotions/emotion.html"; 
 
-var FireinputEmotions = 
+Fireinput.emotions = 
 {
     initialized: false, 
     
@@ -47,7 +46,7 @@ var FireinputEmotions =
 
     addContextSelectedImage: function()
     {
-       if(FireinputEmotionUpdater.save(gContextMenu.imageURL))
+       if(Fireinput.emotionUpdater.save(gContextMenu.imageURL))
        {
           this.loadUserEmotionURL();
        }
@@ -58,11 +57,11 @@ var FireinputEmotions =
        if(!this.initialized || forceLoad) 
        {
           // get default language first 
-          var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage"); 
-          this.mouseTooltip = FireinputUtils.getLocaleString("fireinput.emotion.mouse.tooltips" + defaultLanguage); 
+          var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage"); 
+          this.mouseTooltip = Fireinput.util.getLocaleString("fireinput.emotion.mouse.tooltips" + defaultLanguage); 
 
           var element = document.getElementById("fireinputEmotionMenu"); 
-          var label = FireinputUtils.getLocaleString("fireinput.emotion.label" + defaultLanguage);
+          var label = Fireinput.util.getLocaleString("fireinput.emotion.label" + defaultLanguage);
           element.setAttribute("label", label);
 
           this.initialized = true; 
@@ -74,7 +73,7 @@ var FireinputEmotions =
              return;
 
           // register an observer 
-          var os = FireinputXPC.getService("@mozilla.org/observer-service;1", "nsIObserverService");
+          var os = Fireinput.util.xpc.getService("@mozilla.org/observer-service;1", "nsIObserverService");
           os.addObserver(this, "fireinput-user-emotion-changed", false);
        }
 
@@ -82,22 +81,19 @@ var FireinputEmotions =
 
     addUserEmotionMenu: function()
     {
-       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
+       var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
        var menuElement = document.getElementById("fireinputEmotionMenuItems");
 
        // user action menu 
        var id = "fireinput.emotion.user.action"; 
-       var label = FireinputUtils.getLocaleString(id + defaultLanguage); 
+       var label = Fireinput.util.getLocaleString(id + defaultLanguage); 
        var menuID = document.getElementById(id); 
        if(!menuID)
        {
           var subMenu = document.createElement("menuitem");
           subMenu.setAttribute("label", label);
           subMenu.setAttribute("id", id);
-          subMenu.onclick=bind(function(event)
-                                { 
-                                    this.showAddEmotionDialog(event);
-                                }, this);
+          subMenu.onclick=this.showAddEmotionDialog.bind(this);
 
           menuElement.appendChild(subMenu);
 
@@ -106,7 +102,7 @@ var FireinputEmotions =
        // user img list 
        id = "fireinput.emotion.user.list"; 
        menuID = document.getElementById(id);
-       label = FireinputUtils.getLocaleString(id + defaultLanguage); 
+       label = Fireinput.util.getLocaleString(id + defaultLanguage); 
        if(!menuID)
        {
           var subMenu = document.createElement("menu");
@@ -142,11 +138,11 @@ var FireinputEmotions =
 
     loadUserEmotionURL: function()
     {
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
-       var datafile = FireinputUtils.getUserFile("useremotion.fireinput"); 
+       var datafile = Fireinput.util.getUserFile("useremotion.fireinput"); 
        this.userEmotionList.length = 0; 
        if(!datafile.exists())
        {
@@ -160,7 +156,7 @@ var FireinputEmotions =
           oncomplete: this.addUserEmotionMenu, 
           onavailable: this.getUserEmotionURL
        };
-       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+       Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options);
     }, 
 
     getUserEmotionURL: function(str)
@@ -170,12 +166,12 @@ var FireinputEmotions =
 
     showAddEmotionDialog: function()
     {
-       FireinputUtils.loadURI("chrome://fireinput/content/emotionmgr/emotionmgr.html"); 
+       Fireinput.util.loadURI("chrome://fireinput/content/emotionmgr/emotionmgr.html"); 
     },
 
     loadRemoteEmotions: function()
     {
-       var ajax = new Ajax(); 
+       var ajax = new Fireinput.util.ajax(); 
        if(!ajax)
           return; 
 
@@ -187,7 +183,7 @@ var FireinputEmotions =
              onSuccess: function(p) { self.displayEmotionMenu(p); },
              onFailure: function(p) { self.displayEmotionMenu(p); }
           }); 
-       ajax.request(EMOTION_URL); 
+       ajax.request(Fireinput.SERVER_URL + "/emotions/emotion.html"); 
     }, 
 
     displayEmotionMenu: function(p)
@@ -215,20 +211,20 @@ var FireinputEmotions =
        if(!this.initialized)
           return; 
 
-       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
+       var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
 
-       this.mouseTooltip = FireinputUtils.getLocaleString("fireinput.emotion.mouse.tooltips" + defaultLanguage); 
+       this.mouseTooltip = Fireinput.util.getLocaleString("fireinput.emotion.mouse.tooltips" + defaultLanguage); 
 
        var myMenuID = document.getElementById("fireinput.emotion.user.list");
-       var myLabel = FireinputUtils.getLocaleString("fireinput.emotion.user.list" + defaultLanguage);
+       var myLabel = Fireinput.util.getLocaleString("fireinput.emotion.user.list" + defaultLanguage);
        myMenuID.setAttribute("label", myLabel);
 
        var actionMenuID = document.getElementById("fireinput.emotion.user.action");
-       var aLabel = FireinputUtils.getLocaleString("fireinput.emotion.user.action" + defaultLanguage);
+       var aLabel = Fireinput.util.getLocaleString("fireinput.emotion.user.action" + defaultLanguage);
        actionMenuID.setAttribute("label", aLabel);
 
        var element = document.getElementById("fireinputEmotionMenu"); 
-       var label = FireinputUtils.getLocaleString("fireinput.emotion.label" + defaultLanguage);
+       var label = Fireinput.util.getLocaleString("fireinput.emotion.label" + defaultLanguage);
        element.setAttribute("label", label);
 
        element = document.getElementById("fireinputEmotionMenuItems");
@@ -259,7 +255,7 @@ var FireinputEmotions =
     addGroup: function(jsonArray)
     {
        // get default language first 
-       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
+       var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
        var menuElement = document.getElementById("fireinputEmotionMenuItems");
 
        for(var i=0; i < jsonArray.length; i++)
@@ -267,7 +263,7 @@ var FireinputEmotions =
           var data = jsonArray[i]; 
           var groupName = data.name; 
 
-          if(defaultLanguage.indexOf(LANGUAGE_ZH) < 0)
+          if(defaultLanguage.indexOf(Fireinput.LANGUAGE_ZH) < 0)
              groupName = data.category; 
 
           var id = "fireinput.emotion." + data.category; 
@@ -315,12 +311,12 @@ var FireinputEmotions =
              label.setAttribute("class", "specialcharlabel");
              label.setAttribute("hiddenvalue", urllist[i-j]);
                   
-             label.onclick=bind(function(event) 
+             label.onclick= (function(event) 
                                 { if(event.button == 2) 
-                                    Fireinput.insertSpecialCharAt(event, IMAGE_SOURCE_TYPE, IMAGE_INSERT_BBCODE_URL); 
+                                    Fireinput.main.insertSpecialCharAt(event, Fireinput.IMAGE_SOURCE_TYPE, Fireinput.IMAGE_INSERT_BBCODE_URL); 
                                   else 
-                                    Fireinput.insertSpecialCharAt(event, IMAGE_SOURCE_TYPE, IMAGE_INSERT_URL); 
-                                }, this); 
+                                    Fireinput.main.insertSpecialCharAt(event, Fireinput.IMAGE_SOURCE_TYPE, Fireinput.IMAGE_INSERT_URL); 
+                                }).bind(this); 
              var img = document.createElement("image");
              img.setAttribute("src", urllist[i-j]);
              img.setAttribute("height", 32);

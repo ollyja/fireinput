@@ -33,8 +33,10 @@
  *
  * ***** END LICENSE BLOCK ***** 
  */
+if(!top.Fireinput)
+   Fireinput = {}
 
-var FireinputLog = 
+Fireinput.log = 
 {
     msg: "", 
 

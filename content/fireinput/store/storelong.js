@@ -34,12 +34,12 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var FireinputLongTableSaver = 
+Fireinput.longTableSaver = 
 {
 
     init: function()
     {
-       return FireinputUtils.getUserFile("userlargetable.fireinput");
+       return Fireinput.util.getUserFile("userlargetable.fireinput");
     },
 
 

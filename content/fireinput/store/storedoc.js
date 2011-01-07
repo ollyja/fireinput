@@ -34,13 +34,13 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var FireinputDocSaver = 
+Fireinput.docSaver = 
 {
     docData: '', 
 
     getFile: function(path)
     {
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
        return fileHandler.getFileFromURLSpec(path); 
@@ -48,7 +48,7 @@ var FireinputDocSaver =
 
     initAutoSave: function()
     {
-       var path = FireinputUtils.getUserFile("userdocument.fireinput"); 
+       var path = Fireinput.util.getUserFile("userdocument.fireinput"); 
        return path; 
     },
 
@@ -73,7 +73,7 @@ var FireinputDocSaver =
        this.loadFileDoneCallback = cb; 
 
        var datafile = this.getFile('file://' + file); 
-       FireinputStream.loadXHTMLDataAsync(datafile, options);
+       Fireinput.stream.loadXHTMLDataAsync(datafile, options);
     }, 
 
     open: function(title)
@@ -111,7 +111,7 @@ var FireinputDocSaver =
 
           //FIXME: here we always save as UTF-8. Are there any other charsets that should be used ? 
           var charset = "UTF-8";
-          data = FireinputUnicode.convertFromUnicode(data);
+          data = Fireinput.util.unicode.convertFromUnicode(data);
           fos.write(data, data.length);
           fos.close();
        }

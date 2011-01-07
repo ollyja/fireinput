@@ -34,21 +34,17 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-// this should be updated everytime a new release is ready 
-const FIREINPUT_VERSION = "%FIREINPUT_VERSION%"; 
-
-
-var FireinputVersion =
+Fireinput.version =
 {
     checkFirstRun: function()
     {
-       var firstrun =  fireinputPrefGetDefault("firstRun");
-       if(firstrun != FIREINPUT_VERSION)
+       var firstrun =  Fireinput.pref.getDefault("firstRun");
+       if(firstrun != Fireinput.FIREINPUT_VERSION)
        {
-          Fireinput.toggleFireinput(); 
+          Fireinput.main.toggleFireinput(); 
           // enable it in first run 
-          fireinputPrefSave("firstRun", FIREINPUT_VERSION); 
-          var versionArray = FIREINPUT_VERSION.split('.');
+          Fireinput.pref.save("firstRun", Fireinput.FIREINPUT_VERSION); 
+          var versionArray = Fireinput.FIREINPUT_VERSION.split('.');
           if(versionArray.length < 2) return; 
 
           versionArray[versionArray.length-1] = versionArray[versionArray.length-1].match(/^[\d\.]+/g)[0];
@@ -56,15 +52,15 @@ var FireinputVersion =
           setTimeout(function() { window.openUILinkIn(url, "tab") }, 500);
 
           // if the version is net, enable table installation page 
-          if(/net$/.test(FIREINPUT_VERSION)) {
+          if(/net$/.test(Fireinput.FIREINPUT_VERSION)) {
              setTimeout(function() { window.openUILinkIn("chrome://fireinput/content/tablemgr/installtable.html", "tab") }, 500);
           }
        }
-       else if(fireinputPrefGetDefault("autoLoad"))
+       else if(Fireinput.pref.getDefault("autoLoad"))
        {
-          Fireinput.toggleFireinput(); 
+          Fireinput.main.toggleFireinput(); 
           // keep in EN mode but leave it open 
-          Fireinput.setIMEMode(IME_MODE_EN);
+          Fireinput.main.setIMEMode(Fireinput.IME_MODE_EN);
        }
     }
 }; 

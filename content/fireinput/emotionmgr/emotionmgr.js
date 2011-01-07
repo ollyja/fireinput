@@ -34,7 +34,7 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var EmotionMgr = 
+Fireinput.emotionMgr = 
 {
     imageFileValid: false, 
 
@@ -67,7 +67,7 @@ var EmotionMgr =
 
     notify: function()
     {
-       var os = FireinputXPC.getService("@mozilla.org/observer-service;1", "nsIObserverService");
+       var os = Fireinput.util.xpc.getService("@mozilla.org/observer-service;1", "nsIObserverService");
        os.notifyObservers(null, "fireinput-user-emotion-changed", null);
        return true;
     },
@@ -116,11 +116,11 @@ var EmotionMgr =
        var imgHandle = document.getElementById("addFileShowImage");
        imgHandle.style.display = "none";
        this.imageFileValid = false; 
-       imgHandle.onload = bind(function(event) 
+       imgHandle.onload = (function(event) 
                                {
                                   this.imageFileValid = true; 
                                   imgHandle.style.display = "";
-                               }, this); 
+                               }).bind(this); 
 
        imgHandle.src = imageUrl;
     },
@@ -135,7 +135,7 @@ var EmotionMgr =
 
        var id = document.getElementById("addFileValue");
        var imageUrl = id.value;
-       if(FireinputEmotionUpdater.save(imageUrl))
+       if(Fireinput.emotionUpdater.save(imageUrl))
        {
           this.notify(); 
           this.showAddFileMessage(true, "图案成功加入网络图案菜单");
@@ -237,7 +237,7 @@ var EmotionMgr =
           return; 
        }    
 
-       if(FireinputEmotionUpdater.save(response))
+       if(Fireinput.emotionUpdater.save(response))
        {
           this.notify();
           this.showAddFileMessage(true, "图案成功上传并已加入到网络图案菜单");
@@ -251,7 +251,7 @@ var EmotionMgr =
     {
        var n = 'f' + Math.floor(Math.random() * 99999);
        var d = document.createElement('div');
-       d.innerHTML = '<iframe type="content" style="display:none" src="about:blank" id="'+n+'" name="'+n+'" onload="EmotionMgr.uploadLoaded(\''+n+'\')"></iframe>';
+       d.innerHTML = '<iframe type="content" style="display:none" src="about:blank" id="'+n+'" name="'+n+'" onload="Fireinput.emotionMgr.uploadLoaded(\''+n+'\')"></iframe>';
        document.body.appendChild(d);
        var i = document.getElementById(n);
        if (cb && typeof(cb.onComplete) == 'function') {
@@ -340,11 +340,11 @@ var EmotionMgr =
     loadCurrentEmotions: function()
     {
        // load local list 
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
-       var datafile = FireinputUtils.getUserFile("useremotion.fireinput");
+       var datafile = Fireinput.util.getUserFile("useremotion.fireinput");
        this.userEmotionList.length = 0;
        if(!datafile.exists())
        {
@@ -358,7 +358,7 @@ var EmotionMgr =
           oncomplete: this.showCurrentEmotions,
           onavailable: this.getUserEmotionURL
        };
-       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+       Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options);
     },
 
     showCurrentEmotions: function()
@@ -380,7 +380,7 @@ var EmotionMgr =
        }
 
        this.showSaveFileMessage(true, "");
-       Pagination.buildPages(pageinfo, 'pagecontent', 'paginatioplink', this.limitnum); 
+       Fireinput.pagination.buildPages(pageinfo, 'pagecontent', 'paginatioplink', this.limitnum); 
 
     }, 
    
@@ -414,13 +414,13 @@ var EmotionMgr =
 
     loadServerEmotions: function()
     {
-       var ajax = new Ajax();
+       var ajax = new Fireinput.util.ajax();
        if(!ajax)
           return;
 
        var self = this;
 
-       var url = SERVER_URL + "/emotions/viewlist.php?"; 
+       var url = Fireinput.SERVER_URL + "/emotions/viewlist.php?"; 
        url += "startindex=" + this.startindex + "&limitnum=" + this.limitnum; 
        if(this.showMyEmotions)
           url += "&showmine=true"; 
@@ -452,7 +452,7 @@ var EmotionMgr =
        this.showBrowseFileMessage(true, "");
        this.showSaveFileMessage(true, "");
        this.disableBrowseSaveButton(false);
-       Pagination.buildRemotePages(jsonArray.totalcount, jsonArray.urllist, this.selectedpage, 'pagecontent', 'paginatioplink', this.limitnum); 
+       Fireinput.pagination.buildRemotePages(jsonArray.totalcount, jsonArray.urllist, this.selectedpage, 'pagecontent', 'paginatioplink', this.limitnum); 
     }, 
 
     loadServerEmotionFailure: function(p)
@@ -460,7 +460,7 @@ var EmotionMgr =
        this.showBrowseFileMessage(false, "连接火输网站失败");
        this.showSaveFileMessage(true, "");
        this.disableBrowseSaveButton(true);
-       Pagination.buildRemotePages(0, null, 0, 'pagecontent', 'paginatioplink', this.limitnum); 
+       Fireinput.pagination.buildRemotePages(0, null, 0, 'pagecontent', 'paginatioplink', this.limitnum); 
        return; 
     },
  
@@ -490,7 +490,7 @@ var EmotionMgr =
 
     saveFileToList: function()
     {
-       if(FireinputEmotionUpdater.save(this.userEmotionList, 'overwrite'))
+       if(Fireinput.emotionUpdater.save(this.userEmotionList, 'overwrite'))
        {
           this.notify();
           this.showSaveFileMessage(true, "您所作的更改已成功保存");

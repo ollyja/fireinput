@@ -7,8 +7,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" href="chrome://fireinput/skin/editor.css" type="text/css"/>
     <link rel="stylesheet" href="chrome://fireinput/skin/common.css" type="text/css"/>
-    <script type="text/javascript" src="chrome://fireinput/content/constant.js"></script>
+    <script type="text/javascript" src="chrome://fireinput/content/ns.js"></script>
     <script type="text/javascript" src="chrome://fireinput/content/lib.js"></script>
+    <script type="text/javascript" src="chrome://fireinput/content/constant.js"></script>
     <script type="text/javascript" src="chrome://fireinput/content/stream.js"></script>
     <script type="text/javascript" src="chrome://fireinput/content/utils.js"></script>
     <script type="text/javascript" src="chrome://fireinput/content/store/storedoc.js"></script>
@@ -108,22 +109,22 @@
 
              for (var i= kids.length-1; i >=0; i--) {
                 if (/imagebutton/.test(kids[i].className)) {
-                   kids[i].addEventListener("click", bind(this.buttonClick, this), true);
+                   kids[i].addEventListener("click", this.buttonClick.bind(this), true);
                 }
 		else if(/styleFormat/.test(kids[i].id) && /floatWindowItem/.test(kids[i].className)) {
-                   kids[i].addEventListener("click", bind(this.selectStyle, this), true);
-                   kids[i].addEventListener("mouseover", bind(this.setUIStyle, this), true);
+                   kids[i].addEventListener("click", this.selectStyle.bind(this), true);
+                   kids[i].addEventListener("mouseover", this.setUIStyle.bind(this), true);
                 }
 		else if(/fontSizeWindow/.test(kids[i].id) && /floatWindowItem/.test(kids[i].className)) {
-                   kids[i].addEventListener("click", bind(this.selectFontSize, this), true);
-                   kids[i].addEventListener("mouseover", bind(this.setUIStyle, this), true);
+                   kids[i].addEventListener("click", this.selectFontSize.bind(this), true);
+                   kids[i].addEventListener("mouseover", this.setUIStyle.bind(this), true);
                 }
 		else if(/fontWindow/.test(kids[i].id) && /floatWindowItem/.test(kids[i].className)) {
-                   kids[i].addEventListener("click", bind(this.selectFontName, this), true);
-                   kids[i].addEventListener("mouseover", bind(this.setUIStyle, this), true);
+                   kids[i].addEventListener("click", this.selectFontName.bind(this), true);
+                   kids[i].addEventListener("mouseover", this.setUIStyle.bind(this), true);
                 }
 		else if(/linkFormProtocolWindow/.test(kids[i].id) && /floatWindowItem/.test(kids[i].className)) {
-                   kids[i].addEventListener("click", bind(this.selectLinkProtocol, this), true);
+                   kids[i].addEventListener("click", this.selectLinkProtocol.bind(this), true);
                 }
 		
              }
@@ -144,10 +145,10 @@
              // clear autosave stuff 
              this.dirty = false; 
              this.audosavedContent = BLANK_DOC; 
-             FireinputDocSaver.autosave(BLANK_DOC); 
+             Fireinput.docSaver.autosave(BLANK_DOC); 
              // launch autoSave if it was cancelled 
              if(!this.autoSaveTimer)
-                this.autoSaveTimer = setInterval(bind(this.autoSave, this), 10000); 
+                this.autoSaveTimer = setInterval(this.autoSave.bind(this), 10000); 
           }, 
 
          
@@ -178,7 +179,7 @@
                  return true; 
              }
 
-             ret = FireinputDocSaver.save(html, '保存文档...', true, this.savedFileName);      
+             ret = Fireinput.docSaver.save(html, '保存文档...', true, this.savedFileName);      
              if(ret)
                  this.newDocInternal(keepContent); 
 
@@ -190,7 +191,7 @@
              if(!this.newDoc(true))
                  return; 
 
-             var openfile = FireinputDocSaver.open("打开文档...");
+             var openfile = Fireinput.docSaver.open("打开文档...");
              if(!openfile)
                  return; 
 
@@ -204,7 +205,7 @@
                     textarea.value = openContent; 
              }; 
 
-             FireinputDocSaver.read(openfile, readDone);
+             Fireinput.docSaver.read(openfile, readDone);
              this.savedFileName = openfile; 
              document.getElementById('savedFileName').innerHTML = openfile; 
              this.clearAutoSave();    
@@ -215,7 +216,7 @@
              var html = this.getHTML(); 
              if(!this.savedFileName)
              {
-                this.savedFileName = FireinputDocSaver.save(html, '保存文档...'); 
+                this.savedFileName = Fireinput.docSaver.save(html, '保存文档...'); 
                 if(!this.savedFileName)
                    return false; 
 
@@ -230,7 +231,7 @@
              {
                 var handle = document.getElementById('savedFileName'); 
                 setOpacity(handle, 50); 
-                FireinputDocSaver.save(html, '保存文档...', true, this.savedFileName); 
+                Fireinput.docSaver.save(html, '保存文档...', true, this.savedFileName); 
                 this.savedContent = html; 
                 setTimeout(function() { setOpacity(handle, 100);}, 1000); 
              }
@@ -248,7 +249,7 @@
              } 
              else
              {
-                var path = FireinputDocSaver.save(html, '另保存文档为...'); 
+                var path = Fireinput.docSaver.save(html, '另保存文档为...'); 
                 if(!path)
                    return;
 
@@ -278,7 +279,7 @@
                  return false; 
              }
 
-             ret = FireinputDocSaver.save(html, '保存文档...', true, this.savedFileName);      
+             ret = Fireinput.docSaver.save(html, '保存文档...', true, this.savedFileName);      
              return ret; 
          }, 
 
@@ -289,7 +290,7 @@
              this.autoSaveTimer = null; 
              this.audosavedContent = BLANK_DOC; 
              this.dirty = false; 
-             FireinputDocSaver.autosave(BLANK_DOC); 
+             Fireinput.docSaver.autosave(BLANK_DOC); 
          }, 
 
          autoSave: function()
@@ -308,7 +309,7 @@
              var handle = document.getElementById('autoSavedMessage'); 
              handle.style.display = ""; 
              setOpacity(handle, 100); 
-             FireinputDocSaver.autosave(html); 
+             Fireinput.docSaver.autosave(html); 
              var i = 100;
              var fadetimer=setInterval(function() {
                  setOpacity(handle, i);
@@ -329,12 +330,12 @@
              var editor = document.getElementById('fireinputEditor');
              var readDone = function(docData)
              {
-                    var openContent = FireinputUnicode.getUnicodeString(docData);
+                    var openContent = Fireinput.util.unicode.getUnicodeString(docData);
                     editor.contentWindow.document.body.innerHTML = openContent; 
                     FireinputEditor.audosavedContent = openContent; 
              }; 
 
-             FireinputDocSaver.autoload(readDone);
+             Fireinput.docSaver.autoload(readDone);
          }, 
 
          printDoc: function()
@@ -684,13 +685,13 @@
             }
             setInitSize(); 
             this.initToolbarButtons(); 
-            document.addEventListener("mouseup", bind(this.hideAllFloatWindows, this), true);
-            document.getElementById("fireinputEditor").contentWindow.document.addEventListener("mousedown", bind(this.hideAllFloatWindows,this), true);
+            document.addEventListener("mouseup", this.hideAllFloatWindows.bind(this), true);
+            document.getElementById("fireinputEditor").contentWindow.document.addEventListener("mousedown", this.hideAllFloatWindows.bind(this), true);
             document.addEventListener("keypress", this.hideAllFloatWindows, true);
-            document.getElementById("fireinputEditor").contentWindow.document.addEventListener("keypress", bind(this.hideAllFloatWindows,this), true);
+            document.getElementById("fireinputEditor").contentWindow.document.addEventListener("keypress", this.hideAllFloatWindows.bind(this), true);
 
             // launch autoSave 
-            this.autoSaveTimer = setInterval(bind(this.autoSave, this), 10000); 
+            this.autoSaveTimer = setInterval(this.autoSave.bind(this), 10000); 
          }, 
 
          viewSource: function()

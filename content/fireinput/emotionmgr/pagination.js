@@ -33,7 +33,7 @@
  *
  * ***** END LICENSE BLOCK ***** 
  */
-var Pagination = {
+Fireinput.pagination = {
 
     buildPages: function(pageinfo, divId, paginateId, numPerPage)
     {
@@ -44,7 +44,7 @@ var Pagination = {
        this.totalPages = parseInt(this.pageinfo.page.length / this.numPerPage) + mod; 
        this.paginateId = paginateId; 
        var initialpage = (pageinfo.selectedpage<this.totalPages)? pageinfo.selectedpage : 0; 
-       this.buildPagination(initialpage)
+       this.buildFireinput.pagination(initialpage)
        this.selectPage(initialpage)
      
     }, 
@@ -86,7 +86,7 @@ var Pagination = {
                if (!/disabled/i.test(targetobj.className))
                {
                    var ipage = parseInt(targetobj.getAttribute("rel")); 
-                   EmotionMgr.loadServerNextPages(ipage * pageinstance.numPerPage, ipage); 
+                   Fireinput.emotionMgr.loadServerNextPages(ipage * pageinstance.numPerPage, ipage); 
                }
 	    }
             return false; 
@@ -95,7 +95,7 @@ var Pagination = {
        this.selectRemotePage(selectedPage - this.startPage);
     }, 
 
-    buildPagination: function(selectedpage)
+    buildFireinput.pagination: function(selectedpage)
     {
        if (!this.pageinfo || this.pageinfo.page.length <= 0)
           var paginateHTML="" 
@@ -144,12 +144,12 @@ var Pagination = {
        for(var i=sindex; i<sindex+this.numPerPage && i<this.pageinfo.page.length; i++)
        {
           paginateHTML += "<div class='pagerow'>";
-          paginateHTML += "<span class='pageimg' title='" + this.pageinfo.page[i].url + "' onclick='EmotionMgr.goToPage(\"" + this.pageinfo.page[i].url + "\")'>"; 
+          paginateHTML += "<span class='pageimg' title='" + this.pageinfo.page[i].url + "' onclick='Fireinput.emotionMgr.goToPage(\"" + this.pageinfo.page[i].url + "\")'>"; 
           paginateHTML += "<img width='32px' height='32px' src='" + this.pageinfo.page[i].url + "'/></span>";
           paginateHTML += "<span class='pagecheckbox'>";
-          var shouldchecked = this.pageinfo.page[i].saved ? this.pageinfo.page[i].saved : EmotionMgr.getCheckedStatus(this.pageinfo.page[i].url);
+          var shouldchecked = this.pageinfo.page[i].saved ? this.pageinfo.page[i].saved : Fireinput.emotionMgr.getCheckedStatus(this.pageinfo.page[i].url);
           var checked = shouldchecked ? "checked": ""; 
-            paginateHTML += "<input type='checkbox' " + checked + "' onclick='EmotionMgr.updateUserEmotionList(this, \"" + this.pageinfo.page[i].url + "\")'/></span></div>"; 
+            paginateHTML += "<input type='checkbox' " + checked + "' onclick='Fireinput.emotionMgr.updateUserEmotionList(this, \"" + this.pageinfo.page[i].url + "\")'/></span></div>"; 
          
        }
        paginateHTML += "</div>";
@@ -189,12 +189,12 @@ var Pagination = {
        for(var i=sindex; i<sindex+this.numPerPage && i<this.remotePages.length; i++)
        {
           paginateHTML += "<div class='pagerow'>";
-          paginateHTML += "<span class='pageimg'  title='" + this.remotePages[i] + "' onclick='EmotionMgr.goToPage(\"" + this.remotePages[i] + "\")'>"; 
+          paginateHTML += "<span class='pageimg'  title='" + this.remotePages[i] + "' onclick='Fireinput.emotionMgr.goToPage(\"" + this.remotePages[i] + "\")'>"; 
           paginateHTML += "<img width='32px' height='32px' src='" + this.remotePages[i] + "'/></span>";
           paginateHTML += "<span class='pagecheckbox'>";
-          var shouldchecked = EmotionMgr.getCheckedStatus(this.remotePages[i]);
+          var shouldchecked = Fireinput.emotionMgr.getCheckedStatus(this.remotePages[i]);
           var checked = shouldchecked ? "checked": ""; 
-            paginateHTML += "<input type='checkbox' " + checked + "' onclick='EmotionMgr.updateUserEmotionList(this, \"" + this.remotePages[i] + "\")'/></span></div>"; 
+            paginateHTML += "<input type='checkbox' " + checked + "' onclick='Fireinput.emotionMgr.updateUserEmotionList(this, \"" + this.remotePages[i] + "\")'/></span></div>"; 
          
        }
        paginateHTML += "</div>";

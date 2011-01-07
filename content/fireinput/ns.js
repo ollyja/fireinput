@@ -34,61 +34,18 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-Fireinput.emotionUpdater = 
+/* declare namespace */
+var Fireinput = window.Fireinput || {}; 
+
+Fireinput.namespace = function(name, separator, container)
 {
-
-    init: function()
-    {
-       return Fireinput.util.getUserFile("useremotion.fireinput");
-    },
-
-
-    save: function(list, mode)
-    {
-       var args = list; 
-
-       if(!args || args.length <= 0)
-          return false; 
- 
-       // FIXME: the backfile is required for safe writing 
-
-       var fos = Components.classes["@mozilla.org/network/file-output-stream;1"]
-                    .createInstance(Components.interfaces.nsIFileOutputStream);
-
-       var file = this.init(); 
-       // use 0x02 | 0x10 to open file for appending.
-       // write, create, truncate
-       if(mode && mode == 'overwrite')
-          fos.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
-       else 
-          fos.init(file, 0x02 | 0x08 | 0x10, 0664, 0);
-
-       var charset = "UTF-8";
-       var cos = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
-                   .createInstance(Components.interfaces.nsIConverterOutputStream);
-
-       // This assumes that fos is the nsIOutputStream you want to write to
-       cos.init(fos, charset, 0, 0x0000);
-       if(typeof(args) == "string")
-       { 
-          cos.writeString(args);
-          cos.writeString("\n");
-       }
-       else if(typeof(args) == "object") 
-       { 
-          for(var i=args.length-1; i>=0; i--)
-          {
-             if(args[i].saved)
-             { 
-                cos.writeString(args[i].url);
-                cos.writeString("\n");
-             }
-          }
-       }
-       cos.close();
-
-       return true; 
-    }
-   
-}; 
+  var ns = name.split(separator || '.'),
+    o = container || window,
+    i,
+    len;
+  for(i = 0, len = ns.length; i < len; i++){
+    o = o[ns[i]] = o[ns[i]] || {};
+  }
+  return o;
+};
 

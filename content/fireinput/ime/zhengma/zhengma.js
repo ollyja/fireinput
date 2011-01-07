@@ -34,15 +34,15 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var Zhengma = function()  {}; 
+Fireinput.zhengmaEngine = function()  {}; 
 
-Zhengma.prototype =  extend(new FireinputIME(), 
+Fireinput.zhengmaEngine.prototype =  Fireinput.extend(new Fireinput.imeEngine(), 
 {
     // 0 to disable debug or non zero to enable debug 
     debug: 0, 
 
     // the name of IME 
-    name: IME_ZHENGMA,
+    name: Fireinput.IME_ZHENGMA,
 
     // array to keep all matched words 
     charArray: null,
@@ -75,7 +75,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
     zhengmaSchema: null, 
 
     // encoding mode. Either simplified or big5. Simplified default. 
-    encodingMode: ENCODING_ZH, 
+    encodingMode: Fireinput.ENCODING_ZH, 
 
     // engine enabled 
     engineDisabled: false, 
@@ -89,14 +89,14 @@ Zhengma.prototype =  extend(new FireinputIME(),
     // the entrance function to load all related tables 
     loadTable: function()
     {
-       this.letterConverter = new FullLetterConverter(); 
+       this.letterConverter = new Fireinput.fullLetterConverter(); 
 
        // setTimeout to not block firefox start
        var self = this; 
        setTimeout(function() { return self.loadZhengmaTable(); }, 500); 
 
        // init encoding table 
-       FireinputEncoding.init(); 
+       Fireinput.encoding.init(); 
     },
 
     insertKey: function(keyList, key)
@@ -170,13 +170,13 @@ Zhengma.prototype =  extend(new FireinputIME(),
 
     loadZhengmaTable: function()
     {
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
 
        var path = this.getDataPath(); 
        var datafile = ios.newURI(path + this.getZhengmaFile(), null, null); 
        
-       this.keyZhengmaHash = new FireinputHash();
-       this.keyMapTable = new FireinputHash(); 
+       this.keyZhengmaHash = new Fireinput.util.hash();
+       this.keyMapTable = new Fireinput.util.hash(); 
 
        var checkExists = function() {
           if(this.keyZhengmaHash.length <= 0) {
@@ -188,10 +188,10 @@ Zhengma.prototype =  extend(new FireinputIME(),
 
             var options = {
                caller: this,
-               oncomplete: bind(function() { this.sortKeyMapTable(); this.loadUserTable(); }, this),
+               oncomplete: (function() { this.sortKeyMapTable(); this.loadUserTable(); }).bind(this),
                onavailable: this.getCodeLine
             };
-            FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+            Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options);
           }
           else {
             this.sortKeyMapTable();
@@ -205,7 +205,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
           onavailable: this.getCodeLine
        };
 
-       FireinputStream.loadDataAsync(datafile, options);
+       Fireinput.stream.loadDataAsync(datafile, options);
     },
 
     updateUserCodeValue: function(key, word, freq)
@@ -252,7 +252,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
 
     loadUserTable: function()
     {
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
        var datafile = this.getUserDataFile();
        if(!datafile.exists())
        {
@@ -260,7 +260,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
           return;
        }
  
-       this.userCodeHash = new FireinputHash();
+       this.userCodeHash = new Fireinput.util.hash();
 
        var options = {
           caller: this, 
@@ -268,7 +268,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
           oncomplete: this.loadExtPhraseTable
           
        }; 
-       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options); 
+       Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options); 
     },
 
     getExtPhraseCodeLine: function(str)
@@ -293,7 +293,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
 
     loadExtPhraseTable: function()
     {
-       var ios = FireinputXPC.getIOService();
+       var ios = Fireinput.util.xpc.getIOService();
 
        var datafile = this.getExtDataFile();
        if(!datafile.exists())
@@ -304,15 +304,15 @@ Zhengma.prototype =  extend(new FireinputIME(),
           caller: this,
           onavailable: this.getExtPhraseCodeLine
        };
-       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+       Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options);
     },
 
     hasTableFile: function()
     {
-       var ios = FireinputXPC.getIOService();
+       var ios = Fireinput.util.xpc.getIOService();
 
        var path = this.getDataPath();
-       return FireinputStream.checkAccess(ios.newURI(path + this.getZhengmaFile(), null, null));
+       return Fireinput.stream.checkAccess(ios.newURI(path + this.getZhengmaFile(), null, null));
     },
 
     hasNetTableFile: function()
@@ -348,7 +348,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
 
     setSchema: function(schema)
     {
-       //FireinputLog.debug(this, "Set schema: " + schema);
+       //Fireinput.log.debug(this, "Set schema: " + schema);
        this.zhengmaSchema = schema; 
     }, 
 
@@ -384,7 +384,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
 
     find: function(inputChar)
     {
-       FireinputLog.debug(this,"inputChar: " + inputChar);
+       Fireinput.log.debug(this,"inputChar: " + inputChar);
        var s = inputChar; 
        var retArray = null;
 
@@ -434,7 +434,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
        if(!this.charArray)
           return null; 
 
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
        // if the next this.numSelection are already displayed, return null
        if((this.charIndex+this.numSelection) >= this.charArray.length)
           return null; 
@@ -448,7 +448,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
            i -= this.numSelection; 
            this.charIndex = i>0 ? i:0; 
        }
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
        return {charArray:this.charArray.slice(this.charIndex, this.charIndex+this.numSelection), validInputKey: this.validInputKey};
     }, 
 
@@ -456,7 +456,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
     {
        if(!this.charArray)
           return null; 
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
        // if the previous this.numSelection are already displayed, return null
        if((this.charIndex-this.numSelection) < 0)
           return null; 
@@ -466,7 +466,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
        else
           this.charIndex = 0; 
        
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
        return {charArray: this.charArray.slice(this.charIndex, this.charIndex+this.numSelection), validInputKey: this.validInputKey};
     }, 
 
@@ -488,7 +488,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
 
     getValidWord: function(key)
     {
-       FireinputLog.debug(this,"key: " + key);
+       Fireinput.log.debug(this,"key: " + key);
        if(key.indexOf('z') <= 0)
        {
           return this.getValidWordWithKey(key); 
@@ -513,7 +513,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
        {
           if(new RegExp(regexpStr).test(keyList[i]))
           {
-              arrayInsert(validWord, validWord.length, this.getValidWordWithKey(keyList[i])); 
+              Fireinput.arrayInsert(validWord, validWord.length, this.getValidWordWithKey(keyList[i])); 
           }
        }
 //       validWord.sort(this.sortCodeArray); 
@@ -534,7 +534,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
           // if first key is z, try zmode 
           if(key.substr(0, 1) == 'z')
           {
-             return FireinputSpecialChar.getZMode(key);
+             return Fireinput.specialChar.getZMode(key);
           }
 
           return null; 
@@ -546,7 +546,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
 
        var zhengmaWordList = this.keyZhengmaHash.getItem(key); 
 
-       FireinputLog.debug(this,"zhengmaWordList: " + zhengmaWordList);
+       Fireinput.log.debug(this,"zhengmaWordList: " + zhengmaWordList);
        var zhengmaWordArray = zhengmaWordList.split(","); 
 
        wordArray = new Array(); 
@@ -564,7 +564,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
           if(word.length <= 0) 
              continue; 
 
-          var encodedWord = FireinputEncoding.getEncodedString(word, this.encodingMode);
+          var encodedWord = Fireinput.encoding.getEncodedString(word, this.encodingMode);
           if(typeof(wordList[encodedWord]) != 'undefined')
              continue;
 
@@ -597,9 +597,9 @@ Zhengma.prototype =  extend(new FireinputIME(),
        // if first key is z, try zmode 
        if(key.substr(0, 1) == 'z')
        {
-          var zArray =  FireinputSpecialChar.getZMode(key);
+          var zArray =  Fireinput.specialChar.getZMode(key);
           if(zArray)
-            arrayInsert(wordArray, wordArray.length, zArray.slice(0, zArray.length));
+            Fireinput.arrayInsert(wordArray, wordArray.length, zArray.slice(0, zArray.length));
        }
 
        if(userArray.length <= 0)         
@@ -608,17 +608,17 @@ Zhengma.prototype =  extend(new FireinputIME(),
        // sort the first (this.numSelection+1) items 
        if(userArray.length < (this.numSelection+1))
        {
-          arrayInsert(userArray, userArray.length, wordArray.slice(0, this.numSelection)); 
+          Fireinput.arrayInsert(userArray, userArray.length, wordArray.slice(0, this.numSelection)); 
           userArray.sort(this.sortCodeArray); 
-          arrayInsert(userArray, userArray.length, wordArray.slice((this.numSelection+1), wordArray.length)); 
+          Fireinput.arrayInsert(userArray, userArray.length, wordArray.slice((this.numSelection+1), wordArray.length)); 
        }
        else
        {
           userArray.sort(this.sortCodeArray); 
-          arrayInsert(userArray, userArray.length, wordArray.slice(0, wordArray.length)); 
+          Fireinput.arrayInsert(userArray, userArray.length, wordArray.slice(0, wordArray.length)); 
        }
 
-       // FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
+       // Fireinput.log.debug(this,"userArray: " + this.getKeyWord(userArray));
        return userArray; 
     },
 
@@ -626,7 +626,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
     {
        if(this.userCodeHash && this.userTableChanged)
        { 
-          FireinputSaver.saveUserData(this.userCodeHash);
+          Fireinput.phraseSaver.saveUserData(this.userCodeHash);
        }
     },
 
@@ -635,7 +635,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
        var freq = word.match(/[\d\.]+/g)[0];
        var chars = word.match(/[\D\.]+/g)[0];
        if(!this.userCodeHash)
-          this.userCodeHash = new FireinputHash();
+          this.userCodeHash = new Fireinput.util.hash();
 
        var newfreq = 0; 
        if(this.userCodeHash.hasItem(chars + ":" + key))
@@ -670,9 +670,9 @@ Zhengma.prototype =  extend(new FireinputIME(),
 
        this.userTableChanged = true; 
 
-       // FireinputLog.debug(this,"word: " + word);
-       //FireinputLog.debug(this,"chars: " + chars + ", freq: " + freq);
-       //FireinputLog.debug(this,"chars: " + chars + ", key: " + key + ", initKey: " + initKey);
+       // Fireinput.log.debug(this,"word: " + word);
+       //Fireinput.log.debug(this,"chars: " + chars + ", freq: " + freq);
+       //Fireinput.log.debug(this,"chars: " + chars + ", key: " + key + ", initKey: " + initKey);
        return freq; 
     },
 
@@ -684,7 +684,7 @@ Zhengma.prototype =  extend(new FireinputIME(),
     storeUserAddPhrase: function(phrase, keys, freq)
     {
       if(!this.userCodeHash)
-          this.userCodeHash = new FireinputHash();
+          this.userCodeHash = new Fireinput.util.hash();
 
        if(this.userCodeHash.hasItem(phrase + ":" + keys))
           return;

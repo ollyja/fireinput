@@ -33,12 +33,12 @@
  *
  * ***** END LICENSE BLOCK ***** 
  */
-const maxComposedNumber = 50; 
-const composerFieldTag = "composerfield_"; 
 
-var FireinputComposer = 
+Fireinput.composer = 
 {
     debug: 0, 
+    composerFieldTag:  "composerfield_", 
+    maxComposedNumber: 50, 
 
     composedNumber: 0, 
 
@@ -53,16 +53,16 @@ var FireinputComposer =
           return; 
 
        var composerFieldsElement = document.getElementById("fireinputComposeField"); 
-       FireinputLog.debug(this, "hidding all composed words"); 
+       Fireinput.log.debug(this, "hidding all composed words"); 
        var wlist = composerFieldsElement.getElementsByTagName("hbox");
-       FireinputLog.debug(this, "wlist.length: " + wlist.length);
+       Fireinput.log.debug(this, "wlist.length: " + wlist.length);
        for(var i=0; i < wlist.length; i++)
        {
           wlist[i].style.display = "none";
        }
 
        this.composedNumber = 0; 
-       FireinputIMEPanel.enableComposeEditor(false);
+       Fireinput.imePanel.enableComposeEditor(false);
     }, 
 
     getLastAutoSelected: function()
@@ -71,11 +71,11 @@ var FireinputComposer =
           return ""; 
  
        var composerFieldsElement = document.getElementById("fireinputComposeField"); 
-       FireinputLog.debug(this, "getLastAutoSelected: this.composedNumber= " + this.composedNumber);
+       Fireinput.log.debug(this, "getLastAutoSelected: this.composedNumber= " + this.composedNumber);
        var inputkeys = ""; 
        while(this.composedNumber > 0)
        {
-          var hboxElement = document.getElementById(composerFieldTag + this.composedNumber);
+          var hboxElement = document.getElementById(this.composerFieldTag + this.composedNumber);
           if(!hboxElement || hboxElement.style.display == "none")
           {
              this.composedNumber--; 
@@ -84,19 +84,19 @@ var FireinputComposer =
           else
           {
              // To make searching less expensive, only last autoselected values will be used 
-             var editorBox = document.getElementById(composerFieldTag + this.composedNumber + "_label");
+             var editorBox = document.getElementById(this.composerFieldTag + this.composedNumber + "_label");
              if(editorBox.getAttribute("autoselected") == "true")
              {
                 this.composedNumber--; 
                 inputkeys = editorBox.getAttribute("hiddeninputkey") + inputkeys;
                 hboxElement.style.display = "none"; 
-                FireinputLog.debug(this, "getLastAutoSelected: inputkeys= " + inputkeys);
+                Fireinput.log.debug(this, "getLastAutoSelected: inputkeys= " + inputkeys);
              }
 
              break; 
           }
        }
-       FireinputLog.debug(this, "getLastAutoSelected: inputkeys: " + inputkeys);
+       Fireinput.log.debug(this, "getLastAutoSelected: inputkeys: " + inputkeys);
        return inputkeys; 
     }, 
 
@@ -109,11 +109,11 @@ var FireinputComposer =
        // Removing is not thread-safe, as the function might be invoked more than one time 
        // if the user is typing or removing input keys really quickly.
        var composerFieldsElement = document.getElementById("fireinputComposeField"); 
-       FireinputLog.debug(this, "removeLastFromPanel: this.composedNumber= " + this.composedNumber);
+       Fireinput.log.debug(this, "removeLastFromPanel: this.composedNumber= " + this.composedNumber);
        while(this.composedNumber > 0)
        {
-          FireinputLog.debug(this, "removeLastFromPanel: this.composedNumber= " + this.composedNumber);
-          var hboxElement = document.getElementById(composerFieldTag + this.composedNumber);
+          Fireinput.log.debug(this, "removeLastFromPanel: this.composedNumber= " + this.composedNumber);
+          var hboxElement = document.getElementById(this.composerFieldTag + this.composedNumber);
           if(!hboxElement || hboxElement.style.display == "none")
           {
              this.composedNumber--; 
@@ -121,7 +121,7 @@ var FireinputComposer =
           }
           else
           {
-             var editorBox = document.getElementById(composerFieldTag + this.composedNumber + "_label");
+             var editorBox = document.getElementById(this.composerFieldTag + this.composedNumber + "_label");
              this.composedNumber--; 
              var inputkey = editorBox.getAttribute("hiddeninputkey");
              hboxElement.style.display = "none"; 
@@ -134,9 +134,9 @@ var FireinputComposer =
 
     addToPanel: function(autoselected, result)
     {
-       FireinputLog.debug(this, "addToPanel: result.value: " + result.value);
+       Fireinput.log.debug(this, "addToPanel: result.value: " + result.value);
 
-       if(this.composedNumber >= maxComposedNumber)
+       if(this.composedNumber >= this.maxComposedNumber)
           return; 
 
        this.createComposePanel(autoselected, result);
@@ -159,11 +159,11 @@ var FireinputComposer =
        var composerFieldsElement = document.getElementById("fireinputComposeField"); 
        var wlist = composerFieldsElement.getElementsByTagName("hbox");
 
-       FireinputLog.debug(this, "this.composedNumber: " + this.composedNumber + ", wlist.length: " + wlist.length);
+       Fireinput.log.debug(this, "this.composedNumber: " + this.composedNumber + ", wlist.length: " + wlist.length);
        if(this.composedNumber >= wlist.length)
        {
           this.composedNumber++;
-          var thisId = composerFieldTag + this.composedNumber;    
+          var thisId = this.composerFieldTag + this.composedNumber;    
           
           var hboxElement = document.createElement("hbox");
           hboxElement.setAttribute("id", thisId);
@@ -186,7 +186,7 @@ var FireinputComposer =
           element.setAttribute("composeopened", "false");
           element.setAttribute("autoselected", autoselected);
 
-          FireinputLog.debug(this, "element.value: " + element.value);
+          Fireinput.log.debug(this, "element.value: " + element.value);
           hboxElement.appendChild(element);
            
           composerFieldsElement.appendChild(hboxElement); 
@@ -195,12 +195,12 @@ var FireinputComposer =
        else
        {
           this.composedNumber++;
-          var thisId = composerFieldTag + this.composedNumber;
+          var thisId = this.composerFieldTag + this.composedNumber;
 
           var hboxElement = document.getElementById(thisId);
 
           var element = document.getElementById(thisId + "_label");
-          FireinputLog.debug(this, "element.value: " + element.value);
+          Fireinput.log.debug(this, "element.value: " + element.value);
           element.setAttribute("value",result.value);
           element.setAttribute("hiddenkey", result.key);
           element.setAttribute("hiddenvalue", result.value); 
@@ -230,7 +230,7 @@ var FireinputComposer =
           if(wlist[i].style.display == "none") 
              continue;
           var cfindex = wlist[i].getAttribute("cfindex");
-          var editorBox = document.getElementById(composerFieldTag + cfindex + "_label"); 
+          var editorBox = document.getElementById(this.composerFieldTag + cfindex + "_label"); 
           if(!editorBox)
              continue; 
           words += editorBox.getAttribute("hiddenword"); 

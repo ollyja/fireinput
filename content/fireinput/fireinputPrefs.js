@@ -33,16 +33,17 @@
  *
  * ***** END LICENSE BLOCK ***** 
  */
-const prefNames =
+Fireinput.namespace("Fireinput.pref"); 
+Fireinput.pref.prefNames =
 [
-    {name: "interfaceLanguage", type: "STRING", value: LANGUAGE_ZH},
-    {name: "defaultInputMethod", type: "STRING", value: SMART_PINYIN},
+    {name: "interfaceLanguage", type: "STRING", value: Fireinput.LANGUAGE_ZH},
+    {name: "defaultInputMethod", type: "STRING", value: Fireinput.SMART_PINYIN},
     {name: "inputMethodList", type: "STRING", value: ""},
-    {name: "defaultInputEncoding", type: "STRING", value: ENCODING_ZH},
+    {name: "defaultInputEncoding", type: "STRING", value: Fireinput.ENCODING_ZH},
     {name: "saveHistory", type: "BOOL", value: true},
     {name: "autoInsert", type: "BOOL", value: true},
     {name: "firstRun",type: "STRING", value: ""},
-    {name: "IMEBarPosition", type: "STRING", value: IME_BAR_TOP},
+    {name: "IMEBarPosition", type: "STRING", value: Fireinput.IME_BAR_TOP},
     {name: "themeID", type: "STRING", value: "default"},
     {name: "updateFreq", type: "BOOL", value: true},
     {name: "autoLoad", type: "BOOL", value: true},
@@ -84,18 +85,18 @@ const prefNames =
     
 ];
 
-const prefInterfaceUI = [ 
+Fireinput.pref.prefInterfaceUI = [ 
             {id: "fireinputSettingMenu", strKey: "fireinput.menu.setting.label", attribute: "label"},           
             {id: "fireinputDefaultIMEBarPos", strKey: "fireinput.pref.imebar.position", attribute: "label"},           
             {id: "fireinputIMEBarPosTop", strKey: "fireinput.pref.imebar.position.top", attribute: "label"},           
             {id: "fireinputIMEBarPosBottom", strKey: "fireinput.pref.imebar.position.bottom", attribute: "label"},           
-            {id: "autoInsert", strKey: "fireinput.pref.auto.insert", attribute: "label"},           
-            {id: "autoInsert", strKey: "fireinput.pref.auto.insert.tooltip", attribute: "tooltiptext"},           
+            {id: "fireinputAutoInsert", strKey: "fireinput.pref.auto.insert", attribute: "label"},           
+            {id: "fireinputAutoInsert", strKey: "fireinput.pref.auto.insert.tooltip", attribute: "tooltiptext"},           
             {id: "fireinputConfigInputWindow", strKey: "fireinput.pref.inputwindow.setting", attribute: "label"},           
             {id: "fireinputDefaultInputMethod", strKey: "fireinput.pref.input.method", attribute: "label"},           
-            {id: "saveHistory", strKey: "fireinput.pref.save.history", attribute: "label"},           
-            {id: "updateFreq", strKey: "fireinput.pref.update.freq", attribute: "label"},           
-            {id: "autoLoad", strKey: "fireinput.pref.auto.load", attribute: "label"},           
+            {id: "fireinputSaveHistory", strKey: "fireinput.pref.save.history", attribute: "label"},           
+            {id: "fireinputUpdateFreq", strKey: "fireinput.pref.update.freq", attribute: "label"},           
+            {id: "fireinputAutoLoad", strKey: "fireinput.pref.auto.load", attribute: "label"},           
             {id: "fireinputInterfaceLanguage", strKey: "fireinput.choose.interface.language", attribute: "label"},
             {id: "fireinputLanguageChinese", strKey: "fireinput.chinese.label", attribute: "label"},           
             {id: "fireinputLanguageEnglish", strKey: "fireinput.english.label", attribute: "label"},           
@@ -110,24 +111,23 @@ const prefInterfaceUI = [
             {id: "imeZhengma", strKey: "fireinput.zhengma.label", attribute: "label"},
             {id: "fireinputAMB", strKey: "fireinput.pref.amb.label", attribute: "label"},
             {id: "imeAdvancedConfig", strKey: "fireinput.pref.ime.advanced.label", attribute: "label"},
-            {id: "configHotKey", strKey: "fireinput.pref.hotkey.config.label", attribute: "label"},
+            {id: "fireinputConfigHotKey", strKey: "fireinput.pref.hotkey.config.label", attribute: "label"},
             {id: "fireinputKeyExactMatch", strKey: "fireinput.pref.amb.inputkey.match", attribute: "label"}
       ]; 
 
 
-function fireinputPrefInit()
-{
+Fireinput.pref.init = function () {
     // get default language first 
-    var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage"); 
+    var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage"); 
 
     // update UI 
-    for(var i =prefInterfaceUI.length-1; i>=0; i--)
+    for(var i =Fireinput.pref.prefInterfaceUI.length-1; i>=0; i--)
     {
-       var id = prefInterfaceUI[i].id; 
-       var strKey = prefInterfaceUI[i].strKey; 
-       var attr = prefInterfaceUI[i].attribute; 
+       var id = Fireinput.pref.prefInterfaceUI[i].id; 
+       var strKey = Fireinput.pref.prefInterfaceUI[i].strKey; 
+       var attr = Fireinput.pref.prefInterfaceUI[i].attribute; 
  
-       var value = FireinputUtils.getLocaleString(strKey + defaultLanguage); 
+       var value = Fireinput.util.getLocaleString(strKey + defaultLanguage); 
        var handle = document.getElementById(id); 
        if(!handle)
           handle = document.documentElement.getButton(id); 
@@ -137,38 +137,35 @@ function fireinputPrefInit()
     }
 }
 
-function fireinputPrefGetType(option)
-{
-   for(var i =prefNames.length-1; i>=0; i--)
+Fireinput.pref.getType = function(option) {
+   for(var i =Fireinput.pref.prefNames.length-1; i>=0; i--)
     {
-       if(option == prefNames[i].name)
+       if(option == Fireinput.pref.prefNames[i].name)
        {
-          return prefNames[i].type; 
+          return Fireinput.pref.prefNames[i].type; 
        }
     }
  
     return 'STRING'; 
 }
 
-function fireinputPrefGetDefValue(option)
-{
-   for(var i =prefNames.length-1; i>=0; i--)
+Fireinput.pref.getDefValue = function (option) {
+   for(var i =Fireinput.pref.prefNames.length-1; i>=0; i--)
     {
-       if(option == prefNames[i].name)
+       if(option == Fireinput.pref.prefNames[i].name)
        {
-          return prefNames[i].value;
+          return Fireinput.pref.prefNames[i].value;
        }
     }
 
     return null; 
 }
 
-function fireinputPrefGetDefault(option)
-{
-    var type = fireinputPrefGetType(option); 
-    var value = fireinputPrefGetDefValue(option); 
+Fireinput.pref.getDefault = function(option) {
+    var type = Fireinput.pref.getType(option); 
+    var value = Fireinput.pref.getDefValue(option); 
     try {
-        var getvalue = FireinputPref.getPref(option, type); 
+        var getvalue = Fireinput.util.pref.getPref(option, type); 
         if(type == "BOOL")
         {
           if(getvalue == true)
@@ -192,8 +189,7 @@ function fireinputPrefGetDefault(option)
 }
 
     
-function fireinputPrefShowing(popup)
-{
+Fireinput.pref.showing = function (popup) {
     for (var child = popup.firstChild; child; child = child.nextSibling)
     {
        if (child.localName == "menuitem")
@@ -207,13 +203,13 @@ function fireinputPrefShowing(popup)
                 var value = child.getAttribute("value"); 
                 try
                 {
-                   var optionType = fireinputPrefGetType(option);
-                   var savedValue = FireinputPref.getPref(option, optionType);
+                   var optionType = Fireinput.pref.getType(option);
+                   var savedValue = Fireinput.util.pref.getPref(option, optionType);
                    child.setAttribute("checked", savedValue == value ? true : false); 
                 }
                 catch(e)
                 {
-                   var defaultValue = fireinputPrefGetDefault(option); 
+                   var defaultValue = Fireinput.pref.getDefault(option); 
                    child.setAttribute("checked", defaultValue == value ? true : false); 
                 }
              }
@@ -223,12 +219,12 @@ function fireinputPrefShowing(popup)
                 // checkbox is BOOL type. 
                 try
                 {
-                   var savedValue = FireinputPref.getPref(option, "BOOL");
+                   var savedValue = Fireinput.util.pref.getPref(option, "BOOL");
                    child.setAttribute("checked", savedValue); 
                 }
                 catch(e)
                 {
-                   var defaultValue = fireinputPrefGetDefault(option); 
+                   var defaultValue = Fireinput.pref.getDefault(option); 
                    child.setAttribute("checked", defaultValue); 
                 }
              }
@@ -239,8 +235,7 @@ function fireinputPrefShowing(popup)
     }
 }
 
-function fireinputPrefSave(menuitem, ovalue)
-{
+Fireinput.pref.save = function(menuitem, ovalue) {
     
     var option = null; 
     if(menuitem.getAttribute)
@@ -254,7 +249,7 @@ function fireinputPrefSave(menuitem, ovalue)
           var value = menuitem.getAttribute("value");
           try 
           {
-             FireinputPref.setPref(option,"STRING", value); 
+             Fireinput.pref.setPref(option,"STRING", value); 
           }
           catch(e) {}; 
        }
@@ -263,7 +258,7 @@ function fireinputPrefSave(menuitem, ovalue)
        { 
           try 
           {
-             FireinputPref.setPref(option,"BOOL", menuitem.getAttribute("checked") == "true"); 
+             Fireinput.util.pref.setPref(option,"BOOL", menuitem.getAttribute("checked") == "true"); 
           }
           catch(e) {}; 
        }
@@ -271,12 +266,12 @@ function fireinputPrefSave(menuitem, ovalue)
     else 
     {
        // might be real option 
-       var type = fireinputPrefGetType(menuitem); 
+       var type = Fireinput.pref.getType(menuitem); 
        if(type != 'undefined')
        {
           try 
           {
-             FireinputPref.setPref(menuitem,type, ovalue); 
+             Fireinput.util.pref.setPref(menuitem,type, ovalue); 
           }
           catch(e) {}; 
        }
@@ -285,21 +280,17 @@ function fireinputPrefSave(menuitem, ovalue)
     return true; 
 }
 
-var FireinputPrefDefault = {
-    getAMBOption: function(option)
-    {
-       var ambEnabled = false; 
-       try {
-          var value = FireinputPref.getPref(option, "BOOL");
-          if(value == true)
-             ambEnabled = true;
-          else
-             ambEnabled = false;
-       }
-       catch(e)
-       { };
+Fireinput.pref.getAMBOption = function(option) {
+    var ambEnabled = false; 
+    try {
+       var value = Fireinput.util.pref.getPref(option, "BOOL");
+       if(value == true)
+          ambEnabled = true;
+       else
+          ambEnabled = false;
+    }
+    catch(e)
+    { };
 
-       return ambEnabled;
-    },
-
-}; 
+    return ambEnabled;
+}

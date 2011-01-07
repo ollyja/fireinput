@@ -41,9 +41,10 @@ try {
   Components.utils.import("resource://gre/modules/utils.js");
 }
 
-var readerMainThread = FireinputXPC.getService("@mozilla.org/thread-manager;1").currentThread; 
+Fireinput.namespace("Fireinput.contextReader");
 
-var contextReader = {
+
+Fireinput.contextReader = {
 
     maxStep: 30000,
     maxPhraseLen: 20, 
@@ -53,14 +54,14 @@ var contextReader = {
     {
        gBrowser.addEventListener("load", function (event) {
             if (event.target.defaultView && !event.target.defaultView.frameElement) 
-               contextReader.run(event.originalTarget);
+               Fireinput.contextReader.run(event.originalTarget);
        }, true);
 
        // if tab is closed, remove all data from context reader to claim memory 
        if(gBrowser.tabContainer) {
           // FF 4 
           gBrowser.tabContainer.addEventListener("TabClose", function(event) {
-            contextReader.remove(event.target);
+            Fireinput.contextReader.remove(event.target);
           }, false);
        }
        else {
@@ -75,11 +76,11 @@ var contextReader = {
     run: function(tab)
     {
        /* if it's disabled from config, just return */
-       if(!fireinputPrefGetDefault("enableContextReader"))
+       if(!Fireinput.pref.getDefault("enableContextReader"))
           return; 
 
-       /* only run contextReader when IME is SMART_PINYIN */
-       if(FireinputUtils.getCurrentIME().getIMEType() != SMART_PINYIN)
+       /* only run contextReader when IME is Fireinput.SMART_PINYIN */
+       if(Fireinput.util.getCurrentIME().getIMEType() != Fireinput.SMART_PINYIN)
           return; 
 
        if(this.beginTime <= 0)
@@ -89,10 +90,10 @@ var contextReader = {
        /*FIXME: we use tab index here but the index is same for different window. Something need to be figured out how 
         *       how to support multiple window opening  
         */
-       if(contextReader.validContext(tab)) 
-          readerMainThread.dispatch(new workingThread(
+       if(Fireinput.contextReader.validContext(tab)) 
+          Fireinput.contextReader.readerMainThread.dispatch(new Fireinput.contextReader.workingThread(
                   1,gBrowser.getBrowserIndexForDocument(tab.defaultView.content.document), tab.defaultView.document.documentElement.innerHTML),
-          readerMainThread.DISPATCH_NORMAL);
+          Fireinput.contextReader.readerMainThread.DISPATCH_NORMAL);
     }, 
        
     validContext: function(tab)
@@ -150,7 +151,7 @@ var contextReader = {
     },
 
     remove: function(tab) {
-      FireinputImporter.removePhraseFromRemoteOnDemand(gBrowser.getBrowserIndexForDocument(tab)); 
+      Fireinput.importer.removePhraseFromRemoteOnDemand(gBrowser.getBrowserIndexForDocument(tab)); 
     }, 
 
     start: function(str)
@@ -197,23 +198,25 @@ var contextReader = {
 
 }; 
 
-var workingThread = function(threadID, tabindex, context) {
+Fireinput.contextReader.readerMainThread = Fireinput.util.xpc.getService("@mozilla.org/thread-manager;1").currentThread; 
+
+Fireinput.contextReader.workingThread = function(threadID, tabindex, context) {
     this.threadID = threadID;
     this.tabindex = tabindex; 
     this.context = context; 
     this.result = "";
 };
 
-workingThread.prototype = {
+Fireinput.contextReader.workingThread.prototype = {
     run: function() {
       try {
      
           // if the document is valid document we want to process, start the reader   
-          this.result = contextReader.start(this.context);
+          this.result = Fireinput.contextReader.start(this.context);
 
           // When it's done, call back to the main thread to let it know
           // we're finished.
-          readerMainThread.dispatch(new mainThread(this.threadID, this.result, this.tabindex), readerMainThread.DISPATCH_NORMAL);
+          Fireinput.contextReader.readerMainThread.dispatch(new Fireinput.contextReader.mainThread(this.threadID, this.result, this.tabindex), Fireinput.contextReader.readerMainThread.DISPATCH_NORMAL);
 
           // okay, we are almost done, check to see if there are pending events
           try { 
@@ -236,21 +239,21 @@ workingThread.prototype = {
 };
 
 
-var mainThread = function(threadID, result, tabindex) {
+Fireinput.contextReader.mainThread = function(threadID, result, tabindex) {
     this.threadID = threadID;
     this.result = result;
     this.tabindex = tabindex; 
 };
 
-mainThread.prototype = {
+Fireinput.contextReader.mainThread.prototype = {
     run: function() {
       try {
          // we got data from the working thread.
-         if(this.result.length <= 0)
+         if(!this.result || this.result.length <= 0)
             return; 
 
          // it's up to importer to handle it now 
-         FireinputImporter.processPhraseFromRemoteOnDemand(this.tabindex, this.result, this.result.length);
+         Fireinput.importer.processPhraseFromRemoteOnDemand(this.tabindex, this.result, this.result.length);
 
       } catch(err) {
          Components.utils.reportError(err);

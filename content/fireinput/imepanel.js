@@ -34,7 +34,7 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var FireinputIMEPanel = 
+Fireinput.imePanel = 
 {
     // debug: 0 disable, non-zero enable 
     debug: 1,
@@ -72,12 +72,12 @@ var FireinputIMEPanel =
 
     initPref: function()
     {
-       this.mySaveHistory = fireinputPrefGetDefault("saveHistory"); 
-       this.myAutoInsert = fireinputPrefGetDefault("autoInsert");
-       this.myUpdateFreq = fireinputPrefGetDefault("updateFreq");
-       this.myInputKeyExactMatch = fireinputPrefGetDefault("inputKeyExactMatch");
-       this.myNumWordSelection = fireinputPrefGetDefault("wordselectionNum"); 
-       this.mySelectionFontSize = fireinputPrefGetDefault("wordselectionFontsize"); 
+       this.mySaveHistory = Fireinput.pref.getDefault("saveHistory"); 
+       this.myAutoInsert = Fireinput.pref.getDefault("autoInsert");
+       this.myUpdateFreq = Fireinput.pref.getDefault("updateFreq");
+       this.myInputKeyExactMatch = Fireinput.pref.getDefault("inputKeyExactMatch");
+       this.myNumWordSelection = Fireinput.pref.getDefault("wordselectionNum"); 
+       this.mySelectionFontSize = Fireinput.pref.getDefault("wordselectionFontsize"); 
 
        this.initPanelUI(); 
     }, 
@@ -125,13 +125,13 @@ var FireinputIMEPanel =
     initPanelUI: function()
     {
        var handle = document.getElementById("fireinputIMEContainerBox");
-       var color = fireinputPrefGetDefault("inputboxBgcolor"); 
+       var color = Fireinput.pref.getDefault("inputboxBgcolor"); 
        if(color)
          handle.style.backgroundColor = color; 
 
        handle = document.getElementById("fireinputField"); 
-       color = fireinputPrefGetDefault("inputboxFontcolor"); 
-       var fontsize = fireinputPrefGetDefault("inputboxFontsize"); 
+       color = Fireinput.pref.getDefault("inputboxFontcolor"); 
+       var fontsize = Fireinput.pref.getDefault("inputboxFontsize"); 
 
        /*This might need to be handled differently if it works on win/mac */
        if(color)
@@ -140,7 +140,7 @@ var FireinputIMEPanel =
          handle.style.fontSize = fontsize + "pt"; 
 
        handle = document.getElementById("fireinputIMEList"); 
-       color = fireinputPrefGetDefault("wordselectionFontcolor"); 
+       color = Fireinput.pref.getDefault("wordselectionFontcolor"); 
        if(color)
          handle.style.color = color; 
 
@@ -156,7 +156,7 @@ var FireinputIMEPanel =
        // if the keyCode is Enter, we want to output char + input key left in idf 
        if(event.keyCode == KeyEvent.DOM_VK_RETURN)
        {
-          this.insertCharToTarget(event, Fireinput.getTarget(), index, true, true);
+          this.insertCharToTarget(event, Fireinput.main.getTarget(), index, true, true);
           return; 
        }
 
@@ -174,20 +174,20 @@ var FireinputIMEPanel =
           var result = this.getCharByPos(index);
           if(result)
           {
-             FireinputComposer.addToPanel("false", result);
+             Fireinput.composer.addToPanel("false", result);
           }
 
           // update inputField value and caret position 
           idf.value = subInputKeys; 
           this.myInputChar = subInputKeys.substring(0, 1); 
-          FireinputUtils.setCaretTo(idf, 1); 
+          Fireinput.util.setCaretTo(idf, 1); 
           // number key should be surpressed 
 
           this.findCharWithDelay(); 
 
        }
        else 
-          this.insertCharToTarget(event, Fireinput.getTarget(), index, true);
+          this.insertCharToTarget(event, Fireinput.main.getTarget(), index, true);
         
     }, 
 
@@ -199,11 +199,11 @@ var FireinputIMEPanel =
           return; 
        }
 
-       var fontsize = fireinputPrefGetDefault("wordselectionFontsize"); 
+       var fontsize = Fireinput.pref.getDefault("wordselectionFontsize"); 
 
        var inputPanelElement = document.getElementById('fireinputIMEList'); 
 
-       // FireinputLog.debug(this,"codeArray: " + Fireinput.getCurrentIME().getKeyWord(codeArray)); 
+       // Fireinput.log.debug(this,"codeArray: " + Fireinput.main.getCurrentIME().getKeyWord(codeArray)); 
        var codeArrayLength = codeArray.length; 
        for (var i = 0; i < codeArrayLength; i++)
        {
@@ -211,13 +211,13 @@ var FireinputIMEPanel =
           if(typeof(codeArray[i].encodedWord) != 'undefined')
              codeValue = codeArray[i].encodedWord.replace(/[\d\.]+$/g, ''); 
           else
-             codeValue = FireinputUnicode.getUnicodeString(codeArray[i].word.replace(/[\d\.]+$/g, '')); 
+             codeValue = Fireinput.util.unicode.getUnicodeString(codeArray[i].word.replace(/[\d\.]+$/g, '')); 
         
           var codeDisplayValue = codeValue; 
-          if(i== 0 && FireinputComposer.hasSet())
+          if(i== 0 && Fireinput.composer.hasSet())
           {     
              // preserve the first composed element if it's set 
-             codeDisplayValue = FireinputComposer.getComposeWord().value + codeValue; 
+             codeDisplayValue = Fireinput.composer.getComposeWord().value + codeValue; 
           }
 
           var elementId = "fireinputIMEList_label" + (i+1); 
@@ -258,17 +258,17 @@ var FireinputIMEPanel =
        this.hideChars(codeArray.length); 
 
        // check whether it needs to enable auto insertion 
-       if(this.myAutoInsert && Fireinput.getCurrentIME().canAutoInsert() && codeArray.length == 1)
-          this.insertCharToTarget(Fireinput.getEvent(), Fireinput.getTarget(), 1, true);
+       if(this.myAutoInsert && Fireinput.main.getCurrentIME().canAutoInsert() && codeArray.length == 1)
+          this.insertCharToTarget(Fireinput.main.getEvent(), Fireinput.main.getTarget(), 1, true);
 
        // add long table  to panel 
        if(this.mySaveHistory)
-          FireinputLongTable.notify(Fireinput.getTarget());
+          Fireinput.longTable.notify(Fireinput.main.getTarget());
     },
  
     hideAndCleanInput: function()
     {
-       if(Fireinput.getInputBarStatus())
+       if(Fireinput.main.getInputBarStatus())
        { 
           var id = document.getElementById("fireinputIMEContainer"); 
           id.hidePopup(); 
@@ -289,7 +289,7 @@ var FireinputIMEPanel =
        start = start || 0; 
 
        /* preserve the first composed element if it's set */
-       if(FireinputComposer.hasSet())
+       if(Fireinput.composer.hasSet())
           start = start > 0 ? start : 1; 
        
        for (var i = this.myNumWordSelection; i >= start; i--)
@@ -316,7 +316,7 @@ var FireinputIMEPanel =
 
     getCharByPos: function(i)
     {
-       if(Fireinput.getInputBarStatus())
+       if(Fireinput.main.getInputBarStatus())
        {
           var elementName = "fireinputIMEList_label" + i;
           if(/fireinputIMEList_label/.test(i))
@@ -352,14 +352,14 @@ var FireinputIMEPanel =
 
        var result = this.getCharByPos(i);
        var composeWasEnabled = this.myComposeEnabled; 
-       // FireinputLog.debug(this, "result: " + result + ", this.myComposeEnabled:" + this.myComposeEnabled);
+       // Fireinput.log.debug(this, "result: " + result + ", this.myComposeEnabled:" + this.myComposeEnabled);
        if(result)
        {
-          FireinputComposer.addToPanel(cas, result); 
+          Fireinput.composer.addToPanel(cas, result); 
           if(composeWasEnabled)
           {
              // move the focus to fireinputField 
-             FireinputUtils.setFocus(document.getElementById("fireinputField"));
+             Fireinput.util.setFocus(document.getElementById("fireinputField"));
           }
        } 
     },
@@ -371,11 +371,11 @@ var FireinputIMEPanel =
        // right click to launch search 
        if(event.button == 2)
        {
-          FireinputWebSearch.loadByMouse(result.value);
+          Fireinput.webSearch.loadByMouse(result.value);
           return; 
        }
 
-       if(!Fireinput.getCurrentIME().canComposeNew() || !FireinputComposer.hasSet())
+       if(!Fireinput.main.getCurrentIME().canComposeNew() || !Fireinput.composer.hasSet())
        {
           this.insertCharToTargetByValue(result.value);
           this.hideAndCleanInput(); 
@@ -386,12 +386,12 @@ var FireinputIMEPanel =
 
        if(result)
        {
-          FireinputComposer.addToPanel("false", result);
+          Fireinput.composer.addToPanel("false", result);
        } 
 
        if(composeWasEnabled)
        {
-          FireinputUtils.setFocus(document.getElementById("fireinputField"));
+          Fireinput.util.setFocus(document.getElementById("fireinputField"));
        }
    
        var idf = document.getElementById("fireinputField");
@@ -401,7 +401,7 @@ var FireinputIMEPanel =
           // update inputField value and caret position 
           idf.value = subInputKeys; 
           this.myInputChar = subInputKeys.substring(0, 1); 
-          FireinputUtils.setCaretTo(idf, 1); 
+          Fireinput.util.setCaretTo(idf, 1); 
           this.findCharWithDelay(); 
        }
        else 
@@ -413,15 +413,15 @@ var FireinputIMEPanel =
 
     insertCharToTargetByValue: function (charstr)
     {
-       FireinputUtils.insertCharAtCaret(Fireinput.getTarget(), charstr);
+       Fireinput.util.insertCharAtCaret(Fireinput.main.getTarget(), charstr);
        // add into long table 
        if(this.mySaveHistory)
-          FireinputLongTable.notify(Fireinput.getTarget());
+          Fireinput.longTable.notify(Fireinput.main.getTarget());
     }, 
 
     insertCharToTarget: function (event, target, i, hideInput, outputAll)
     {
-       if(Fireinput.getInputBarStatus())
+       if(Fireinput.main.getInputBarStatus())
        {
           event.preventDefault();
           event.stopPropagation(); 
@@ -454,7 +454,7 @@ var FireinputIMEPanel =
 
     insertAllCharsToTarget: function (target, hideInput, keyWordResult, outputAll)
     {
-       if(Fireinput.getInputBarStatus())
+       if(Fireinput.main.getInputBarStatus())
        {
           var value = "";
           var key = ""; 
@@ -470,7 +470,7 @@ var FireinputIMEPanel =
           }
 
           var insertValue = value; 
-          var composeWord = FireinputComposer.getComposeWord(); 
+          var composeWord = Fireinput.composer.getComposeWord(); 
           // if there is no composed word, and no valid word selection, and doesn't ask 
           // to output the key in pinyin field, we just hide here 
           if(composeWord.key.length <= 0 && key.length <= 0 && !outputAll)
@@ -500,30 +500,30 @@ var FireinputIMEPanel =
           // the outputAll is from just Enter press which just prints out the input key 
           if(outputAll)
           {
-             FireinputUtils.insertCharAtCaret(target, composeWord.ikey + keyInField); 
+             Fireinput.util.insertCharAtCaret(target, composeWord.ikey + keyInField); 
              // no need to go further, just return here 
              return; 
           }
           else 
-             FireinputUtils.insertCharAtCaret(target, insertValue);
+             Fireinput.util.insertCharAtCaret(target, insertValue);
 
           // keep the last selected element to insert repeatedly 
           this.myLastSelectedElementValue = insertValue; 
 
-          //FireinputLog.debug(this, "word: " + word + ", key: " + key + ", ufreq: " +  ufreq); 
+          //Fireinput.log.debug(this, "word: " + word + ", key: " + key + ", ufreq: " +  ufreq); 
           // update the frequency or save as new word 
           if(composeWord.key.length > 0)
           {
              var newPhraseArray = []; 
              newPhraseArray.push({key: composeWord.key + " " + key, word: composeWord.word + word}); 
-             //FireinputLog.debug(this, "newPhraseArray: " + composeWord.key + " " + key + ", word: " +  composeWord.word + word); 
-             Fireinput.getCurrentIME().storeUserPhrase(newPhraseArray); 
+             //Fireinput.log.debug(this, "newPhraseArray: " + composeWord.key + " " + key + ", word: " +  composeWord.word + word); 
+             Fireinput.main.getCurrentIME().storeUserPhrase(newPhraseArray); 
           }
           else if(this.myUpdateFreq && ufreq)
-             Fireinput.getCurrentIME().updateFrequency(word, key);
+             Fireinput.main.getCurrentIME().updateFrequency(word, key);
 
           if(this.mySaveHistory)
-             FireinputLongTable.notify(Fireinput.getTarget());
+             Fireinput.longTable.notify(Fireinput.main.getTarget());
        }   
     },
 
@@ -572,11 +572,11 @@ var FireinputIMEPanel =
        var idf = document.getElementById("fireinputField");
        
        // send to IME method to query the string 
-       var result = Fireinput.getCurrentIME().prev(homeFlag);
-       // FireinputLog.debug(this,"call prev, length: " + codeArray.length); 
+       var result = Fireinput.main.getCurrentIME().prev(homeFlag);
+       // Fireinput.log.debug(this,"call prev, length: " + codeArray.length); 
        if(!result || !result.charArray)
           this.disableSelButton(true, false); 
-       else if(homeFlag || Fireinput.getCurrentIME().isBeginning())
+       else if(homeFlag || Fireinput.main.getCurrentIME().isBeginning())
           this.disableSelButton(true, false); 
        else
           this.disableSelButton(false, false); 
@@ -595,11 +595,11 @@ var FireinputIMEPanel =
        var idf = document.getElementById("fireinputField");
 
        // send to IME method to query the string 
-       var result = Fireinput.getCurrentIME().next(endFlag); 
-       // FireinputLog.debug(this,"call next, length: " + codeArray.length); 
+       var result = Fireinput.main.getCurrentIME().next(endFlag); 
+       // Fireinput.log.debug(this,"call next, length: " + codeArray.length); 
        if(!result || !result.charArray || result.charArray.length < this.myNumWordSelection)
           this.disableSelButton(false, true);
-       else if (endFlag || Fireinput.getCurrentIME().isEnd())
+       else if (endFlag || Fireinput.main.getCurrentIME().isEnd())
           this.disableSelButton(false, true);
        else    
           this.disableSelButton(false, false);
@@ -644,7 +644,7 @@ var FireinputIMEPanel =
        if(this.myKeyTimer)
          clearTimeout(this.myKeyTimer); 
 
-       FireinputLog.debug(this, "findCharWithDelay: call findChar");
+       Fireinput.log.debug(this, "findCharWithDelay: call findChar");
        var self = this; 
        this.myKeyTimer = setTimeout(function () { self.findChar(); }, delayMSec); 
     },
@@ -657,35 +657,35 @@ var FireinputIMEPanel =
  
        var singleWord = false; 
        // force single word to be chosen for next look up 
-       if(FireinputComposer.hasSet())
+       if(Fireinput.composer.hasSet())
           singleWord = false; 
 
-       FireinputLog.debug(this, "findChar: " + this.myInputChar);
+       Fireinput.log.debug(this, "findChar: " + this.myInputChar);
  
        var autoCompKeys = ""; 
-       if(newKeyFlag && Fireinput.getCurrentIME().canComposeNew() && FireinputComposer.hasSet())
+       if(newKeyFlag && Fireinput.main.getCurrentIME().canComposeNew() && Fireinput.composer.hasSet())
        {
           /* Fireinput might have composed a few, but it may not be accurate. If there is a new key in, 
            * redo the composition, so there might be a chance to get correct result 
            */
-          autoCompKeys = FireinputComposer.getLastAutoSelected(); 
+          autoCompKeys = Fireinput.composer.getLastAutoSelected(); 
           /* Note: don't directly change this.myInputChar as it syncs with inputField position */
        } 
        // send to IME method to query the string 
-       var result = Fireinput.getCurrentIME().find(autoCompKeys+this.myInputChar, singleWord, this.myInputKeyExactMatch);
+       var result = Fireinput.main.getCurrentIME().find(autoCompKeys+this.myInputChar, singleWord, this.myInputKeyExactMatch);
        this.sendStringToPanel(result.charArray, result.validInputKey);
        if(!result.charArray || result.charArray.length < this.myNumWordSelection)
           this.disableSelButton(true, true); 
-       else if (Fireinput.getCurrentIME().isEnd())
+       else if (Fireinput.main.getCurrentIME().isEnd())
           this.disableSelButton(true, true);
        else
           this.disableSelButton(true, false);
       
-       if(!Fireinput.getCurrentIME().canComposeNew())
+       if(!Fireinput.main.getCurrentIME().canComposeNew())
           return; 
 
-       FireinputLog.debug(this, "result.validInputKey: " + result.validInputKey);
-       FireinputLog.debug(this, "this.myInputChar: " + this.myInputChar);
+       Fireinput.log.debug(this, "result.validInputKey: " + result.validInputKey);
+       Fireinput.log.debug(this, "this.myInputChar: " + this.myInputChar);
 
        /* sanity check. autoCompKeys must be considered since it was part of search keys */
        if(result && result.charArray && result.charArray.length > 0 && 
@@ -694,9 +694,9 @@ var FireinputIMEPanel =
           var newvalue = (autoCompKeys+this.myInputChar).substr(result.validInputKey.length, autoCompKeys.length + this.myInputChar.length); 
           this.insertCharToComposer(null, 1, "true");
           var idf = document.getElementById("fireinputField");
-          FireinputLog.debug(this,"newvalue:" + newvalue + ", idf.value: " + idf.value + ", this.myInputChar: " + this.myInputChar);
+          Fireinput.log.debug(this,"newvalue:" + newvalue + ", idf.value: " + idf.value + ", this.myInputChar: " + this.myInputChar);
           idf.value = newvalue + idf.value.replace(this.myInputChar, ""); 
-          FireinputUtils.setCaretTo(idf, newvalue.length); 
+          Fireinput.util.setCaretTo(idf, newvalue.length); 
           this.myInputChar = newvalue; 
           this.findChar(); 
        }
@@ -709,12 +709,12 @@ var FireinputIMEPanel =
           var idf = document.getElementById("fireinputField");
           idf.value = autoCompKeys + idf.value; 
           this.myInputChar = autoCompKeys + this.myInputChar; 
-          FireinputUtils.setCaretTo(idf, autoCompKeys.length + this.myInputChar.length);
-          FireinputLog.debug(this, "no result or all key are valid: idf.value:  " + idf.value);
-          FireinputLog.debug(this, "no result or all key are valid: this.myInputChar:  " + this.myInputChar);
+          Fireinput.util.setCaretTo(idf, autoCompKeys.length + this.myInputChar.length);
+          Fireinput.log.debug(this, "no result or all key are valid: idf.value:  " + idf.value);
+          Fireinput.log.debug(this, "no result or all key are valid: this.myInputChar:  " + this.myInputChar);
        }
 
-       // FireinputLog.debug(this, "after findChar, this.myInputChar: " + this.myInputChar);
+       // Fireinput.log.debug(this, "after findChar, this.myInputChar: " + this.myInputChar);
 
     },
   
@@ -723,14 +723,14 @@ var FireinputIMEPanel =
        if(!inputChar || inputChar.length <= 0)
           return; 
 
-       //FireinputLog.debug(this, "Send key: inputChar: " + inputChar);
+       //Fireinput.log.debug(this, "Send key: inputChar: " + inputChar);
  
        // send to IME method to query the string 
-       var result = Fireinput.getCurrentIME().find(inputChar);
+       var result = Fireinput.main.getCurrentIME().find(inputChar);
        this.sendStringToPanel(result.charArray, result.validInputKey);
        if(!result.charArray || result.charArray.length < this.myNumWordSelection)
           this.disableSelButton(true, true); 
-       else if (Fireinput.getCurrentIME().isEnd())
+       else if (Fireinput.main.getCurrentIME().isEnd())
           this.disableSelButton(true, true);
        else
           this.disableSelButton(true, false);

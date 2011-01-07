@@ -34,12 +34,13 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-const tableManagmentUI = [
+Fireinput.namespace("Fireinput.table"); 
+
+Fireinput.table.tableManagmentUI = [
     {id: "fireinputTableManagement", strKey: "fireinput.table.management.label", attribute: "label"}
 ]; 
 
-var FireinputTable = 
-{
+Fireinput.table = Fireinput.extend(Fireinput.table, {
     debug: 0, 
 
     updateTimer: null, 
@@ -54,7 +55,7 @@ var FireinputTable =
        this.refreshMenu(); 
 
        // register an observer 
-       var os = FireinputXPC.getService("@mozilla.org/observer-service;1", "nsIObserverService");
+       var os = Fireinput.util.xpc.getService("@mozilla.org/observer-service;1", "nsIObserverService");
        os.addObserver(this, "fireinput-table-update-request", false);
        
        // check new table words 
@@ -77,24 +78,24 @@ var FireinputTable =
     refreshMenu: function()
     {
        // get default language first 
-       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
+       var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
        // update UI 
-       for(var i =0; i<tableManagmentUI.length; i++)
+       for(var i =0; i<this.tableManagmentUI.length; i++)
        {
-          var id = tableManagmentUI[i].id;
+          var id = this.tableManagmentUI[i].id;
           var handle = document.getElementById(id);
           if(!handle)
              continue;
 
-          var strKey = tableManagmentUI[i].strKey;
-          var attr = tableManagmentUI[i].attribute;
+          var strKey = this.tableManagmentUI[i].strKey;
+          var attr = this.tableManagmentUI[i].attribute;
 
-          var value = FireinputUtils.getLocaleString(strKey + defaultLanguage);
+          var value = Fireinput.util.getLocaleString(strKey + defaultLanguage);
           // to check whether the shortcut keystring exists 
           var found =value.match(/%(.+)%/i);
           if(found)
           {
-             var keystring = FireinputKeyBinding.getKeyString(found[1]);
+             var keystring = Fireinput.keyBinding.getKeyString(found[1]);
              value = value.replace(found[0], keystring);
           }
 
@@ -104,12 +105,12 @@ var FireinputTable =
 
     showDialog: function()
     {
-       FireinputUtils.loadURI("chrome://fireinput/content/tablemgr/tablemgr.html");
+       Fireinput.util.loadURI("chrome://fireinput/content/tablemgr/tablemgr.html");
     },
 
     openUpdateLink: function()
     {
-      FireinputUtils.loadURI(SERVER_URL + "table/index.php");
+      Fireinput.util.loadURI(Fireinput.SERVER_URL + "table/index.php");
     }, 
 
     isBeingUpdated: function()
@@ -126,8 +127,8 @@ var FireinputTable =
           if(handle) 
             handle.style.display = ""; // don't put block here as it will not align with other menu well 
 
-          var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
-          var value = FireinputUtils.getLocaleString('fireinput.table.updating.label' + defaultLanguage);
+          var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
+          var value = Fireinput.util.getLocaleString('fireinput.table.updating.label' + defaultLanguage);
           var h = document.getElementById('fireinputTableUpdate'); 
           if(h)
               h.setAttribute('label', value); 
@@ -149,14 +150,14 @@ var FireinputTable =
        if(this.isBeingUpdated())
           return; 
 
-       var lastupdate = fireinputPrefGetDefault("lastTableUpdate"); 
-       var intervalInHour = fireinputPrefGetDefault("tableUpdateInterval");
+       var lastupdate = Fireinput.pref.getDefault("lastTableUpdate"); 
+       var intervalInHour = Fireinput.pref.getDefault("tableUpdateInterval");
        if(lastupdate.length <= 0)
        {
 
           // find out the fireinput installation time 
           // FIXME: this is wrong 
-          var dirService = FireinputXPC.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
+          var dirService = Fireinput.util.xpc.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
 
           var path = dirService.get("ProfD", Components.interfaces.nsIFile);
           path.append("fireinput");
@@ -170,7 +171,7 @@ var FireinputTable =
        {
           // perodically loop to see if the interval has been changed. 
           var timeout = 30 * 60 * 1000; 
-          this.updateTimer = setTimeout(function() { FireinputTable.checkTableUpdate(); }, timeout);
+          this.updateTimer = setTimeout(function() { Fireinput.table.checkTableUpdate(); }, timeout);
        }
        else 
        {
@@ -180,23 +181,23 @@ var FireinputTable =
           timeout = (!force && timeout > 0) ? timeout: 1000; // give 1 seconds window 
           var lastupdatetime = last / 1000;
 
-          FireinputLog.debug(this, "lastupdatetime: " + lastupdatetime + ", timeout: " + timeout);
-          this.updateTimer = setTimeout(function() { FireinputTable.startTableUpdate(lastupdatetime); }, timeout);
+          Fireinput.log.debug(this, "lastupdatetime: " + lastupdatetime + ", timeout: " + timeout);
+          this.updateTimer = setTimeout(function() { Fireinput.table.startTableUpdate(lastupdatetime); }, timeout);
        }
     },
 
     startTableUpdate: function(lastupdatetime)
     {
-       var ime = FireinputUtils.getCurrentIME();
+       var ime = Fireinput.util.getCurrentIME();
        // FIXME: only support pinyin now 
-       if(ime.getIMEType() > SMARTABC_SHUANGPIN)
+       if(ime.getIMEType() > Fireinput.SMARTABC_SHUANGPIN)
        {
-          fireinputPrefSave('lastTableUpdate', (new Date()).toString());
+          Fireinput.pref.save('lastTableUpdate', (new Date()).toString());
           this.checkTableUpdate(); 
           return; 
        }
 
-       var ajax = new Ajax();
+       var ajax = new Fireinput.util.ajax();
        if(!ajax) 
           return;
 
@@ -211,11 +212,11 @@ var FireinputTable =
 
        this.showUpdatingProgress(true); 
 
-       var ime = FireinputUtils.getCurrentIME(); 
+       var ime = Fireinput.util.getCurrentIME(); 
        var params = "imetype=" + encodeURIComponent(ime.getIMEType()) + 
                     "&lastupdate=" + encodeURIComponent(lastupdatetime); 
 
-       setTimeout(function() { ajax.request(SERVER_URL + "/table/getlatest.php?" + params); }, 5000);
+       setTimeout(function() { ajax.request(Fireinput.SERVER_URL + "/table/getlatest.php?" + params); }, 5000);
     },
 
     processLatestTableUpdate: function(p, error)
@@ -225,7 +226,7 @@ var FireinputTable =
           this.showUpdatingProgress(false); 
           // if not error, set lastUpdateTime 
           if(!error)
-            fireinputPrefSave('lastTableUpdate', (new Date()).toString());
+            Fireinput.pref.save('lastTableUpdate', (new Date()).toString());
 
           // re-schedule it 
           this.checkTableUpdate(); 
@@ -233,7 +234,7 @@ var FireinputTable =
        }
 
        // the input is UTF-8, we need to convert as we save raw bytes in memory 
-       var words = FireinputUnicode.convertFromUnicode(p.responseText);
+       var words = Fireinput.util.unicode.convertFromUnicode(p.responseText);
        var jsonArray;
        try {
           jsonArray = JSON.parse(words); 
@@ -242,13 +243,13 @@ var FireinputTable =
 
        if(typeof(jsonArray) == 'undefined')
        { 
-          fireinputPrefSave('lastTableUpdate', (new Date()).toString());
+          Fireinput.pref.save('lastTableUpdate', (new Date()).toString());
           this.showUpdatingProgress(false); 
           this.checkTableUpdate(); 
           return;
        }
 
-       FireinputLog.debug(this, FireinputUnicode.getUnicodeString(jsonArray.toString()));
+       Fireinput.log.debug(this, Fireinput.util.unicode.getUnicodeString(jsonArray.toString()));
        this.processLatestTable(jsonArray); 
        this.showUpdatingProgress(false); 
     },
@@ -257,18 +258,19 @@ var FireinputTable =
     {
        var current = new Date(); 
        try {
-         FireinputImporter.storePhraseFromAutoupdate(tableArray); 
+         Fireinput.importer.storePhraseFromAutoupdate(tableArray); 
          
        } catch(e) {}; 
 
        // update lastTableUpdate time and re-schedule checking 
-       fireinputPrefSave('lastTableUpdate', current.toString());
+       Fireinput.pref.save('lastTableUpdate', current.toString());
        this.checkTableUpdate(); 
     }
    
-}; 
+}); 
 
-var FireinputImporter = {
+
+Fireinput.importer = {
 
    debug: 0, 
    extPhraseCodeHash: null, 
@@ -280,7 +282,7 @@ var FireinputImporter = {
       if(this.mDBConn)
          return; 
 
-      var file = FireinputXPC.getService("@mozilla.org/file/directory_service;1", "nsIProperties").
+      var file = Fireinput.util.xpc.getService("@mozilla.org/file/directory_service;1", "nsIProperties").
                               get("ProfD", Components.interfaces.nsIFile);
   
       file.append("fireinput.sqlite");  
@@ -324,12 +326,12 @@ var FireinputImporter = {
       if(!this.mDBConn)
         return; 
       var statement = this.mDBConn.createStatement("SELECT * FROM import_history WHERE signature=:signature");
-      statement.params.signature = hex_md5(tablename);
+      statement.params.signature = Fireinput.md5.hex_md5(tablename);
       statement.executeAsync({
         empty: true,
         handleResult: function(aResultSet) {  
            this.empty = false; 
-           FireinputImporter.updateImportHistory(tablename);
+           Fireinput.importer.updateImportHistory(tablename);
         }, 
         handleError: function(aError) {
         }, 
@@ -337,7 +339,7 @@ var FireinputImporter = {
         handleCompletion: function(aReason) {
            if(aReason == Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED && 
               this.empty) {
-              FireinputImporter.insertImportHistory(filelink, tablename);
+              Fireinput.importer.insertImportHistory(filelink, tablename);
            }
         }
       });
@@ -353,7 +355,7 @@ var FireinputImporter = {
       var statement = this.mDBConn.createStatement("UPDATE import_history SET last_updated=:last_updated WHERE signature=:signature");
       var d = new Date(); 
       statement.params.last_updated = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(); 
-      statement.params.signature = hex_md5(tablename);
+      statement.params.signature = Fireinput.md5.hex_md5(tablename);
 
       statement.executeAsync({
         handleCompletion: function(aReason) {
@@ -372,7 +374,7 @@ var FireinputImporter = {
       var statement = this.mDBConn.createStatement("INSERT INTO import_history (table_link, table_name, signature, last_updated) VALUES(:table_link, :table_name, :signature, :last_updated)");  
       var d = new Date(); 
       statement.params.last_updated = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(); 
-      statement.params.signature = hex_md5(tablename);
+      statement.params.signature = Fireinput.md5.hex_md5(tablename);
       statement.params.table_link = filelink; 
       statement.params.table_name = tablename;
 
@@ -406,11 +408,11 @@ var FireinputImporter = {
   
    loadExtPhraseTable: function(callback)
    {
-       var ios = FireinputXPC.getIOService();
+       var ios = Fireinput.util.xpc.getIOService();
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
-       var IME = new FireinputIME();
+       var IME = new Fireinput.imeEngine();
        var datafile = IME.getExtDataFile();
        if(!datafile.exists())
        {
@@ -418,14 +420,14 @@ var FireinputImporter = {
           return;
        }
 
-       this.extPhraseCodeHash = new FireinputHash();
+       this.extPhraseCodeHash = new Fireinput.util.hash();
 
        var options = {
           caller: this,
           onavailable: this.getExtPhraseCodeLine,
           oncomplete: function() { callback(); }
        };
-       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+       Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options);
     },
 
     getExtPhraseCodeLine: function(str)
@@ -444,7 +446,7 @@ var FireinputImporter = {
        var signature = strArray[5]; 
 
        // only care about pinyin 
-       if(schema != SMART_PINYIN)
+       if(schema != Fireinput.SMART_PINYIN)
           return; 
 
        this.extPhraseCodeHash.setItem(word + ":" + key, {freq: freq, initKey: initKey, schema: schema, signature: signature});
@@ -453,7 +455,7 @@ var FireinputImporter = {
     addOneExtPhrase: function(phrase, key, freq, initKey, schema, signature)
     {
        if(!this.extPhraseCodeHash)
-          this.extPhraseCodeHash = new FireinputHash();
+          this.extPhraseCodeHash = new Fireinput.util.hash();
 
        if(this.extPhraseCodeHash.hasItem(phrase + ":" + key))
           return; 
@@ -466,7 +468,7 @@ var FireinputImporter = {
     {
        if(this.extPhraseCodeHash && this.extPhraseTableChanged)
        {
-          FireinputSaver.saveExtData(this.extPhraseCodeHash);
+          Fireinput.phraseSaver.saveExtData(this.extPhraseCodeHash);
           this.extPhraseTableChanged = 0; 
           this.extPhraseCodeHash = null; 
        }
@@ -486,7 +488,7 @@ var FireinputImporter = {
                 self.extPhraseCodeHash.removeItem(k); 
              }
           }); 
-          FireinputSaver.saveExtData(self.extPhraseCodeHash);
+          Fireinput.phraseSaver.saveExtData(self.extPhraseCodeHash);
           self.deleteImportHistory(signature, callback);
        }; 
    
@@ -496,10 +498,10 @@ var FireinputImporter = {
 
     buildPhraseKeyMap: function(word, keyArray)
     {
-       var ime = FireinputUtils.getCurrentIME();
+       var ime = Fireinput.util.getCurrentIME();
 
        var pinyin = ime.getWordPinyin(word);
-       //FireinputLog.debug(this, "pinyin: " + pinyin);
+       //Fireinput.log.debug(this, "pinyin: " + pinyin);
        if(!pinyin)
           return keyArray; 
 
@@ -538,7 +540,7 @@ var FireinputImporter = {
           {
              // okay. Here is the complicated thing: the keyArray might be multiple entries, so as same as pinyin list
              // as such we need to extend keyArray by M (number of pinyin list) times of entries. We need to put limit here 
-             var result = cloneArray(keyArray);
+             var result = Fireinput.cloneArray(keyArray);
              for(var i=0; i<pinyin.length; i++)
              {
                 // remove freq 
@@ -564,7 +566,7 @@ var FireinputImporter = {
           }
 
        }
-       //FireinputLog.debug(this, "build keyArray: " + keyArray.join(",")); 
+       //Fireinput.log.debug(this, "build keyArray: " + keyArray.join(",")); 
 
     }, 
 
@@ -574,9 +576,9 @@ var FireinputImporter = {
            keyArray=[]; 
 
        var uword = phrase.substr(0, 1); 
-       var word = FireinputUnicode.convertFromUnicode(uword);
+       var word = Fireinput.util.unicode.convertFromUnicode(uword);
  
-       var ime = FireinputUtils.getCurrentIME(); 
+       var ime = Fireinput.util.getCurrentIME(); 
 
        if(!ime.getWordPinyin(word) || uword == word)
        {
@@ -584,7 +586,7 @@ var FireinputImporter = {
           return null; 
        }
 
-       //FireinputLog.debug(this, "word: " + FireinputUnicode.getUnicodeString(word));
+       //Fireinput.log.debug(this, "word: " + Fireinput.util.unicode.getUnicodeString(word));
        if(word)
        {
           phrase = phrase.substr(1, phrase.length);
@@ -592,8 +594,8 @@ var FireinputImporter = {
           this.getPhrasePinyinKey(phrase, keyArray);
        }
 
-      // FireinputLog.debug(this, "return keyArray: " + keyArray.join(",")); 
-      // FireinputLog.debug(this, "return keyArray.length: " + keyArray.length); 
+      // Fireinput.log.debug(this, "return keyArray: " + keyArray.join(",")); 
+      // Fireinput.log.debug(this, "return keyArray.length: " + keyArray.length); 
        return keyArray; 
     }, 
 
@@ -603,11 +605,11 @@ var FireinputImporter = {
        if(!line || line.length <= 1)
           return; 
 
-       FireinputLog.debug(this, "line: " + line); 
+       Fireinput.log.debug(this, "line: " + line); 
        var pinyinkey = null; 
        var phraseFreq = null; 
 
-       var ime = FireinputUtils.getCurrentIME(); 
+       var ime = Fireinput.util.getCurrentIME(); 
 
        // supported format: 
        // phrase
@@ -627,7 +629,7 @@ var FireinputImporter = {
        {
           // must be freq phrase or phrase only 
           phraseFreq = line; 
-          if(ime.getIMEType() != SMART_PINYIN)
+          if(ime.getIMEType() != Fireinput.SMART_PINYIN)
           {
              // for any non-pinyin importing, we need the key; ignore if the line doesn't have it 
              return; 
@@ -661,13 +663,13 @@ var FireinputImporter = {
               var keys = this.getPhrasePinyinKey(phrase);
               if(!keys || keys.length <= 0)
                  return; 
-              FireinputLog.debug(this, "Phrase: " + phrase + ", Got keys: " + keys.join(",")); 
+              Fireinput.log.debug(this, "Phrase: " + phrase + ", Got keys: " + keys.join(",")); 
 
-              phrase = FireinputUnicode.convertFromUnicode(phrase); 
+              phrase = Fireinput.util.unicode.convertFromUnicode(phrase); 
               for(var i=0; i<keys.length; i++)
               {
                  var initialKey = ime.getPhraseInitKey(keys[i]);
-                 if(ondemand && ime.getIMEType() == SMART_PINYIN) {
+                 if(ondemand && ime.getIMEType() == Fireinput.SMART_PINYIN) {
                     // if the signature is not given, it means the phrase is from on-demand, and the engine must flush it out 
                     // once the url is closed or after a certain amount of time 
                     ime.storeOnDemandPhrase(phrase, keys[i], freq, initialKey, signature);
@@ -688,17 +690,17 @@ var FireinputImporter = {
            {
               // on-demand processing should never reach here
               var initialKey = ime.getPhraseInitKey(pinyinkey);
-              ime.storeOneUpdatePhraseWithFreq(FireinputUnicode.convertFromUnicode(phrase), pinyinkey, freq, initialKey);         
+              ime.storeOneUpdatePhraseWithFreq(Fireinput.util.unicode.convertFromUnicode(phrase), pinyinkey, freq, initialKey);         
               // only update ext hash when signature is set. This is not true for on-demand processing 
               if(signature)
-                 this.addOneExtPhrase(FireinputUnicode.convertFromUnicode(phrase), keys[i], freq, initialKey, ime.getIMEType(), signature);
+                 this.addOneExtPhrase(Fireinput.util.unicode.convertFromUnicode(phrase), keys[i], freq, initialKey, ime.getIMEType(), signature);
            }
        }
     }, 
 
     storePhraseFromLocal: function(localfile)
     {
-       var ios = FireinputXPC.getIOService();
+       var ios = Fireinput.util.xpc.getIOService();
        var fileHandler = ios.getProtocolHandler("file")
                          .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
@@ -709,15 +711,15 @@ var FireinputImporter = {
            return;
        }
 
-       var istream = FireinputXPC.createInstance("@mozilla.org/network/file-input-stream;1", "nsIFileInputStream");
+       var istream = Fireinput.util.xpc.createInstance("@mozilla.org/network/file-input-stream;1", "nsIFileInputStream");
        istream.init(datafile,  0x01, 0444, 0);
        istream.QueryInterface(Components.interfaces.nsILineInputStream);
 
-       FireinputLog.debug(this, "datafile.fileSize: " + datafile.fileSize);
+       Fireinput.log.debug(this, "datafile.fileSize: " + datafile.fileSize);
        var line = {}, lines = [], hasmore;
        do {
            hasmore = istream.readLine(line);
-           line.value = FireinputUnicode.getUnicodeString(line.value); 
+           line.value = Fireinput.util.unicode.getUnicodeString(line.value); 
            lines.push(line.value);
        } while(hasmore);
 
@@ -726,7 +728,7 @@ var FireinputImporter = {
        this.storePhrasePercent = 0; 
        // process any insertion after loading is completed 
        this.loadExtPhraseTable(function() {
-          FireinputImporter.processPhraseFromLocal(lines, 0, datafile.fileSize, hex_md5(localfile));
+          Fireinput.importer.processPhraseFromLocal(lines, 0, datafile.fileSize, Fireinput.md5.hex_md5(localfile));
        }); 
     }, 
  
@@ -740,8 +742,8 @@ var FireinputImporter = {
     /* remove on demand phrase to save memory if the tab is closed */
     removePhraseFromRemoteOnDemand: function(signature)
     {
-       var ime = FireinputUtils.getCurrentIME(); 
-       if(ime.getIMEType() != SMART_PINYIN)
+       var ime = Fireinput.util.getCurrentIME(); 
+       if(ime.getIMEType() != Fireinput.SMART_PINYIN)
          return; 
 
        ime.removeOnDemandPhrase(signature); 
@@ -753,7 +755,7 @@ var FireinputImporter = {
        this.storePhrasePercent = 0; 
        // process any insertion after loading is completed 
        this.loadExtPhraseTable(function() {
-          FireinputImporter.processPhraseFromLocal(lines, 0, totalsize, signature);
+          Fireinput.importer.processPhraseFromLocal(lines, 0, totalsize, signature);
        }); 
     }, 
 
@@ -794,22 +796,22 @@ var FireinputImporter = {
        if(!updatePhrases || updatePhrases.length <= 0)
           return;
 
-       FireinputLog.debug(this, "updatePhrase.length: " + updatePhrases.length);
+       Fireinput.log.debug(this, "updatePhrase.length: " + updatePhrases.length);
        // load existing tables 
        this.loadExtPhraseTable(function() {
-          var signature = hex_md5("火输词库更新");
+          var signature = Fireinput.md5.hex_md5("火输词库更新");
           for(var i=0; i<updatePhrases.length; i++)
           {
-             FireinputImporter.storeOneUpdatePhrase(updatePhrases[i], signature);
+             Fireinput.importer.storeOneUpdatePhrase(updatePhrases[i], signature);
           }
-          FireinputImporter.flushExtPhraseTable();
-          FireinputImporter.updateHistory(SERVER_URL + "table/index.php", "火输词库更新");
+          Fireinput.importer.flushExtPhraseTable();
+          Fireinput.importer.updateHistory(Fireinput.SERVER_URL + "table/index.php", "火输词库更新");
        }); 
     },
 
     storeOneUpdatePhrase: function(updatePhrase, signature)
     {
-       FireinputLog.debug(this, "phrase: " + updatePhrase);
+       Fireinput.log.debug(this, "phrase: " + updatePhrase);
        if(!updatePhrase || updatePhrase.length <= 0)
           return;
 
@@ -822,7 +824,7 @@ var FireinputImporter = {
           var keys = phraseKey[1]; //.replace(/\d+/g, ''); 
           var freq = phraseKey[0].match(/[\d\.]+/g)[0];
 
-          var ime = FireinputUtils.getCurrentIME(); 
+          var ime = Fireinput.util.getCurrentIME(); 
           var initialKey = ime.getPhraseInitKey(keys);
           ime.storeOneUpdatePhraseWithFreq(phrase, keys, freq, initialKey);
           // add it to ext phrase list

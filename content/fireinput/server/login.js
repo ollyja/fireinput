@@ -34,11 +34,11 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var FireinputServerLogin = 
+Fireinput.serverLogin = 
 {
     checkUserLogon: function(loginCallback)
     {
-       var ajax = new Ajax();
+       var ajax = new Fireinput.util.ajax();
        if(!ajax)
           return;
        var self = this;
@@ -49,7 +49,7 @@ var FireinputServerLogin =
              onSuccess: function(p) { self.checkUserLogonSuccess(p, loginCallback); },
              onFailure: function(p) { self.checkUserLogonFailure(p); }
           });
-       ajax.request(SERVER_URL + "/account/logon_info.php"); 
+       ajax.request(Fireinput.SERVER_URL + "/account/logon_info.php"); 
     },
       
     checkUserLogonSuccess: function(p, loginCallback)
@@ -113,7 +113,7 @@ var FireinputServerLogin =
          handle.style.display = "none";
          return; 
        }
-       var ajax = new Ajax();
+       var ajax = new Fireinput.util.ajax();
        if(!ajax)
           return;
 
@@ -129,7 +129,7 @@ var FireinputServerLogin =
              onSuccess: function(p) { self.showLogonFormSuccess(p, px, py,target); },
              onFailure: function(p) { self.showLogonFormFailure(p, px, py,target); }
           });
-       ajax.request(SERVER_URL + "/account/logon_form_simple.php");
+       ajax.request(Fireinput.SERVER_URL + "/account/logon_form_simple.php");
     },
  
     showLogonFormSuccess: function(p, px, py,target)
@@ -176,12 +176,12 @@ var FireinputServerLogin =
        var password = document.getElementById("logonPasswd").value; 
        var seed = document.getElementById("logonSeed").value; 
        var salt = password.substr(Math.floor(password.length/2),password.length);
-       var md5hex1 = hex_hmac_md5(password, salt);
-       var md5hex2 = hex_hmac_md5(md5hex1, seed);
+       var md5hex1 = Fireinput.md5.hex_hmac_md5(password, salt);
+       var md5hex2 = Fireinput.md5.hex_hmac_md5(md5hex1, seed);
        var url = "/account/logon_user.php";
        var params = "email="+email + "&password="+md5hex2;
 
-       var ajax = new Ajax();
+       var ajax = new Fireinput.util.ajax();
        var self = this; 
        ajax.setOptions(
         {
@@ -191,7 +191,7 @@ var FireinputServerLogin =
           onSuccess: function(p) { self.loginServerSuccess(p, loginCallback); },
           onFailure: function(p) { self.loginServerFailure(p); }
         });
-       ajax.request(SERVER_URL + url);
+       ajax.request(Fireinput.SERVER_URL + url);
     },
 
     loginServerSuccess: function(p, loginCallback)

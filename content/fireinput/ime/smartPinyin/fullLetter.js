@@ -34,7 +34,7 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-const HALF_FULL_TABLE = [
+Fireinput.HALF_FULL_TABLE = [
        { half: '0020', full: '3000', next: 1 },
        { half: '0021', full: 'FF01', next: 94 },
        { half: '00A1', full: 'FFE0', next: 2 },
@@ -98,9 +98,9 @@ const HALF_FULL_TABLE = [
        { half: 'FFEE', full: '25CB', next: 1 }
 ]; 
 
-var FullLetterConverter = function() {}; 
+Fireinput.fullLetterConverter = function() {}; 
 
-FullLetterConverter.prototype = 
+Fireinput.fullLetterConverter.prototype = 
 {
     double_quot_stat: 0,
     single_quot_stat: 0,
@@ -203,12 +203,12 @@ FullLetterConverter.prototype =
     convertToFullLetter: function(key)
     {
        var charCode = key.charCodeAt(0); 
-       for (var i=HALF_FULL_TABLE.length-1; i>=0; i--)
+       for (var i=Fireinput.HALF_FULL_TABLE.length-1; i>=0; i--)
        {
-          var halfCode = parseInt(HALF_FULL_TABLE[i].half, 16); 
-          var fullCode = parseInt(HALF_FULL_TABLE[i].full, 16); 
+          var halfCode = parseInt(Fireinput.HALF_FULL_TABLE[i].half, 16); 
+          var fullCode = parseInt(Fireinput.HALF_FULL_TABLE[i].full, 16); 
           if(charCode >= halfCode && 
-             charCode < (halfCode + HALF_FULL_TABLE[i].next))
+             charCode < (halfCode + Fireinput.HALF_FULL_TABLE[i].next))
              return String.fromCharCode(fullCode + charCode - halfCode); 
        }
 
@@ -218,12 +218,12 @@ FullLetterConverter.prototype =
     convertToHalfLetter: function(key)
     {
        var charCode = key.charCodeAt(0);
-       for (var i=HALF_FULL_TABLE.length-1; i>=0; i--)
+       for (var i=Fireinput.HALF_FULL_TABLE.length-1; i>=0; i--)
        {
-          var halfCode = parseInt(HALF_FULL_TABLE[i].half, 16);
-          var fullCode = parseInt(HALF_FULL_TABLE[i].full, 16);
+          var halfCode = parseInt(Fireinput.HALF_FULL_TABLE[i].half, 16);
+          var fullCode = parseInt(Fireinput.HALF_FULL_TABLE[i].full, 16);
           if(charCode >= fullCode &&
-             charCode < (fullCode + HALF_FULL_TABLE[i].next))
+             charCode < (fullCode + Fireinput.HALF_FULL_TABLE[i].next))
              return String.fromCharCode(halfCode + charCode - fullCode);
        }
 

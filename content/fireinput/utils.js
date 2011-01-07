@@ -34,12 +34,9 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var EXPORTED_SYMBOLS = [
-   "FireinputXPC", "FireinputEnv", "FireinputPref", "FireinputUnicode",
-   "FireinputUtils", "FireinputHash", "Ajax", "FireinputTime"
-]; 
+Fireinput.namespace("Fireinput.util");
 
-var FireinputXPC = 
+Fireinput.util.xpc = 
 {
     CC: function(cName)
     {
@@ -78,17 +75,17 @@ var FireinputXPC =
 }; 
 
 
-var FireinputEnv = 
+Fireinput.util.env = 
 {
     getEnv: function(name)
     {
-       var gEnv = FireinputXPC.getService("@mozilla.org/process/environment;1", "nsIEnvironment");
+       var gEnv = Fireinput.util.xpc.getService("@mozilla.org/process/environment;1", "nsIEnvironment");
        return gEnv.get(name);
     },
 
     getOS: function()
     {
-       var gOS = FireinputXPC.getService("@mozilla.org/network/protocol;1?name=http", "nsIHttpProtocolHandler");
+       var gOS = Fireinput.util.xpc.getService("@mozilla.org/network/protocol;1?name=http", "nsIHttpProtocolHandler");
        var oscpu = gOS.oscpu; 
        if(/linux/i.test(oscpu))
           return "Linux"; 
@@ -118,16 +115,16 @@ var FireinputEnv =
 }; 
 
 
-var FireinputPref = 
+Fireinput.util.pref = 
 {
     gPref: null, 
 
     getPref: function(name, type)
     {
        if(!this.gPref)
-         this.gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
+         this.gPref = Fireinput.util.xpc.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
 
-       var prefName = prefDomain + "." + name;
+       var prefName = Fireinput.prefDomain + "." + name;
 
        if(type == 'undefined')
           type = this.gPref.getPrefType(prefName);
@@ -145,8 +142,8 @@ var FireinputPref =
     setPref: function(name, type,  value)
     {
        if(!this.gPref)
-         this.gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
-       var prefName = prefDomain + "." + name;
+         this.gPref = Fireinput.util.xpc.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
+       var prefName = Fireinput.prefDomain + "." + name;
 
        if(type == 'undefined')
           type = this.gPref.getPrefType(prefName);
@@ -162,21 +159,21 @@ var FireinputPref =
     addObserver: function(aTopic, aOwnsWeak)
     {
        if(!this.gPref)
-          this.gPref = FireinputXPC.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
+          this.gPref = Fireinput.util.xpc.getService("@mozilla.org/preferences-service;1", "nsIPrefBranch"); 
        var pbi =  this.gPref.QueryInterface(Components.interfaces.nsIPrefBranch2);
-       pbi.addObserver(prefDomain, aTopic, aOwnsWeak);
+       pbi.addObserver(Fireinput.prefDomain, aTopic, aOwnsWeak);
     }
 
 }; 
 
-var FireinputUnicode = 
+Fireinput.util.unicode = 
 {
     gUnicode: null, 
 
     getUnicodeString: function(text, charset)
     {
        if(!this.gUnicode)
-         this.gUnicode = FireinputXPC.getService("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter"); 
+         this.gUnicode = Fireinput.util.xpc.createInstance("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter"); 
        this.gUnicode.charset = charset ? charset : "UTF-8";
        try
        {
@@ -193,7 +190,7 @@ var FireinputUnicode =
        try 
        {
           if(!this.gUnicode)
-             this.gUnicode = FireinputXPC.getService("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter"); 
+             this.gUnicode = Fireinput.util.xpc.createInstance("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter"); 
           this.gUnicode.charset = charset ? charset : "UTF-8";
           text = this.gUnicode.ConvertFromUnicode(text);
           return text + this.gUnicode.Finish();
@@ -202,13 +199,27 @@ var FireinputUnicode =
        {
          return text; 
        }
-    }
+    },
+    getByteArray: function(text, charset)
+    {
+       if(!this.gUnicode)
+         this.gUnicode = Fireinput.util.xpc.createInstance("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
+       this.gUnicode.charset = charset ? charset : "UTF-8";
+       try
+       {
+          var dataArray = {};
+          return this.gUnicode.convertToByteArray(text, dataArray); 
+       }
+       catch(ex)
+       {
+         return text;
+       }
+    },
+
 };
 
-
-var FireinputUtils = 
-{
-    debug: 0, 
+Fireinput.util = Fireinput.extend(Fireinput.util, {
+    debug: 1, 
 
     $STR: function(name)
     {
@@ -247,24 +258,25 @@ var FireinputUtils =
        if(element.target.setSelectionRange) 
        {
           // setFocus before set any values to avoid being reset by target onfocus event -  normally happens to textfield or textarea  
-          this.setFocus(element.target); 
+          this.setFocus(element.originalTarget); 
 
-          if(typeof(sourceType) != 'undefined' && sourceType == IMAGE_SOURCE_TYPE)
+          if(typeof(sourceType) != 'undefined' && sourceType == Fireinput.IMAGE_SOURCE_TYPE)
           {
-             if(insertMode == IMAGE_INSERT_BBCODE_URL) 
+             if(insertMode == Fireinput.IMAGE_INSERT_BBCODE_URL) 
       	        text = "[img]" + text + "[/img]"; 
           }
 
           // trigger custom-event 
-          Fireinput.setEventDispathMode(true);
+          Fireinput.main.setEventDispathMode(true);
           for(var i=0; i<text.length; i++) {
             var newEvent = document.createEvent("KeyEvents")
-            newEvent.initKeyEvent("keypress", true, true, window,
-                        element.event.ctrlKey, element.event.altKey, element.event.shiftKey,
-                        element.event.metaKey, 0, text.charCodeAt(i));
-            element.originalTarget.dispatchEvent(newEvent)
+            newEvent.initKeyEvent("keypress", true, false, document.defaultView,
+                        false, false, false, false, 
+                        0, text.charCodeAt(i));
+
+            element.originalTarget.dispatchEvent(newEvent);
           }
-          Fireinput.setEventDispathMode(false);
+          Fireinput.main.setEventDispathMode(false);
 
           return;
        }
@@ -277,10 +289,10 @@ var FireinputUtils =
           if(!selection.focusNode)
              return; 
 
-          // FireinputLog.debug(this, "selection.focusNode.nodeType: " + selection.focusNode.nodeType); 
-          // FireinputLog.debug(this, "selection.focusNode.name: " + selection.focusNode.nodeName); 
-          // FireinputLog.debug(this, "selection.focusNode.value: " + selection.focusNode.nodeValue); 
-          // FireinputLog.debug(this, "selection.focusOffset: " + selection.focusOffset); 
+          // Fireinput.log.debug(this, "selection.focusNode.nodeType: " + selection.focusNode.nodeType); 
+          // Fireinput.log.debug(this, "selection.focusNode.name: " + selection.focusNode.nodeName); 
+          // Fireinput.log.debug(this, "selection.focusNode.value: " + selection.focusNode.nodeValue); 
+          // Fireinput.log.debug(this, "selection.focusOffset: " + selection.focusOffset); 
 
           // get the first range of the selection
           // delete content if the collpase is not true 
@@ -291,7 +303,7 @@ var FireinputUtils =
           if (selection.focusNode.nodeType==Node.ELEMENT_NODE || selection.focusNode.nodeType == Node.TEXT_NODE)
           {
 
-             if(typeof(sourceType) != 'undefined' && sourceType == IMAGE_SOURCE_TYPE)
+             if(typeof(sourceType) != 'undefined' && sourceType == Fireinput.IMAGE_SOURCE_TYPE)
              {
                 var imgNode = doc.createElement("img");
                 imgNode.setAttribute("src", text); 
@@ -311,20 +323,29 @@ var FireinputUtils =
              }
           }
         }
+
         // complex document. It's highly possible that the editor is not using designMode. 
         // As such we emulate keypress event to send out text value. By doing this way, 
         // google doc works great 
              
-        Fireinput.setEventDispathMode(true);
+        Fireinput.main.setEventDispathMode(true);
         for(var i=0; i<text.length; i++) {
             var newEvent = document.createEvent("KeyEvents")
-            newEvent.initKeyEvent("keypress", true, true, document.defaultView,
-                        element.event.ctrlKey, element.event.altKey, element.event.shiftKey,
-                        element.event.metaKey, 0, text.charCodeAt(i));
+            newEvent.initKeyEvent("keypress", true, false, document.defaultView,
+                        false, false, false, false, 
+                        0, text.charCodeAt(i));
             // don't use element.target since it's originalTarget which won't work 
-            element.event.target.dispatchEvent(newEvent)             
+            var target = element.event.target; 
+
+            if(typeof(element.event.button) != 'undefined') {
+               // originally mouse event. use target.document which is pointed to iframe 
+               // Teh target.content.document is pointed to iframe parent window 
+               target = element.target.document.documentElement;
+            }
+
+            target.dispatchEvent(newEvent);             
         }
-        Fireinput.setEventDispathMode(false);
+        Fireinput.main.setEventDispathMode(false);
     },
 
     setCaretTo: function (obj, pos) 
@@ -373,7 +394,7 @@ var FireinputUtils =
           }
 
           var tmpNode = "";
-          if(typeof(sourceType) != 'undefined' && sourceType == IMAGE_SOURCE_TYPE)
+          if(typeof(sourceType) != 'undefined' && sourceType == Fireinput.IMAGE_SOURCE_TYPE)
           {
              tmpNode = doc.createElement("img");
              tmpNode.setAttribute("src", text);
@@ -469,8 +490,8 @@ var FireinputUtils =
        try 
        {
 
-          var chromeRegistry = FireinputXPC.getService("@mozilla.org/chrome/chrome-registry;1", "nsIChromeRegistry");
-          var uri = FireinputXPC.createInstance("@mozilla.org/network/standard-url;1", "nsIURI");
+          var chromeRegistry = Fireinput.util.xpc.getService("@mozilla.org/chrome/chrome-registry;1", "nsIChromeRegistry");
+          var uri = Fireinput.util.xpc.createInstance("@mozilla.org/network/standard-url;1", "nsIURI");
 					
           uri.spec = "chrome://fireinput/content/";
 			
@@ -495,7 +516,7 @@ var FireinputUtils =
     getUserFile: function(filename)
     {
        this.moveOldUserDataFile(filename);
-       var dirService = FireinputXPC.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
+       var dirService = Fireinput.util.xpc.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
 
        var file = dirService.get("ProfD", Components.interfaces.nsIFile);
        file.append("fireinput"); 
@@ -505,7 +526,7 @@ var FireinputUtils =
 
     moveOldUserDataFile: function(filename)
     {
-       var dirService = FireinputXPC.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
+       var dirService = Fireinput.util.xpc.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
 
        var sfile = dirService.get("ProfD", Components.interfaces.nsIFile);
        sfile.append(filename);
@@ -518,7 +539,7 @@ var FireinputUtils =
 
     initUserDataDir: function()
     {
-       var dirService = FireinputXPC.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
+       var dirService = Fireinput.util.xpc.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
 
        var file = dirService.get("ProfD", Components.interfaces.nsIFile);
        file.append("fireinput"); 
@@ -529,7 +550,7 @@ var FireinputUtils =
 
     getAppRootPath: function()
     {
-       var dirService = FireinputXPC.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
+       var dirService = Fireinput.util.xpc.getService("@mozilla.org/file/directory_service;1", "nsIProperties");
 
        var file = dirService.get("ProfD", Components.interfaces.nsIFile);
        return file.path; 
@@ -543,7 +564,7 @@ var FireinputUtils =
     getLocaleString: function (stringKey)
     {
        if(!this.stringBundle)
-          this.stringBundle = FireinputXPC.getService("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
+          this.stringBundle = Fireinput.util.xpc.getService("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
        if(!this.stringBundle)
             return stringKey; 
 
@@ -563,35 +584,35 @@ var FireinputUtils =
 
     getIMENameString: function(value)
     {
-       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage"); 
+       var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage"); 
        switch(value)
        {
-          case SMART_PINYIN:
+          case Fireinput.SMART_PINYIN:
           default:
              return this.getLocaleString('fireinput.pinyin.quan.label' + defaultLanguage);
           break;
-          case ZIGUANG_SHUANGPIN:
+          case Fireinput.ZIGUANG_SHUANGPIN:
              return this.getLocaleString('fireinput.pinyin.shuang.ziguang.label' + defaultLanguage);
           break;
-          case MS_SHUANGPIN:
+          case Fireinput.MS_SHUANGPIN:
              return this.getLocaleString('fireinput.pinyin.shuang.ms.label' + defaultLanguage);
           break;
-          case CHINESESTAR_SHUANGPIN:
+          case Fireinput.CHINESESTAR_SHUANGPIN:
              return this.getLocaleString('fireinput.pinyin.shuang.chinesestar.label' + defaultLanguage);
           break;
-          case SMARTABC_SHUANGPIN:
+          case Fireinput.SMARTABC_SHUANGPIN:
              return this.getLocaleString('fireinput.pinyin.shuang.smartabc.label' + defaultLanguage);
           break;
-          case WUBI_86:
+          case Fireinput.WUBI_86:
              return this.getLocaleString('fireinput.wubi86.label' + defaultLanguage);
           break;
-          case WUBI_98:
+          case Fireinput.WUBI_98:
              return this.getLocaleString('fireinput.wubi98.label' + defaultLanguage);
           break;
-          case CANGJIE_5:
+          case Fireinput.CANGJIE_5:
              return this.getLocaleString('fireinput.cangjie5.label' + defaultLanguage);
           break;
-          case ZHENGMA:
+          case Fireinput.ZHENGMA:
              return this.getLocaleString('fireinput.zhengma.label' + defaultLanguage);
           break;
        }
@@ -617,7 +638,7 @@ var FireinputUtils =
 
     notify: function(aSubject, aTopic, aData)
     {
-       var os = FireinputXPC.getService("@mozilla.org/observer-service;1", "nsIObserverService");
+       var os = Fireinput.util.xpc.getService("@mozilla.org/observer-service;1", "nsIObserverService");
        os.notifyObservers(aSubject, aTopic, aData); 
        return true;
     }, 
@@ -625,25 +646,25 @@ var FireinputUtils =
     getCurrentIME: function()
     {
        /* If we are being called inside of Fireinput, don't lookup XPCOM */
-       if(typeof(Fireinput) != 'undefined')
+       if(typeof(Fireinput.main) != 'undefined')
        {
-          return Fireinput.getCurrentIME();
+          return Fireinput.main.getCurrentIME();
        }
        else
        {
-          var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+          var gs =  Fireinput.util.xpc.getService("@fireinput.com/fireinput;1", "nsIFireinput");
           return gs.getChromeWindow().getFireinput().getCurrentIME();
        }
     }
-}; 
+}); 
 
-var FireinputHash = function() 
+Fireinput.util.hash = function() 
 {
     this.items = new Array();
     this.length = 0;
 }; 
 
-FireinputHash.prototype = 
+Fireinput.util.hash.prototype = 
 {
     foreach: function(callback) 
     {
@@ -694,10 +715,10 @@ FireinputHash.prototype =
     }
 };
 
-var Ajax = function() {};
-Ajax.Events = ['Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete'];
+Fireinput.util.ajax = function() {};
+Fireinput.util.ajax.Events = ['Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete'];
 
-Ajax.prototype = 
+Fireinput.util.ajax.prototype = 
 {
     transport: null, 
 
@@ -711,7 +732,7 @@ Ajax.prototype =
           parameters:   ''
        }
 
-       extend(this.options, options || {})
+       Fireinput.extend(this.options, options || {})
     },
 
     responseIsSuccess: function() 
@@ -743,8 +764,8 @@ Ajax.prototype =
              this.options.asynchronous);
           if (this.options.asynchronous) 
           {
-             this.transport.onreadystatechange = bind(this.onStateChange, this); 
-             setTimeout(bind(function() {this.respondToReadyState(1)}, this), 10);
+             this.transport.onreadystatechange = this.onStateChange.bind(this); 
+             setTimeout((function() {this.respondToReadyState(1)}).bind(this), 10);
           }
 
           this.setRequestHeaders();
@@ -800,7 +821,7 @@ Ajax.prototype =
 
     respondToReadyState: function(readyState) 
     {
-       var event = Ajax.Events[readyState];
+       var event = Fireinput.util.ajax.Events[readyState];
        var transport = this.transport; 
 
        if (event == 'Complete') 
@@ -832,7 +853,7 @@ Ajax.prototype =
     }
 };
 
-var FireinputTime  =
+Fireinput.util.time  =
 {
     starttime: 0,
 

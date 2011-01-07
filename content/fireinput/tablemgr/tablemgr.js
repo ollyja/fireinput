@@ -34,32 +34,32 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-const PinyinTones = ["ā", "á", "ă", "à", "ō", "ó", "ǒ", "ò", "ū", "ú", "ǔ", "ù", 
-                     "ī", "í", "ǐ", "ì", "ē", "é", "ě", "è", "ǖ", "ǘ", "ǚ", "ǜ"]; 
+Fireinput.namespace("Fireinput.tableMgr"); 
 
-var KeyInput = function() { this.init(); };
+Fireinput.tableMgr.keyInput = function() { this.init(); };
 
-KeyInput.prototype = 
+Fireinput.tableMgr.keyInput.prototype = 
 {
+    pinyinTones: ["ā", "á", "ă", "à", "ō", "ó", "ǒ", "ò", "ū", "ú", "ǔ", "ù", 
+                  "ī", "í", "ǐ", "ì", "ē", "é", "ě", "è", "ǖ", "ǘ", "ǚ", "ǜ"],
     pinyinInitials: [],
     pinyinFinals: [],
     pinyinTones: [], 
     init: function()
     {
-      for(var i=0; i<PinyinInitials.length; i++)
-         this.pinyinInitials[PinyinInitials[i]] = PinyinInitials[i];
+      for(var i=0; i<Fireinput.PinyinInitials.length; i++)
+         this.pinyinInitials[Fireinput.PinyinInitials[i]] = Fireinput.PinyinInitials[i];
 
-       for(var i=0; i<PinyinFinals.length; i++)
-         this.pinyinFinals[PinyinFinals[i]] = PinyinFinals[i];
+       for(var i=0; i<Fireinput.PinyinFinals.length; i++)
+         this.pinyinFinals[Fireinput.PinyinFinals[i]] = Fireinput.PinyinFinals[i];
 
-       for(var i=0; i<PinyinTones.length; i++)
-         this.pinyinTones[PinyinTones[i]] = PinyinTones[i];
+       for(var i=0; i<this.pinyinTones.length; i++)
+         this.pinyinTones[this.pinyinTones[i]] = this.pinyinTones[i];
     }
 }
 
-var PinyinInput = function()  { };
-
-PinyinInput.prototype = extend(new KeyInput(), 
+Fireinput.tableMgr.pinyinInput = function() { }
+Fireinput.tableMgr.pinyinInput.prototype = Fireinput.extend(new Fireinput.tableMgr.keyInput(), 
 {
     getAllowedInputKey: function()
     {
@@ -92,7 +92,7 @@ PinyinInput.prototype = extend(new KeyInput(),
        {
          var pinyinKey = {};
          pinyinKey.key = keyInitial + keyFinal;
-         pinyinKey.type = keyInitialLen>0 ? KEY_FULL : KEY_FINAL;
+         pinyinKey.type = keyInitialLen>0 ? Fireinput.KEY_FULL : Fireinput.KEY_FINAL;
          pinyinKey.pos = keyInitialLen + keyFinal.length;
          return pinyinKey;
        }
@@ -105,14 +105,14 @@ PinyinInput.prototype = extend(new KeyInput(),
              {
                 var pinyinKey = {};
                 pinyinKey.key = keyInitial + subFinal;
-                pinyinKey.type = keyInitialLen>0 ? KEY_FULL : KEY_FINAL;
+                pinyinKey.type = keyInitialLen>0 ? Fireinput.KEY_FULL : Fireinput.KEY_FINAL;
                 pinyinKey.pos = keyInitialLen + i;
                 return pinyinKey;
              }
           }
        }
 
-       return ({key: keyInitial, type: KEY_INITIAL, pos: keyInitialLen});
+       return ({key: keyInitial, type: Fireinput.KEY_INITIAL, pos: keyInitialLen});
     },
 
     parseKeys: function(inputchar)
@@ -131,7 +131,7 @@ PinyinInput.prototype = extend(new KeyInput(),
               var retArray = this.parseKeySteps(keyListArray[i]);
 
               if(retArray != null)
-                 arrayInsert(keys, keys.length, retArray.slice(0, retArray.length));
+                 Fireinput.arrayInsert(keys, keys.length, retArray.slice(0, retArray.length));
            }
 
            return keys;
@@ -155,15 +155,15 @@ PinyinInput.prototype = extend(new KeyInput(),
               var finals = keyList.substr(i+2, 4);
               if(finals.length <= 0)
               {
-                    keys.push({key: key2, type: KEY_INITIAL});
+                    keys.push({key: key2, type: Fireinput.KEY_INITIAL});
 
                  break;
               }
               var pinyinKey = this.parseOneKey(key2, finals);
-              if(pinyinKey.type == KEY_INITIAL)
+              if(pinyinKey.type == Fireinput.KEY_INITIAL)
               {
                  // No finals. Store them each one as Initial
-                    keys.push({key: key2, type: KEY_INITIAL});
+                    keys.push({key: key2, type: Fireinput.KEY_INITIAL});
               }
               else
               {
@@ -177,7 +177,7 @@ PinyinInput.prototype = extend(new KeyInput(),
               var finals = keyList.substr(i+1, 4);
               if(finals.length <= 0)
               {
-                 keys.push({key: key1, type: KEY_INITIAL});
+                 keys.push({key: key1, type: Fireinput.KEY_INITIAL});
                  break;
               }
               var pinyinKey = this.parseOneKey(key1, finals);
@@ -201,7 +201,7 @@ PinyinInput.prototype = extend(new KeyInput(),
               }
               else
               {
-                 keys.push({key: pinyinKey.key, type: KEY_FINAL});
+                 keys.push({key: pinyinKey.key, type: Fireinput.KEY_FINAL});
                  i += pinyinKey.pos;
               }
           }
@@ -211,9 +211,8 @@ PinyinInput.prototype = extend(new KeyInput(),
               
 }); 
 
-var WubiInput = function() { }; 
-
-WubiInput.prototype = extend(new KeyInput(),
+Fireinput.tableMgr.wubiInput = function() {}
+Fireinput.tableMgr.wubiInput.prototype = Fireinput.extend(new Fireinput.tableMgr.keyInput(),
 {
     validateInputKey: function(inputkey)
     {
@@ -235,9 +234,8 @@ WubiInput.prototype = extend(new KeyInput(),
     }
 });
 
-var Cangjie5Input = function() { };
-
-Cangjie5Input.prototype = extend(new KeyInput(),
+Fireinput.tableMgr.cangjie5Input = function() {}
+Fireinput.tableMgr.cangjie5Input.prototype = Fireinput.extend(new Fireinput.tableMgr.keyInput(),
 {
     validateInputKey: function(inputkey)
     {
@@ -259,9 +257,8 @@ Cangjie5Input.prototype = extend(new KeyInput(),
     }
 });
 
-var ZhengmaInput = function() { };
-
-ZhengmaInput.prototype = extend(new KeyInput(),
+Fireinput.tableMgr.zhengmaInput = function() {}
+Fireinput.tableMgr.zhengmaInput.prototype = Fireinput.extend(new Fireinput.tableMgr.keyInput(),
 {
     validateInputKey: function(inputkey)
     {
@@ -284,15 +281,14 @@ ZhengmaInput.prototype = extend(new KeyInput(),
 });
 
 
-var FireinputTableMgr = 
-{
+Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
     imageFileValid: false, 
 
     selectedpage: 0, 
 
     init: function()
     {
-       FireinputServerLogin.checkUserLogon(); 
+       Fireinput.serverLogin.checkUserLogon(); 
        this.initAutomaticUpdateInteval();
        this.getLastUpdate();   
        this.initObserver(); 
@@ -313,21 +309,21 @@ var FireinputTableMgr =
 
     initObserver: function()
     {
-       FireinputPref.addObserver(this, false);
+       Fireinput.util.pref.addObserver(this, false);
     }, 
 
     observe: function(subject, topic, data)
     {
-       if(topic == "nsPref:changed" && typeof(prefDomain) != 'undefined')
+       if(topic == "nsPref:changed" && typeof(Fireinput.prefDomain) != 'undefined')
        {
-          var name = data.substr(prefDomain.length+1);
+          var name = data.substr(Fireinput.prefDomain.length+1);
           if(name == 'lastTableUpdate')
           {
              $('#lastTableUpdate').html('自动更新完成...');
              $('#updateNowButton').show(); 
              $('#updateNowImg').hide(); 
 
-             setTimeout(function() { FireinputTableMgr.getLastUpdate(); }, 2000);  
+             setTimeout(function() { Fireinput.tableMgr.getLastUpdate(); }, 2000);  
           }
    
           if(name == 'defaultInputMethod')
@@ -349,13 +345,13 @@ var FireinputTableMgr =
     
     changeAutomaticUpdateInterval: function(interval)
     {
-       fireinputPrefSave('tableUpdateInterval', interval); 
-       FireinputUtils.notify(null, "fireinput-table-update-request", null);
+       Fireinput.pref.save('tableUpdateInterval', interval); 
+       Fireinput.util.notify(null, "fireinput-table-update-request", null);
     }, 
    
     initAutomaticUpdateInteval: function()
     {
-       var intervalInHour = fireinputPrefGetDefault("tableUpdateInterval");
+       var intervalInHour = Fireinput.pref.getDefault("tableUpdateInterval");
        options = document.getElementById('tableUpdateInterval'); 
        for (var i = 0; i < options.length; i++)
        {
@@ -369,7 +365,7 @@ var FireinputTableMgr =
 
     getLastUpdate: function()
     {
-       var lastupdate = fireinputPrefGetDefault("lastTableUpdate");
+       var lastupdate = Fireinput.pref.getDefault("lastTableUpdate");
        if(lastupdate.length <= 0)
        { 
           $('#lastTableUpdate').html('自动更新还没被执行过'); 
@@ -395,7 +391,7 @@ var FireinputTableMgr =
        
        button.style.display = "none";
        $('#updateNowImg').css("display", ""); 
-       FireinputUtils.notify(null, "fireinput-table-update-request", '1');
+       Fireinput.util.notify(null, "fireinput-table-update-request", '1');
     }, 
 
     uploadFrame: function(cb) 
@@ -464,31 +460,31 @@ var FireinputTableMgr =
 
     imeSelect: function()
     {
-        var schema = fireinputPrefGetDefault("defaultInputMethod");
+        var schema = Fireinput.pref.getDefault("defaultInputMethod");
         $("#newWordError").hide();
         $("#newWordForm").show();
         switch(schema)
         { 
-           case ZHENGMA:
+           case Fireinput.ZHENGMA:
              $("#importZhengmaFormat").show();
              $("#addNewServer").attr("disabled", true);
            break; 
-           case CANGJIE_5:
+           case Fireinput.CANGJIE_5:
              $("#importCanjieFormat").show();
              $("#addNewServer").attr("disabled", true);
            break; 
-           case SMART_PINYIN: 
+           case Fireinput.SMART_PINYIN: 
              $("#importPinyinFormat").show();
              $("#addNewServer").attr("disabled", false);
            break; 
-           case ZIGUANG_SHUANGPIN: 
-           case MS_SHUANGPIN: 
-           case CHINESESTAR_SHUANGPIN: 
-           case SMARTABC_SHUANGPIN: 
+           case Fireinput.ZIGUANG_SHUANGPIN: 
+           case Fireinput.MS_SHUANGPIN: 
+           case Fireinput.CHINESESTAR_SHUANGPIN: 
+           case Fireinput.SMARTABC_SHUANGPIN: 
              $("#importPinyinFormat").show();
            break; 
-           case WUBI_98:
-           case WUBI_86:
+           case Fireinput.WUBI_98:
+           case Fireinput.WUBI_86:
              $("#addNewServer").attr("disabled", true);
              $("#importWubiFormat").show();
            break; 
@@ -516,7 +512,7 @@ var FireinputTableMgr =
     {
         // clear error fist 
         this.showError("&nbsp");
-        if(sel.value != SMART_PINYIN)
+        if(sel.value != Fireinput.SMART_PINYIN)
         {
            $("#keySuggestion").hide(); 
            $("#keyConfirm").hide(); 
@@ -535,18 +531,18 @@ var FireinputTableMgr =
 
         switch(imetype)
         {
-           case SMART_PINYIN: 
-              parser = new PinyinInput(); 
+           case Fireinput.SMART_PINYIN: 
+              parser = new this.pinyinInput(); 
            break; 
-           case WUBI_86: 
-           case WUBI_98:
-              parser = new WubiInput(); 
+           case Fireinput.WUBI_86: 
+           case Fireinput.WUBI_98:
+              parser = new this.wubiInput(); 
            break; 
-           case CANGJIE_5:
-              parser = new Canjie5Input(); 
+           case Fireinput.CANGJIE_5:
+              parser = new this.canjie5Input(); 
            break; 
-           case ZHENGMA:
-              parser = new ZhengmaInput(); 
+           case Fireinput.ZHENGMA:
+              parser = new this.zhengmaInput(); 
            break; 
            default: 
               this.showError("对不起,不支持此输入法");
@@ -563,7 +559,7 @@ var FireinputTableMgr =
        if(!list)
        {
            errstr = "读入输入键失败"; 
-           if(imetype == WUBI_86 || imetype == WUBI_98)
+           if(imetype == Fireinput.WUBI_86 || imetype == Fireinput.WUBI_98)
              errstr += ", 五笔输入键最多是四键";
 
            this.showError(errstr);
@@ -626,23 +622,23 @@ var FireinputTableMgr =
         if(!this.checkWord())
            return false; 
 
-        var schema = fireinputPrefGetDefault("defaultInputMethod");
+        var schema = Fireinput.pref.getDefault("defaultInputMethod");
         var notification = 0; 
         switch(imetype)
         {
-           case ZHENGMA:
-           case CANGJIE_5:
-           case WUBI_98:
-           case WUBI_86:
+           case Fireinput.ZHENGMA:
+           case Fireinput.CANGJIE_5:
+           case Fireinput.WUBI_98:
+           case Fireinput.WUBI_86:
              notification = (schema == imetype) ? 1 : 0; 
            break;
-           case SMART_PINYIN: 
-             notification = (schema <= SMARTABC_SHUANGPIN) ? 1 : 0; 
+           case Fireinput.SMART_PINYIN: 
+             notification = (schema <= Fireinput.SMARTABC_SHUANGPIN) ? 1 : 0; 
            break; 
         }
 
         // we need to see whether user has modify the input keys 
-        inputkey = FireinputUtils.trimString(inputkey); 
+        inputkey = Fireinput.util.trimString(inputkey); 
         if(inputkey.length <= 0)
         {
            this.showError("输入键不能是空");
@@ -657,8 +653,8 @@ var FireinputTableMgr =
         if(notification)
         {
            try {
-              var ime = FireinputUtils.getCurrentIME(); 
-              ime.storeUserAddPhrase(FireinputUnicode.convertFromUnicode(inputword), inputkey, 0); 
+              var ime = Fireinput.util.getCurrentIME(); 
+              ime.storeUserAddPhrase(Fireinput.util.unicode.convertFromUnicode(inputword), inputkey, 0); 
               this.showError("<div style='margin-left: 8px; color: green'>成功加入</div>");
            }
            catch(e)
@@ -706,9 +702,9 @@ var FireinputTableMgr =
 
            // keep it in pref for later reuse. 
            if(guestdefname != guestname)
-             fireinputPrefSave("serverGuestName", guestname); 
+             Fireinput.pref.save("serverGuestName", guestname); 
            if(email != defemail)
-             fireinputPrefSave("serverGuestId", email); 
+             Fireinput.pref.save("serverGuestId", email); 
 
            this.addWordServer(inputword, imetype, result, guestname, email);
            return true; 
@@ -730,7 +726,7 @@ var FireinputTableMgr =
        }
 
        var url = "/table/addnew.php";
-       var ajax = new Ajax();
+       var ajax = new Fireinput.util.ajax();
        var self = this; 
        ajax.setOptions(
         {
@@ -742,7 +738,7 @@ var FireinputTableMgr =
         });
 
        this.disableButton("addNewServer", true);
-       ajax.request(SERVER_URL + url);
+       ajax.request(Fireinput.SERVER_URL + url);
    },
 
    addWordServerSuccess: function(p)
@@ -837,9 +833,9 @@ var FireinputTableMgr =
         // user information form is displayed 
         if(data.step == 2)
         {
-           document.newWordForm.realname.value = fireinputPrefGetDefault("serverGuestName"); 
+           document.newWordForm.realname.value = Fireinput.pref.getDefault("serverGuestName"); 
            document.newWordForm.realname.defvalue = document.newWordForm.realname.value; 
-           document.newWordForm.email.value = fireinputPrefGetDefault("serverGuestId"); 
+           document.newWordForm.email.value = Fireinput.pref.getDefault("serverGuestId"); 
            document.newWordForm.email.defvalue = document.newWordForm.email.value; 
            $("#userInfoData").show(); 
         }
@@ -856,7 +852,7 @@ var FireinputTableMgr =
        var imetype = document.newWordForm.imetype.value; 
 
        // only do key suggestion for pinyin 
-       if(imetype != SMART_PINYIN)
+       if(imetype != Fireinput.SMART_PINYIN)
           return; 
  
        if($("#inputword").attr("defvalue") == inputword)
@@ -890,18 +886,18 @@ var FireinputTableMgr =
        var url = "/table/getpinyinkey.php";
 
        var params = "inputword="+encodeURIComponent(inputword);
-       var ajax = new Ajax();
+       var ajax = new Fireinput.util.ajax();
        var self = this; 
        ajax.setOptions(
         {
           method: 'post',
           postBody: params,
           contentType: 'application/x-www-form-urlencoded',
-          onSuccess: function(p) { FireinputTableMgr.addKeySuggestion(p); self.ischecking = false;},
+          onSuccess: function(p) { Fireinput.tableMgr.addKeySuggestion(p); self.ischecking = false;},
           onFailure: function(p) { $("#inputword").attr("defvalue", ""); self.ischecking = false;}
         });
 
-       ajax.request(SERVER_URL + url);
+       ajax.request(Fireinput.SERVER_URL + url);
 
    },
 
@@ -929,7 +925,7 @@ var FireinputTableMgr =
 
           if(charToneKeyList.length > 1)
           {
-            data += "<tr><td colspan=2 valign='center'><span><select id='myselect' onchange='FireinputTableMgr.keySuggestionChange(this)'>"; 
+            data += "<tr><td colspan=2 valign='center'><span><select id='myselect' onchange='Fireinput.tableMgr.keySuggestionChange(this)'>"; 
             for(var i=0; i<charToneKeyList.length; i++)
             {
                data += "<option value='" + numToneKeyList[i] + 
@@ -1004,7 +1000,7 @@ var FireinputTableMgr =
           {
              html += "<tr><td><a target='_blank' href='" + tablelink + "'>" + tablename + "</a></td>"; 
              html += "<td>" + last_updated + "</td>"; 
-             html += "<td><input type='button' value='卸载' onclick='return FireinputTableMgr.uninstallTableFile(event,\"" + signature + "\")'>";
+             html += "<td><input type='button' value='卸载' onclick='return Fireinput.tableMgr.uninstallTableFile(event,\"" + signature + "\")'>";
              html += "<span id='uninstallError' class='errorMsg' style='margin-left: 10px'></span></td>";
              html += "</tr>"; 
           }
@@ -1016,7 +1012,7 @@ var FireinputTableMgr =
           }
        }
 
-       FireinputImporter.getImportList(getlist);
+       Fireinput.importer.getImportList(getlist);
    }, 
  
    loadDownloadTableList: function()
@@ -1024,19 +1020,19 @@ var FireinputTableMgr =
       // only show pinyin phrase list 
       $("#downloadLinkArea").hide(); 
 
-      var schema = fireinputPrefGetDefault("defaultInputMethod");
+      var schema = Fireinput.pref.getDefault("defaultInputMethod");
   
       // only support pinyin now
-      if(schema > SMARTABC_SHUANGPIN)
+      if(schema > Fireinput.SMARTABC_SHUANGPIN)
          return;
 
-      var ajax = new Ajax();
+      var ajax = new Fireinput.util.ajax();
        if(!ajax)
          return;
 
        var self = this;
 
-       var url = SERVER_URL + "/table/getspt.php?";
+       var url = Fireinput.SERVER_URL + "/table/getspt.php?";
        ajax.setOptions(
           {
              method: 'get',
@@ -1069,10 +1065,10 @@ var FireinputTableMgr =
 
        for(var i=0; i<jsonArray.length; i++)
        {
-          var link = SERVER_URL + jsonArray[i][1]; 
+          var link = Fireinput.SERVER_URL + jsonArray[i][1]; 
           html += "<tr><td><a target='_blank' href='" + link + "'>" + jsonArray[i][0] + "</a></td>"; 
           html += "<td>" + FireinputTime.prettyDate(jsonArray[i][2]) + "</td>"; 
-          html += "<td><input type='button' value='安装' onclick='return FireinputTableMgr.importRemoteTableFile(event,\"" + link + "\"," + "\"" + jsonArray[i][0] + "\")'>";
+          html += "<td><input type='button' value='安装' onclick='return Fireinput.tableMgr.importRemoteTableFile(event,\"" + link + "\"," + "\"" + jsonArray[i][0] + "\")'>";
           html += "<span id='installError' class='errorMsg' style='margin-left: 10px'></span></td>";
           html += "</tr>"; 
        }
@@ -1099,28 +1095,28 @@ var FireinputTableMgr =
    importLocalTableFile: function(localfile)
    {
 
-       setTimeout(function() { FireinputImporter.storePhraseFromLocal(localfile)}, 500);
+       setTimeout(function() { Fireinput.importer.storePhraseFromLocal(localfile)}, 500);
        $("#importFile").hide(); 
        $("#importLoading").show(); 
        this.importTimer = setInterval(function() { 
-                                var percent = FireinputImporter.getStorePhrasePercent();  
+                                var percent = Fireinput.importer.getStorePhrasePercent();  
                                 if(percent >=0)
                                 {  
                                    $("#importPercent").html("<span style='margin-right: 8px; color: green'>" + percent+"%</span>"); 
                                    $("#importPercent").show();
                                 }
                                 else {
-                                   clearInterval(FireinputTableMgr.importTimer);
+                                   clearInterval(Fireinput.tableMgr.importTimer);
                                    $("#importFile").show(); 
                                    $("#importLoading").hide(); 
                                    $("#importFormError").html("<div style='margin-left: 8px;'>导入失败</div>"); 
                                 }
                                 if(percent >= 100) { 
-                                   clearInterval(FireinputTableMgr.importTimer);
+                                   clearInterval(Fireinput.tableMgr.importTimer);
                                    // commit 
-                                   FireinputImporter.flushExtPhraseTable();
+                                   Fireinput.importer.flushExtPhraseTable();
                                    // remember history 
-                                   FireinputImporter.updateHistory("file://" + localfile, localfile);
+                                   Fireinput.importer.updateHistory("file://" + localfile, localfile);
 
                                    $("#importFile").show(); 
                                    $("#importPercent").hide();
@@ -1128,14 +1124,14 @@ var FireinputTableMgr =
                                    $("#importFormError").html("<div style='margin-left: 8px; color: green'>成功导入</div>");
 
                                    // reload imported list. need to settimeout because updateHistory is just done
-                                   setTimeout(function() { FireinputTableMgr.loadImportedTableList()}, 1000); 
+                                   setTimeout(function() { Fireinput.tableMgr.loadImportedTableList()}, 1000); 
                                  }
                              }, 1000); 
    },
 
    importRemoteTableFile: function(e, remotefile, tablename)
    {
-      var ajax = new Ajax();
+      var ajax = new Fireinput.util.ajax();
        if(!ajax)
           return;
 
@@ -1158,34 +1154,34 @@ var FireinputTableMgr =
        }
 
        var lines = p.responseText.split(/\r\n|\r|\n/);
-       var signature = hex_md5(tablename);
-       FireinputImporter.processPhraseFromRemote(lines, p.responseText.length, signature);
+       var signature = Fireinput.md5.hex_md5(tablename);
+       Fireinput.importer.processPhraseFromRemote(lines, p.responseText.length, signature);
        var ptarget = e.target.parentNode; 
        var ohtml = ptarget.innerHTML; 
     
        ptarget.innerHTML = '';
        this.importTimer = setInterval(function() {
-                                var percent = FireinputImporter.getStorePhrasePercent();
+                                var percent = Fireinput.importer.getStorePhrasePercent();
                                 if(percent >=0)
                                 {
                                    ptarget.innerHTML = "<span style='margin-right: 8px; color: green'>" + percent+"%</span><img  src='chrome://fireinput/skin/loading.gif'/>";
                                 }
                                 else {
-                                   clearInterval(FireinputTableMgr.importTimer);
+                                   clearInterval(Fireinput.tableMgr.importTimer);
                                    ptarget.innerHTML = ohtml;
                                    $("#installError", ptarget).html("<span>导入失败</span>");
                                 }
                                 if(percent >= 100) {
                                    // commit 
-                                   FireinputImporter.flushExtPhraseTable();
+                                   Fireinput.importer.flushExtPhraseTable();
                                    // remember history 
-                                   FireinputImporter.updateHistory(remotefile, tablename);
-                                   clearInterval(FireinputTableMgr.importTimer);
+                                   Fireinput.importer.updateHistory(remotefile, tablename);
+                                   clearInterval(Fireinput.tableMgr.importTimer);
                                    ptarget.innerHTML = ohtml;
                                    $("#installError", ptarget).html("<span style='color:green'>成功导入</span>");
 
                                    // reload imported list 
-                                   setTimeout(function() { FireinputTableMgr.loadImportedTableList()}, 1000); 
+                                   setTimeout(function() { Fireinput.tableMgr.loadImportedTableList()}, 1000); 
                                  }
                              }, 1000);
 
@@ -1199,57 +1195,57 @@ var FireinputTableMgr =
        var deleted = function()
        {
           ptarget.innerHTML = ohtml;  
-          FireinputTableMgr.loadImportedTableList();
+          Fireinput.tableMgr.loadImportedTableList();
        }; 
  
-       setTimeout(function() { FireinputImporter.deleteExtPhraseTable(signature, deleted)}, 1000);
+       setTimeout(function() { Fireinput.importer.deleteExtPhraseTable(signature, deleted)}, 1000);
        ptarget.innerHTML = "<img  src='chrome://fireinput/skin/loading.gif'/>";
    }, 
 
    /* handles network table installation */
    showInputMethodSetting: function()
    {
-       var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+       var gs =  Fireinput.util.xpc.getService("@fireinput.com/fireinput;1", "nsIFireinput");
        var fi = gs.getChromeWindow().getFireinput(); 
        fi.showInputMethodSetting();
    }, 
 
    initNetTableInstall: function()
    {
-       var supportIMEList = fireinputPrefGetDefault("inputMethodList");
+       var supportIMEList = Fireinput.pref.getDefault("inputMethodList");
        //For Dev Mode 
        if(supportIMEList == '%IME_LIST%') 
             supportIMEList = "1,2,3,4,5,6,7,8,9";
 
        supportIMEList = supportIMEList ? supportIMEList.split(",") : [];
-       var hideIMEList = fireinputPrefGetDefault("hiddenInputMethod") || ""; 
+       var hideIMEList = Fireinput.pref.getDefault("hiddenInputMethod") || ""; 
        hideIMEList = hideIMEList.split(",");
 
        for (var s in supportIMEList) {
-         if(inArray(hideIMEList,supportIMEList[s])) {
+         if(Fireinput.inArray(hideIMEList,supportIMEList[s])) {
             $("#ime" + supportIMEList[s]).hide();
             continue; 
          }
 
          var ime = null; 
          var id = supportIMEList[s];
-         if(id == ZIGUANG_SHUANGPIN || id == MS_SHUANGPIN || id == CHINESESTAR_SHUANGPIN ||
-            id == SMARTABC_SHUANGPIN)
-            id = SMART_PINYIN; 
+         if(id == Fireinput.ZIGUANG_SHUANGPIN || id == Fireinput.MS_SHUANGPIN || id == Fireinput.CHINESESTAR_SHUANGPIN ||
+            id == Fireinput.SMARTABC_SHUANGPIN)
+            id = Fireinput.SMART_PINYIN; 
 
          switch (id) {
-            case SMART_PINYIN:
-               var ime = new SmartPinyin(); 
+            case Fireinput.SMART_PINYIN:
+               var ime = new Fireinput.smartPinyinEngine(); 
             break; 
-            case WUBI_86: 
-            case WUBI_98: 
-               var ime = new Wubi();
+            case Fireinput.WUBI_86: 
+            case Fireinput.WUBI_98: 
+               var ime = new Fireinput.wubiEngine();
             break; 
-            case CANGJIE_5: 
-               var ime = new Cangjie();
+            case Fireinput.CANGJIE_5: 
+               var ime = new Fireinput.cangjieEngine();
             break; 
-            case ZHENGMA: 
-               var ime = new Zhengma();
+            case Fireinput.ZHENGMA: 
+               var ime = new Fireinput.zhengmaEngine();
             break; 
          }
 
@@ -1257,12 +1253,12 @@ var FireinputTableMgr =
             ime.setSchema(id);
             if(ime.hasNetTableFile()) {
                $("#ime" + id + " input").attr("value", "已安装, 卸载?").css("color", "red").attr("schema", id).unbind("click").click(function(e) {
-                  FireinputTableMgr.uninstallNetTable(e);
+                  Fireinput.tableMgr.uninstallNetTable(e);
                }); 
             }
             else if(!ime.hasTableFile()){
                $("#ime" + id + " input").attr("value", "安装").attr("schema", id).unbind("click").click(function(e) {
-                  FireinputTableMgr.installNetTable(e);
+                  Fireinput.tableMgr.installNetTable(e);
                });
             }
             else {
@@ -1278,7 +1274,7 @@ var FireinputTableMgr =
    {
      var target = $(event.target); 
      var schema = target.attr("schema");
-     var ajax = new Ajax();
+     var ajax = new Fireinput.util.ajax();
        if(!ajax)
           return;
 
@@ -1289,7 +1285,7 @@ var FireinputTableMgr =
              onSuccess: function(p) { self.saveNetTableFile(target, p); },
              onFailure: function() { self.saveNetTableFile(target); }
           });
-     ajax.request(SERVER_URL + "table/getnetspt.php?s=" + encodeURIComponent(schema));
+     ajax.request(Fireinput.SERVER_URL + "table/getnetspt.php?s=" + encodeURIComponent(schema));
    },
 
    saveNetTableFile: function(target, p)
@@ -1325,7 +1321,7 @@ var FireinputTableMgr =
           ptarget.append("<span style='margin-left: 5px; color:green'>成功安装</span>");
           target.unbind("click");
           // reload IME 
-          var gs =  FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+          var gs =  Fireinput.util.xpc.getService("@fireinput.com/fireinput;1", "nsIFireinput");
           var fi = gs.getChromeWindow().getFireinput(); 
           fi.reloadIME();
 
@@ -1338,7 +1334,7 @@ var FireinputTableMgr =
    }, 
 
    saveNetTableFileStep: function(item, next, cb) {
-     var ajax = new Ajax();
+     var ajax = new Fireinput.util.ajax();
        if(!ajax) {
           cb.call(this, false);
           return;
@@ -1349,12 +1345,12 @@ var FireinputTableMgr =
           {
              method: 'get',
              onSuccess: function(p) {   
-                  data = FireinputUnicode.getUnicodeString(p.responseText);
-                  if(hex_md5(data) != item[2]) {
+                  data = Fireinput.util.unicode.getUnicodeString(p.responseText);
+                  if(Fireinput.md5.hex_md5(data) != item[2]) {
                      cb.call(this, false);
                   }
 
-                  var file = FireinputUtils.getUserFile(item[0]); 
+                  var file = Fireinput.util.getUserFile(item[0]); 
                   var fos = Components.classes["@mozilla.org/network/file-output-stream;1"]
                           .createInstance(Components.interfaces.nsIFileOutputStream);
                   fos.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
@@ -1376,7 +1372,7 @@ var FireinputTableMgr =
              onFailure: function() {  cb.call(this, false); }
           });
 
-     ajax.request(SERVER_URL + item[1] + "/" + item[0]); 
+     ajax.request(Fireinput.SERVER_URL + item[1] + "/" + item[0]); 
    }, 
 
    uninstallNetTable: function(event)
@@ -1384,25 +1380,25 @@ var FireinputTableMgr =
      var target = $(event.target); 
      var schema = target.attr("schema");
      switch(schema) {
-        case SMART_PINYIN:
-            var ime = new SmartPinyin();
+        case Fireinput.SMART_PINYIN:
+            var ime = new Fireinput.smartPinyinEngine();
             ime.getNetPinyinDataFile().remove(false); 
             ime.getNetPinyinPhraseFile().remove(false);
         break;
-        case WUBI_86:
-            var ime = new Wubi();
+        case Fireinput.WUBI_86:
+            var ime = new Fireinput.wubiEngine();
             ime.getNetWubi86File().remove(false);
         break; 
-        case WUBI_98:
-            var ime = new Wubi();
+        case Fireinput.WUBI_98:
+            var ime = new Fireinput.wubiEngine();
             ime.getNetWubi98File().remove(false);
         break;
-        case CANGJIE_5:
-            var ime = new Cangjie();
+        case Fireinput.CANGJIE_5:
+            var ime = new Fireinput.cangjieEngine();
             ime.getNetCangjie5File().remove(false);
         break;
-        case ZHENGMA:
-            var ime = new Zhengma();
+        case Fireinput.ZHENGMA:
+            var ime = new Fireinput.zhengmaEngine();
             ime.getNetZhengmaFile().remove(false);
         break;
      }
@@ -1412,10 +1408,10 @@ var FireinputTableMgr =
 
      // update page 
      $("#ime" + schema + " input").attr("value", "安装").css("color", "#000").unbind('click').click(function(e) {
-        FireinputTableMgr.installNetTable(e);
+        Fireinput.tableMgr.installNetTable(e);
      });
    }
 
-}; 
+}); 
 
 

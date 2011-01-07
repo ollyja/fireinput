@@ -34,15 +34,15 @@
  *
  * ***** END LICENSE BLOCK *****
  */
-var Cangjie = function(){};
+Fireinput.cangjieEngine = function(){};
 
-Cangjie.prototype = extend(new FireinputIME(),
+Fireinput.cangjieEngine.prototype = Fireinput.extend(new Fireinput.imeEngine(),
 {
     // 0 to disable debug or non zero to enable debug
     debug: 0,
 
     // the name of IME
-    name: IME_CANGJIE,
+    name: Fireinput.IME_CANGJIE,
 
     // array to keep all matched words
     charArray: null,
@@ -72,7 +72,7 @@ Cangjie.prototype = extend(new FireinputIME(),
     cangjieSchema: null,
 
     // encoding mode
-    encodingMode: ENCODING_ZH,
+    encodingMode: Fireinput.ENCODING_ZH,
 
     // engine enabled
     engineDisabled: false,
@@ -86,14 +86,14 @@ Cangjie.prototype = extend(new FireinputIME(),
     // the entrance function to load all related tables
     loadTable: function()
     {
-       this.letterConverter = new FullLetterConverter();
+       this.letterConverter = new Fireinput.fullLetterConverter();
 
        // setTimeout to not block firefox start
        var self = this;
        setTimeout(function(){return self.loadCangjieTable();}, 500);
 
        // init encoding table
-       FireinputEncoding.init();
+       Fireinput.encoding.init();
     },
 
     getCodeLine: function(str)
@@ -108,18 +108,18 @@ Cangjie.prototype = extend(new FireinputIME(),
 
     loadCangjieTable: function()
     {
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
        var fileHandler = ios.getProtocolHandler("file")
            .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 
        var path = this.getDataPath();
        var datafile = "";
-       if (this.cangjieSchema == CANGJIE_5)
+       if (this.cangjieSchema == Fireinput.CANGJIE_5)
        {
            datafile = ios.newURI(path + this.getCangjie5File(), null, null);
        }
 
-       this.keyCangjieHash = new FireinputHash();
+       this.keyCangjieHash = new Fireinput.util.hash();
 
        var checkExists = function() {
           if(this.keyCangjieHash.length <= 0) {
@@ -134,7 +134,7 @@ Cangjie.prototype = extend(new FireinputIME(),
                oncomplete:this.loadUserTable,
                onavailable: this.getCodeLine
             };
-            FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+            Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options);
           }
           else
             this.loadUserTable();
@@ -147,7 +147,7 @@ Cangjie.prototype = extend(new FireinputIME(),
        	  onavailable: this.getCodeLine
        };
 
-       FireinputStream.loadDataAsync(datafile, options);
+       Fireinput.stream.loadDataAsync(datafile, options);
     },
 
     updateUserCodeValue: function(key, word, freq)
@@ -194,12 +194,12 @@ Cangjie.prototype = extend(new FireinputIME(),
 
     loadUserTable: function()
     {
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
        var datafile = this.getUserDataFile();
 
        if (!datafile.exists()) return;
 
-       this.userCodeHash = new FireinputHash();
+       this.userCodeHash = new Fireinput.util.hash();
 
        var options =
        {
@@ -207,17 +207,17 @@ Cangjie.prototype = extend(new FireinputIME(),
        	  onavailable: this.getUserCodeLine
        };
 
-       FireinputStream.loadDataAsync(ios.newFileURI(datafile), options);
+       Fireinput.stream.loadDataAsync(ios.newFileURI(datafile), options);
     },
 
     hasTableFile: function()
     {
-       var ios = FireinputXPC.getIOService();
+       var ios = Fireinput.util.xpc.getIOService();
 
        var path = this.getDataPath();
        var datafile = ios.newURI(path + this.getCangjie5File(), null, null);
 
-       return FireinputStream.checkAccess(datafile); 
+       return Fireinput.stream.checkAccess(datafile); 
     },
 
     hasNetTableFile: function()
@@ -254,7 +254,7 @@ Cangjie.prototype = extend(new FireinputIME(),
 
     setSchema: function(schema)
     {
-       //FireinputLog.debug(this, "Set schema: " + schema);
+       //Fireinput.log.debug(this, "Set schema: " + schema);
        this.cangjieSchema = schema;
     },
 
@@ -341,7 +341,7 @@ Cangjie.prototype = extend(new FireinputIME(),
        if (! this.charArray)
        	return null;
 
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
        // if the next this.numSelection are already displayed, return null
        if ((this.charIndex+this.numSelection) >= this.charArray.length)
        	return null;
@@ -357,7 +357,7 @@ Cangjie.prototype = extend(new FireinputIME(),
        	i -= this.numSelection;
        	this.charIndex = (i > 0) ? i : 0;
        }
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
        return {charArray:this.charArray.slice(this.charIndex, this.charIndex+this.numSelection), validInputKey: this.validInputKey};
     },
 
@@ -365,7 +365,7 @@ Cangjie.prototype = extend(new FireinputIME(),
     {
        if (! this.charArray)
        	  return null;
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
        // if the previous this.numSelection are already displayed, return null
        if ((this.charIndex - this.numSelection) < 0)
        	  return null;
@@ -375,7 +375,7 @@ Cangjie.prototype = extend(new FireinputIME(),
        else
        	  this.charIndex = 0;
 
-       // FireinputLog.debug(this,"this.charIndex: " + this.charIndex);
+       // Fireinput.log.debug(this,"this.charIndex: " + this.charIndex);
        return {charArray: this.charArray.slice(this.charIndex, this.charIndex+this.numSelection), validInputKey: this.validInputKey};
     },
 
@@ -435,7 +435,7 @@ Cangjie.prototype = extend(new FireinputIME(),
        	  continue;
 
 
-       	var encodedWord = FireinputEncoding.getEncodedString(word, this.encodingMode);
+       	var encodedWord = Fireinput.encoding.getEncodedString(word, this.encodingMode);
        	if (typeof(wordList[encodedWord]) != 'undefined')
        	  continue;
 
@@ -462,22 +462,22 @@ Cangjie.prototype = extend(new FireinputIME(),
        // free it
        wordList = null;
 
-       // FireinputLog.debug(this,"wordArray: " + this.getKeyWord(wordArray));
-       // FireinputLog.debug(this,"userArray: " + this.getKeyWord(userArray));
+       // Fireinput.log.debug(this,"wordArray: " + this.getKeyWord(wordArray));
+       // Fireinput.log.debug(this,"userArray: " + this.getKeyWord(userArray));
        if (userArray.length <= 0)
        	  return wordArray;
 
        // sort the first this.numSelection items
        if (userArray.length < (this.numSelection+1))
        {
-       	  arrayInsert(userArray, userArray.length, wordArray.slice(0, this.numSelection));
+       	  Fireinput.arrayInsert(userArray, userArray.length, wordArray.slice(0, this.numSelection));
        	  userArray.sort(this.sortCodeArray);
-       	  arrayInsert(userArray, userArray.length, wordArray.slice(this.numSelection+1, wordArray.length));
+       	  Fireinput.arrayInsert(userArray, userArray.length, wordArray.slice(this.numSelection+1, wordArray.length));
        }
        else
        {
        	  userArray.sort(this.sortCodeArray);
-       	  arrayInsert(userArray, userArray.length, wordArray.slice(0, wordArray.length));
+       	  Fireinput.arrayInsert(userArray, userArray.length, wordArray.slice(0, wordArray.length));
        }
 
        return userArray;
@@ -487,7 +487,7 @@ Cangjie.prototype = extend(new FireinputIME(),
     {
        if (this.userCodeHash && this.userTableChanged)
        {
-       	  FireinputSaver.saveUserData(this.userCodeHash);
+       	  Fireinput.phraseSaver.saveUserData(this.userCodeHash);
        }
     },
 
@@ -497,7 +497,7 @@ Cangjie.prototype = extend(new FireinputIME(),
        var chars = word.match(/[\D\.]+/g)[0];
 
        if (! this.userCodeHash)
-       	  this.userCodeHash = new FireinputHash();
+       	  this.userCodeHash = new Fireinput.util.hash();
 
        var newfreq = 0;
        if (this.userCodeHash.hasItem(chars + ":" + key))
@@ -533,9 +533,9 @@ Cangjie.prototype = extend(new FireinputIME(),
 
        this.userTableChanged = true;
 
-       // FireinputLog.debug(this,"word: " + word);
-       // FireinputLog.debug(this,"chars: " + chars + ", freq: " + freq);
-       // FireinputLog.debug(this,"chars: " + chars + ", key: " + key + ", initKey: " + initKey);
+       // Fireinput.log.debug(this,"word: " + word);
+       // Fireinput.log.debug(this,"chars: " + chars + ", freq: " + freq);
+       // Fireinput.log.debug(this,"chars: " + chars + ", key: " + key + ", initKey: " + initKey);
        return freq;
     },
 
@@ -547,7 +547,7 @@ Cangjie.prototype = extend(new FireinputIME(),
     storeUserAddPhrase: function(phrase, keys, freq)
     {
       if(!this.userCodeHash)
-          this.userCodeHash = new FireinputHash();
+          this.userCodeHash = new Fireinput.util.hash();
 
        if(this.userCodeHash.hasItem(phrase + ":" + keys))
           return;

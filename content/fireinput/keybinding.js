@@ -34,134 +34,137 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
+Fireinput.namespace("Fireinput.keyBinding"); 
+
 /* the mapping between DOM_VK_* and its value */
-var keyCodeMapper=new Object();
-keyCodeMapper['3']='CANCEL'
-keyCodeMapper['6']='HELP'
-keyCodeMapper['8']='BACK_SPACE'
-keyCodeMapper['9']='TAB'
-keyCodeMapper['12']='CLEAR'
-keyCodeMapper['13']='RETURN'
-keyCodeMapper['14']='ENTER'
-keyCodeMapper['16']='SHIFT'
-keyCodeMapper['17']='CONTROL'
-keyCodeMapper['18']='ALT'
-keyCodeMapper['19']='PAUSE'
-keyCodeMapper['20']='CAPS_LOCK'
-keyCodeMapper['27']='ESCAPE'
-keyCodeMapper['32']='SPACE'
-keyCodeMapper['33']='PAGE_UP'
-keyCodeMapper['34']='PAGE_DOWN'
-keyCodeMapper['35']='END'
-keyCodeMapper['36']='HOME'
-keyCodeMapper['37']='LEFT'
-keyCodeMapper['38']='UP'
-keyCodeMapper['39']='RIGHT'
-keyCodeMapper['40']='DOWN'
-keyCodeMapper['44']='PRINTSCREEN'
-keyCodeMapper['45']='INSERT'
-keyCodeMapper['46']='DELETE'
-keyCodeMapper['48']='0'
-keyCodeMapper['49']='1'
-keyCodeMapper['50']='2'
-keyCodeMapper['51']='3'
-keyCodeMapper['52']='4'
-keyCodeMapper['53']='5'
-keyCodeMapper['54']='6'
-keyCodeMapper['55']='7'
-keyCodeMapper['56']='8'
-keyCodeMapper['57']='9'
-keyCodeMapper['59']=';'
-keyCodeMapper['61']='='
-keyCodeMapper['65']='A'
-keyCodeMapper['66']='B'
-keyCodeMapper['67']='C'
-keyCodeMapper['68']='D'
-keyCodeMapper['69']='E'
-keyCodeMapper['70']='F'
-keyCodeMapper['71']='G'
-keyCodeMapper['72']='H'
-keyCodeMapper['73']='I'
-keyCodeMapper['74']='J'
-keyCodeMapper['75']='K'
-keyCodeMapper['76']='L'
-keyCodeMapper['77']='M'
-keyCodeMapper['78']='N'
-keyCodeMapper['79']='O'
-keyCodeMapper['80']='P'
-keyCodeMapper['81']='Q'
-keyCodeMapper['82']='R'
-keyCodeMapper['83']='S'
-keyCodeMapper['84']='T'
-keyCodeMapper['85']='U'
-keyCodeMapper['86']='V'
-keyCodeMapper['87']='W'
-keyCodeMapper['88']='X'
-keyCodeMapper['89']='Y'
-keyCodeMapper['90']='Z'
-keyCodeMapper['93']='CONTEXT_MENU'
-keyCodeMapper['96']='NUMPAD0'
-keyCodeMapper['97']='NUMPAD1'
-keyCodeMapper['98']='NUMPAD2'
-keyCodeMapper['99']='NUMPAD3'
-keyCodeMapper['100']='NUMPAD4'
-keyCodeMapper['101']='NUMPAD5'
-keyCodeMapper['102']='NUMPAD6'
-keyCodeMapper['103']='NUMPAD7'
-keyCodeMapper['104']='NUMPAD8'
-keyCodeMapper['105']='NUMPAD9'
-keyCodeMapper['106']='MULTIPLY'
-keyCodeMapper['107']='ADD'
-keyCodeMapper['108']='SEPARATOR'
-keyCodeMapper['109']='SUBTRACT'
-keyCodeMapper['110']='DECIMAL'
-keyCodeMapper['111']='DIVIDE'
-keyCodeMapper['112']='F1'
-keyCodeMapper['113']='F2'
-keyCodeMapper['114']='F3'
-keyCodeMapper['115']='F4'
-keyCodeMapper['116']='F5'
-keyCodeMapper['117']='F6'
-keyCodeMapper['118']='F7'
-keyCodeMapper['119']='F8'
-keyCodeMapper['120']='F9'
-keyCodeMapper['121']='F10'
-keyCodeMapper['122']='F11'
-keyCodeMapper['123']='F12'
-keyCodeMapper['124']='F13'
-keyCodeMapper['125']='F14'
-keyCodeMapper['126']='F15'
-keyCodeMapper['127']='F16'
-keyCodeMapper['128']='F17'
-keyCodeMapper['129']='F18'
-keyCodeMapper['130']='F19'
-keyCodeMapper['131']='F20'
-keyCodeMapper['132']='F21'
-keyCodeMapper['133']='F22'
-keyCodeMapper['134']='F23'
-keyCodeMapper['135']='F24'
-keyCodeMapper['144']='NUM_LOCK'
-keyCodeMapper['145']='SCROLL_LOCK'
-keyCodeMapper['188']=','
-keyCodeMapper['190']='.'
-keyCodeMapper['191']='/'
-keyCodeMapper['192']='`'
-keyCodeMapper['219']='{'
-keyCodeMapper['220']='\\'
-keyCodeMapper['221']='}'
-keyCodeMapper['222']='\''
-keyCodeMapper['224']='META'
+Fireinput.keyBinding.keyCodeMapper=new Object();
+Fireinput.keyBinding.keyCodeMapper['3']='CANCEL'
+Fireinput.keyBinding.keyCodeMapper['6']='HELP'
+Fireinput.keyBinding.keyCodeMapper['8']='BACK_SPACE'
+Fireinput.keyBinding.keyCodeMapper['9']='TAB'
+Fireinput.keyBinding.keyCodeMapper['12']='CLEAR'
+Fireinput.keyBinding.keyCodeMapper['13']='RETURN'
+Fireinput.keyBinding.keyCodeMapper['14']='ENTER'
+Fireinput.keyBinding.keyCodeMapper['16']='SHIFT'
+Fireinput.keyBinding.keyCodeMapper['17']='CONTROL'
+Fireinput.keyBinding.keyCodeMapper['18']='ALT'
+Fireinput.keyBinding.keyCodeMapper['19']='PAUSE'
+Fireinput.keyBinding.keyCodeMapper['20']='CAPS_LOCK'
+Fireinput.keyBinding.keyCodeMapper['27']='ESCAPE'
+Fireinput.keyBinding.keyCodeMapper['32']='SPACE'
+Fireinput.keyBinding.keyCodeMapper['33']='PAGE_UP'
+Fireinput.keyBinding.keyCodeMapper['34']='PAGE_DOWN'
+Fireinput.keyBinding.keyCodeMapper['35']='END'
+Fireinput.keyBinding.keyCodeMapper['36']='HOME'
+Fireinput.keyBinding.keyCodeMapper['37']='LEFT'
+Fireinput.keyBinding.keyCodeMapper['38']='UP'
+Fireinput.keyBinding.keyCodeMapper['39']='RIGHT'
+Fireinput.keyBinding.keyCodeMapper['40']='DOWN'
+Fireinput.keyBinding.keyCodeMapper['44']='PRINTSCREEN'
+Fireinput.keyBinding.keyCodeMapper['45']='INSERT'
+Fireinput.keyBinding.keyCodeMapper['46']='DELETE'
+Fireinput.keyBinding.keyCodeMapper['48']='0'
+Fireinput.keyBinding.keyCodeMapper['49']='1'
+Fireinput.keyBinding.keyCodeMapper['50']='2'
+Fireinput.keyBinding.keyCodeMapper['51']='3'
+Fireinput.keyBinding.keyCodeMapper['52']='4'
+Fireinput.keyBinding.keyCodeMapper['53']='5'
+Fireinput.keyBinding.keyCodeMapper['54']='6'
+Fireinput.keyBinding.keyCodeMapper['55']='7'
+Fireinput.keyBinding.keyCodeMapper['56']='8'
+Fireinput.keyBinding.keyCodeMapper['57']='9'
+Fireinput.keyBinding.keyCodeMapper['59']=';'
+Fireinput.keyBinding.keyCodeMapper['61']='='
+Fireinput.keyBinding.keyCodeMapper['65']='A'
+Fireinput.keyBinding.keyCodeMapper['66']='B'
+Fireinput.keyBinding.keyCodeMapper['67']='C'
+Fireinput.keyBinding.keyCodeMapper['68']='D'
+Fireinput.keyBinding.keyCodeMapper['69']='E'
+Fireinput.keyBinding.keyCodeMapper['70']='F'
+Fireinput.keyBinding.keyCodeMapper['71']='G'
+Fireinput.keyBinding.keyCodeMapper['72']='H'
+Fireinput.keyBinding.keyCodeMapper['73']='I'
+Fireinput.keyBinding.keyCodeMapper['74']='J'
+Fireinput.keyBinding.keyCodeMapper['75']='K'
+Fireinput.keyBinding.keyCodeMapper['76']='L'
+Fireinput.keyBinding.keyCodeMapper['77']='M'
+Fireinput.keyBinding.keyCodeMapper['78']='N'
+Fireinput.keyBinding.keyCodeMapper['79']='O'
+Fireinput.keyBinding.keyCodeMapper['80']='P'
+Fireinput.keyBinding.keyCodeMapper['81']='Q'
+Fireinput.keyBinding.keyCodeMapper['82']='R'
+Fireinput.keyBinding.keyCodeMapper['83']='S'
+Fireinput.keyBinding.keyCodeMapper['84']='T'
+Fireinput.keyBinding.keyCodeMapper['85']='U'
+Fireinput.keyBinding.keyCodeMapper['86']='V'
+Fireinput.keyBinding.keyCodeMapper['87']='W'
+Fireinput.keyBinding.keyCodeMapper['88']='X'
+Fireinput.keyBinding.keyCodeMapper['89']='Y'
+Fireinput.keyBinding.keyCodeMapper['90']='Z'
+Fireinput.keyBinding.keyCodeMapper['93']='CONTEXT_MENU'
+Fireinput.keyBinding.keyCodeMapper['96']='NUMPAD0'
+Fireinput.keyBinding.keyCodeMapper['97']='NUMPAD1'
+Fireinput.keyBinding.keyCodeMapper['98']='NUMPAD2'
+Fireinput.keyBinding.keyCodeMapper['99']='NUMPAD3'
+Fireinput.keyBinding.keyCodeMapper['100']='NUMPAD4'
+Fireinput.keyBinding.keyCodeMapper['101']='NUMPAD5'
+Fireinput.keyBinding.keyCodeMapper['102']='NUMPAD6'
+Fireinput.keyBinding.keyCodeMapper['103']='NUMPAD7'
+Fireinput.keyBinding.keyCodeMapper['104']='NUMPAD8'
+Fireinput.keyBinding.keyCodeMapper['105']='NUMPAD9'
+Fireinput.keyBinding.keyCodeMapper['106']='MULTIPLY'
+Fireinput.keyBinding.keyCodeMapper['107']='ADD'
+Fireinput.keyBinding.keyCodeMapper['108']='SEPARATOR'
+Fireinput.keyBinding.keyCodeMapper['109']='SUBTRACT'
+Fireinput.keyBinding.keyCodeMapper['110']='DECIMAL'
+Fireinput.keyBinding.keyCodeMapper['111']='DIVIDE'
+Fireinput.keyBinding.keyCodeMapper['112']='F1'
+Fireinput.keyBinding.keyCodeMapper['113']='F2'
+Fireinput.keyBinding.keyCodeMapper['114']='F3'
+Fireinput.keyBinding.keyCodeMapper['115']='F4'
+Fireinput.keyBinding.keyCodeMapper['116']='F5'
+Fireinput.keyBinding.keyCodeMapper['117']='F6'
+Fireinput.keyBinding.keyCodeMapper['118']='F7'
+Fireinput.keyBinding.keyCodeMapper['119']='F8'
+Fireinput.keyBinding.keyCodeMapper['120']='F9'
+Fireinput.keyBinding.keyCodeMapper['121']='F10'
+Fireinput.keyBinding.keyCodeMapper['122']='F11'
+Fireinput.keyBinding.keyCodeMapper['123']='F12'
+Fireinput.keyBinding.keyCodeMapper['124']='F13'
+Fireinput.keyBinding.keyCodeMapper['125']='F14'
+Fireinput.keyBinding.keyCodeMapper['126']='F15'
+Fireinput.keyBinding.keyCodeMapper['127']='F16'
+Fireinput.keyBinding.keyCodeMapper['128']='F17'
+Fireinput.keyBinding.keyCodeMapper['129']='F18'
+Fireinput.keyBinding.keyCodeMapper['130']='F19'
+Fireinput.keyBinding.keyCodeMapper['131']='F20'
+Fireinput.keyBinding.keyCodeMapper['132']='F21'
+Fireinput.keyBinding.keyCodeMapper['133']='F22'
+Fireinput.keyBinding.keyCodeMapper['134']='F23'
+Fireinput.keyBinding.keyCodeMapper['135']='F24'
+Fireinput.keyBinding.keyCodeMapper['144']='NUM_LOCK'
+Fireinput.keyBinding.keyCodeMapper['145']='SCROLL_LOCK'
+Fireinput.keyBinding.keyCodeMapper['188']=','
+Fireinput.keyBinding.keyCodeMapper['190']='.'
+Fireinput.keyBinding.keyCodeMapper['191']='/'
+Fireinput.keyBinding.keyCodeMapper['192']='`'
+Fireinput.keyBinding.keyCodeMapper['219']='{'
+Fireinput.keyBinding.keyCodeMapper['220']='\\'
+Fireinput.keyBinding.keyCodeMapper['221']='}'
+Fireinput.keyBinding.keyCodeMapper['222']='\''
+Fireinput.keyBinding.keyCodeMapper['224']='META'
 
 /* a list of key and its command mapping */
-var keyActions = [
-    {name: "openKey", value: "",  command: "Fireinput.toggleFireinput"},
-    {name: "openEditorKey", value: "", command: "FireinputHelp.openEditor"},
-    {name: "toggleIMEKey", value: "", command: "Fireinput.toggleIMEMode"},
+
+Fireinput.keyBinding.keyActions = [
+    {name: "openKey", value: "",  command: "Fireinput.main.toggleFireinput"},
+    {name: "openEditorKey", value: "", command: "Fireinput.main.help.openEditor"},
+    {name: "toggleIMEKey", value: "", command: "Fireinput.main.toggleIMEMode"},
     {name: "quickToggleIMEKey", value: "", command: ""},
-    {name: "switchInputMethodKey", value: "", command: "Fireinput.switchInputMethod"},
-    {name: "toggleHalfKey", value: "", command: "Fireinput.toggleHalfMode"},
-    {name: "togglePuncKey", value: "", command: "Fireinput.togglePunctMode"},
-    {name: "toggleEncodingKey", value: "", command: "Fireinput.toggleEncodingMode"},
+    {name: "switchInputMethodKey", value: "", command: "Fireinput.main.switchInputMethod"},
+    {name: "toggleHalfKey", value: "", command: "Fireinput.main.toggleHalfMode"},
+    {name: "togglePuncKey", value: "", command: "Fireinput.main.togglePunctMode"},
+    {name: "toggleEncodingKey", value: "", command: "Fireinput.main.toggleEncodingMode"},
     {name: "pageUpKey", value: "", command: null},
     {name: "pageDownKey", value: "", command: null},
     {name: "selectFirstKey", value: "", command: null},
@@ -169,7 +172,7 @@ var keyActions = [
     {name: "selectThirdKey", value: "", command: null}
 ]; 
 
-var FireinputKeyBinding = 
+Fireinput.keyBinding = Fireinput.extend(Fireinput.keyBinding,  
 {
     keyValueHash: null, 
     keyCodeHash: null, 
@@ -177,20 +180,20 @@ var FireinputKeyBinding =
     // initialize key value 
     init: function()
     {
-       this.keyValueHash = new FireinputHash(); 
-       this.keyCodeHash = new FireinputHash(); 
+       this.keyValueHash = new Fireinput.util.hash(); 
+       this.keyCodeHash = new Fireinput.util.hash(); 
  
-       for (var i=0; i<keyActions.length; i++)
+       for (var i=0; i<this.keyActions.length; i++)
        {
-          keyActions[i].value = fireinputPrefGetDefault(keyActions[i].name); 
-          this.keyValueHash.setItem(keyActions[i].value, keyActions[i]); 
-          this.keyValueHash.setItem(keyActions[i].name, keyActions[i]); 
+          this.keyActions[i].value = Fireinput.pref.getDefault(this.keyActions[i].name); 
+          this.keyValueHash.setItem(this.keyActions[i].value, this.keyActions[i]); 
+          this.keyValueHash.setItem(this.keyActions[i].name, this.keyActions[i]); 
        }
 
        // create string to code value 
-       for(var k in keyCodeMapper)
+       for(var k in this.keyCodeMapper)
        {
-          this.keyCodeHash.setItem(keyCodeMapper[k], k); 
+          this.keyCodeHash.setItem(this.keyCodeMapper[k], k); 
        }
 
     }, 
@@ -209,9 +212,9 @@ var FireinputKeyBinding =
     disableConflictKey: function(allowInputKeys)
     {
        // reset first 
-       for (var i=0; i<keyActions.length; i++)
+       for (var i=0; i<this.keyActions.length; i++)
        {
-          keyActions[i].disabled = false; 
+          this.keyActions[i].disabled = false; 
        }
        for(var i=0; i<allowInputKeys.length; i++)
        {
@@ -233,7 +236,7 @@ var FireinputKeyBinding =
        var keyAction = this.keyValueHash.getItem(option); 
        if(keyAction)
        {
-           var key = keyCodeMapper[this.getDecodedKey(keyAction.value)]; 
+           var key = this.keyCodeMapper[this.getDecodedKey(keyAction.value)]; 
            var modifiers = this.getDecodedModifier(keyAction.value); 
            var str = ''; 
            str += (modifiers & Event.CONTROL_MASK)?'Ctrl+':'';
@@ -269,8 +272,18 @@ var FireinputKeyBinding =
           var commands = keyAction.command.split(".");
           if(commands && commands.length >= 2)
           {
-             var func = window[commands[0]][commands[1]]; 
-             func.call(window[commands[0]]); 
+             var func = window; 
+             for(var i =0; i<commands.length; i++) {
+               var o  = func[commands[i]] || {}; 
+               if(typeof(o) == 'function') {
+                  func = o.bind(func); 
+               }
+               else {
+                  func = o; 
+               }
+
+             }
+             func.call(window, event); 
           }
           else if(commands)
           {
@@ -314,5 +327,5 @@ var FireinputKeyBinding =
        return value & 0xF; 
     }
   
-}; 
+}); 
 

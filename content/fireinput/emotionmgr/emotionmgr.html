@@ -25,18 +25,18 @@
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/emotionmgr/emotionmgr.js"></script>
 <script type="text/javascript">
 $(function() {
-   FireinputServerLogin.checkUserLogon(); 
-   EmotionMgr.loadCurrentEmotions();
+   Fireinput.serverLogin.checkUserLogon(); 
+   Fireinput.emotionMgr.loadCurrentEmotions();
    $('#topTabMenu').tabs({
 	fxSpeed: 'fast',
         onShow: function (){
-          EmotionMgr.initTab($(this).activeTab()); 
+          Fireinput.emotionMgr.initTab($(this).activeTab()); 
           if($(this).activeTab() == 2)
-            EmotionMgr.loadCurrentEmotions(); 
+            Fireinput.emotionMgr.loadCurrentEmotions(); 
         }
    });
    // initialize for page refresh 
-   EmotionMgr.initTab($('#topTabMenu').activeTab()); 
+   Fireinput.emotionMgr.initTab($('#topTabMenu').activeTab()); 
 });
 </script>
 </head>
@@ -49,16 +49,16 @@ $(function() {
           <span id="logonUser" style="color: blue;margin-right: 10px;"></span>
         </span>
         <span id="addFileCommand">
-          <span id="uploadLink" class="textLink logonLink" onclick="EmotionMgr.toggleUploadForm()">上传</span>
+          <span id="uploadLink" class="textLink logonLink" onclick="Fireinput.emotionMgr.toggleUploadForm()">上传</span>
         </span>
         <span id="browseFileCommand">
-          <span id="localFiles" class="textLink logonLink" onclick="EmotionMgr.loadCurrentEmotions()">我的图案</span>
+          <span id="localFiles" class="textLink logonLink" onclick="Fireinput.emotionMgr.loadCurrentEmotions()">我的图案</span>
           <span>|</span>
-          <span id="showAllFiles" class="textLink logonLink" onclick="EmotionMgr.showMimeOrAll(false)">共享图案</span>
-          <span id="showMyUpload">|<span class="textLink logonLink" onclick="EmotionMgr.showMimeOrAll(true)">我的上传</span></span>
+          <span id="showAllFiles" class="textLink logonLink" onclick="Fireinput.emotionMgr.showMimeOrAll(false)">共享图案</span>
+          <span id="showMyUpload">|<span class="textLink logonLink" onclick="Fireinput.emotionMgr.showMimeOrAll(true)">我的上传</span></span>
         </span>
         </span>
-        <span id="logonLink">|<span class="textLink logonLink" onclick="FireinputServerLogin.toggleLogonForm(event)">登录</span></span>
+        <span id="logonLink">|<span class="textLink logonLink" onclick="Fireinput.serverLogin.toggleLogonForm(event)">登录</span></span>
       </div>
  
       <!-- logon form -->
@@ -68,10 +68,10 @@ $(function() {
           <form onsubmit="javascript:return false;">
             <table>
                  <tr><td style="vertical-align:top">注册邮箱:</td><td><input id="logonEmail" type="text" /></td></tr>
-                 <tr><td style="text-align:right">密码:</td><td><input id="logonPasswd" type="password" onkeypress="FireinputServerLogin.logon(event)"/></td></tr>
+                 <tr><td style="text-align:right">密码:</td><td><input id="logonPasswd" type="password" onkeypress="Fireinput.serverLogin.logon(event)"/></td></tr>
                  <tr><td><input id="logonSeed" type="hidden" value=""/></td></tr>
-                 <tr><td></td><td><input type="button" id="logonButton" value="登录" onclick="FireinputServerLogin.logon()"/>&nbsp;&nbsp;
-                 <input type="button" id="cancelLogonButton" value="取消" onclick="FireinputServerLogin.toggleLogonForm(event)"/></td></tr>
+                 <tr><td></td><td><input type="button" id="logonButton" value="登录" onclick="Fireinput.serverLogin.logon()"/>&nbsp;&nbsp;
+                 <input type="button" id="cancelLogonButton" value="取消" onclick="Fireinput.serverLogin.toggleLogonForm(event)"/></td></tr>
            </table>
           </form>
         </div>
@@ -93,7 +93,7 @@ $(function() {
       <div id="uploadLinkBox" style="display:none; margin-right: 5px">
         <br/>
         <div id="uploadFileHelp" style="text-align:left; padding-left: 5px;">
-        想上传您的图片? 点击"Browser..."按钮选择您想上传的图案，然后点击上传按钮。 <span id="needLogonHelp" style="display:none">如果您想管理所上传的图案，请到<a href="javascript:void(0)" class="textLink" onclick="EmotionMgr.goToPage('http://www.fireinput.com/account/create_user.php')">www.fireinput.com</a>去注册。如果您已经注册，请先登录。非注册用户依然可以上传，但将不能够管理所上传图案</span>
+        想上传您的图片? 点击"Browser..."按钮选择您想上传的图案，然后点击上传按钮。 <span id="needLogonHelp" style="display:none">如果您想管理所上传的图案，请到<a href="javascript:void(0)" class="textLink" onclick="Fireinput.emotionMgr.goToPage('http://www.fireinput.com/account/create_user.php')">www.fireinput.com</a>去注册。如果您已经注册，请先登录。非注册用户依然可以上传，但将不能够管理所上传图案</span>
         </div>
      </div> <!-- Upload part --> 
 
@@ -103,16 +103,16 @@ $(function() {
      </div>
      <div style="margin-right: 3px">
         <div id="uploadForm" style="display:none; padding-left: 5px;">
-          <form enctype="multipart/form-data" action="http://www.fireinput.com/emotions/uploadem.php" method="POST" onsubmit="return EmotionMgr.uploadFile(this)">
-            <input id="uploadFileValue" type="file" name="NewFile" size="50" onchange="EmotionMgr.addFileOnInput()"/>
+          <form enctype="multipart/form-data" action="http://www.fireinput.com/emotions/uploadem.php" method="POST" onsubmit="return Fireinput.emotionMgr.uploadFile(this)">
+            <input id="uploadFileValue" type="file" name="NewFile" size="50" onchange="Fireinput.emotionMgr.addFileOnInput()"/>
             &nbsp;&nbsp;
             <input type="submit" value="上传"/>
           </form>
         </div>
         <div id="addForm" style="padding-left: 5px">
-          <form action="javascript:EmotionMgr.addFileIntoList()">
-           <input id="addFileValue" style="color: blue" size="50" onfocus="EmotionMgr.addFileOnFocus(event)" oninput="EmotionMgr.addFileOnInput(event)"/>
-           <input type="button" id="okButton" value="加入" onclick="EmotionMgr.addFileIntoList()"/>
+          <form action="javascript:Fireinput.emotionMgr.addFileIntoList()">
+           <input id="addFileValue" style="color: blue" size="50" onfocus="Fireinput.emotionMgr.addFileOnFocus(event)" oninput="Fireinput.emotionMgr.addFileOnInput(event)"/>
+           <input type="button" id="okButton" value="加入" onclick="Fireinput.emotionMgr.addFileIntoList()"/>
           </form>
         </div>
      </div>
@@ -140,7 +140,7 @@ $(function() {
         <div id="paginatioplink" class="pagecontent"></div>
       </div>
       <div style="margin-left: 40px;">
-           <input type="button" id="updateButton" value="保存" onclick="EmotionMgr.saveFileToList()"/>
+           <input type="button" id="updateButton" value="保存" onclick="Fireinput.emotionMgr.saveFileToList()"/>
            <span id="saveFileMessage" style="margin-left: 5px; color: green;"></span>
       </div>
     </div>

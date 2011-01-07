@@ -34,7 +34,7 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var FireinputConfig = 
+Fireinput.config = 
 {
     loadWindow: function()
     {
@@ -56,7 +56,7 @@ var FireinputConfig =
     displayInputMethodlist: function(param)
     {
        var list = param.split(",").sort(); 
-       var hideIMEList = fireinputPrefGetDefault("hiddenInputMethod") || "";
+       var hideIMEList = Fireinput.pref.getDefault("hiddenInputMethod") || "";
        var lb = document.getElementById("inputMethodList"); 
 
        for(var i=0; i<list.length; i++)
@@ -83,12 +83,10 @@ var FireinputConfig =
           item.setAttribute("imeindex", imeindex);
           item.setAttribute("id", "listitem_" + imeindex); 
           item.setAttribute("imehidden", hidden);
-          item.onclick = bind(function(event) {
-                 this.toggleShow(event);
-                 }, this);
+          item.onclick = this.toggleShow.bind(this);
 
           var cell = document.createElement("listcell");
-          cell.setAttribute("label", FireinputUtils.getIMENameString(imeindex));
+          cell.setAttribute("label", Fireinput.util.getIMENameString(imeindex));
           item.appendChild(cell);
           cell = document.createElement("listcell");
           cell.setAttribute("type", "checkbox");
@@ -132,7 +130,7 @@ var FireinputConfig =
        for (var i = 0; i < keyinputboxes.length; i++)
        {
           var keyinputbox = keyinputboxes[i];
-          keyinputbox.combinedValue = fireinputPrefGetDefault(keyinputbox.getAttribute("option")); 
+          keyinputbox.combinedValue = Fireinput.pref.getDefault(keyinputbox.getAttribute("option")); 
        }
 
     },
@@ -143,7 +141,7 @@ var FireinputConfig =
        for(var i=0; i<ids.length; i++)
        {
           var el = document.getElementById(ids[i]); 
-          var elvalue = fireinputPrefGetDefault(el.getAttribute("option"));
+          var elvalue = Fireinput.pref.getDefault(el.getAttribute("option"));
           var element = el.getElementsByAttribute("value", elvalue)[0];
           if (element)
              el.selectedItem  = element; 
@@ -153,7 +151,7 @@ var FireinputConfig =
        for(var i=0; i<ids.length; i++)
        {
           var el = document.getElementById(ids[i]); 
-          var elvalue = fireinputPrefGetDefault(el.getAttribute("option"));
+          var elvalue = Fireinput.pref.getDefault(el.getAttribute("option"));
           el.color = elvalue; 
        }
     },
@@ -164,14 +162,14 @@ var FireinputConfig =
        for(var i=0; i<ids.length; i++)
        {
           var el = document.getElementById(ids[i]); 
-          fireinputPrefSave(el.getAttribute("option"), el.value); 
+          Fireinput.pref.save(el.getAttribute("option"), el.value); 
        }
 
        ids = ["fireinput.inputbox.bgcolor", "fireinput.inputbox.fontcolor", "fireinput.wordselection.fontcolor"];
        for(var i=0; i<ids.length; i++)
        {
           var el = document.getElementById(ids[i]);
-          fireinputPrefSave(el.getAttribute("option"), el.color);
+          Fireinput.pref.save(el.getAttribute("option"), el.color);
        }
     }, 
 
@@ -187,7 +185,7 @@ var FireinputConfig =
              imeHiddens.push(listcells[i].getAttribute("imeindex")); 
           }
        }
-       fireinputPrefSave("hiddenInputMethod", imeHiddens.join(",")); 
+       Fireinput.pref.save("hiddenInputMethod", imeHiddens.join(",")); 
 
        // save key configuration.
 
@@ -196,7 +194,7 @@ var FireinputConfig =
        for (i = 0; i < keyinputboxes.length; i++)
        {
            var keyinputbox = keyinputboxes[i];
-           fireinputPrefSave(keyinputbox.getAttribute("option"), keyinputbox.combinedValue); 
+           Fireinput.pref.save(keyinputbox.getAttribute("option"), keyinputbox.combinedValue); 
        }
 
        // save interface settings 

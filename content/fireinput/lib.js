@@ -34,28 +34,38 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-function bind()
-{
-    var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
-    return function() { return fn.apply(object, arrayInsert(cloneArray(args), 0, arguments)); }
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function/bind
+// Compatibility for Function.bind 
+if ( !Function.prototype.bind ) {
+
+   Function.prototype.bind = function( obj ) {
+      var slice = [].slice,
+        args = slice.call(arguments, 1), 
+        self = this, 
+        nop = function () {}, 
+        bound = function () {
+          return self.apply( this instanceof nop ? this : ( obj || {} ), 
+                              args.concat( slice.call(arguments) ) );    
+        };
+
+      nop.prototype = self.prototype;
+
+      bound.prototype = new nop();
+
+      return bound;
+  };
 }
 
-this.bindFixed = function()
-{
-    var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
-    return function() { return fn.apply(object, args); } 
-};  
-
-function extend(d, s)
+Fireinput.extend = function(d, s)
 {
    for (var property in s) {
      d[property] = s[property];
    }
    return d; 
-}
+};
 
 
-function cloneArray(array, fn)
+Fireinput.cloneArray = function(array, fn)
 {
     var newArray = [];
 
@@ -68,51 +78,26 @@ function cloneArray(array, fn)
           newArray[newArray.length] = array[i];
 
     return newArray;
-}
+};
 
-function extendArray(array, array2)
+Fireinput.extendArray = function(array, array2)
 {
     var newArray = [];
     newArray.push.apply(newArray, array);
     newArray.push.apply(newArray, array2);
     return newArray;
-}
+};
 
-function arrayInsert(array, index, other)
+Fireinput.arrayInsert = function(array, index, other)
 {
     var len = other.length; 
     for (var i = 0; i < len; ++i)
        array.splice(i+index, 0, other[i]);
 
     return array;
-}
+};
 
-function createCookie(name,value,days) 
-{
-    if (days) {
-       var date = new Date();
-       date.setTime(date.getTime()+(days*24*60*60*1000));
-       var expires = "; expires="+date.toGMTString();
-    }
-    else 
-       var expires = "";
-    document.cookie = name+"="+value+expires+"; path=/";
-}
-
-function readCookie(name) 
-{
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i=ca.length-1;i>=0;i--) {
-       var c = ca[i];
-       while (c.charAt(0)==' ') c = c.substring(1,c.length);
-       if (c.indexOf(nameEQ) == 0) 
-          return c.substring(nameEQ.length,c.length);
-    }
-    return null;
-}
-
-function inArray(array, value) {
+Fireinput.inArray = function(array, value) {
    for (var i = 0; i < array.length; i++) {
       if (array[i] == value) return true;
    }

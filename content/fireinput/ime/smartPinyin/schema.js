@@ -34,10 +34,10 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-const PinyinAMBInitials  = ["zh z","ch c","sh s"];
-const PinyinAMBFinals  = ["an ang", "en eng","in ing"];
+Fireinput.PinyinAMBInitials  = ["zh z","ch c","sh s"];
+Fireinput.PinyinAMBFinals  = ["an ang", "en eng","in ing"];
 
-const ZiGuangShuangPinInitials = [
+Fireinput.ZiGuangShuangPinInitials = [
        { key: "a", initials: "ch"      },
        { key: "b", initials: "b"       },
        { key: "c", initials: "c"       },
@@ -63,7 +63,7 @@ const ZiGuangShuangPinInitials = [
        { key: "z", initials: "z"       }
     ]; 
 
-const ZiGuangShuangPinFinals = [
+Fireinput.ZiGuangShuangPinFinals = [
        { key: "a", finals: "a"         },
        { key: "b", finals: "iao"       },
        { key: "c", finals: "ing"       },
@@ -92,7 +92,7 @@ const ZiGuangShuangPinFinals = [
        { key: "z", finals: "ou"        }
     ]; 
    
-const MSShuangPinInitials = [
+Fireinput.MSShuangPinInitials = [
        { key: "b", initials: "b"       },
        { key: "c", initials: "c"       },
        { key: "d", initials: "d"       },
@@ -118,7 +118,7 @@ const MSShuangPinInitials = [
        { key: "z", initials: "z"       }
     ];
  
-const MSShuangPinFinals = [
+Fireinput.MSShuangPinFinals = [
        { key: "a", finals: "a"         },
        { key: "b", finals: "ou"        },
        { key: "c", finals: "iao"       },
@@ -148,7 +148,7 @@ const MSShuangPinFinals = [
        { key: ";", finals: "ing"       }
     ]; 
 
-const ChineseStarShuangPinInitials = [
+Fireinput.ChineseStarShuangPinInitials = [
        { key: "b", initials: "b"       },
        { key: "c", initials: "c"       },
        { key: "d", initials: "d"       },
@@ -174,7 +174,7 @@ const ChineseStarShuangPinInitials = [
        { key: "z", initials: "z"       }
     ];
   
-const ChineseStarShuangPinFinals = [
+Fireinput.ChineseStarShuangPinFinals = [
        { key: "a", finals: "a"         },
        { key: "b", finals: "ia,ua"     },
        { key: "c", finals: "uan"       },
@@ -203,7 +203,7 @@ const ChineseStarShuangPinFinals = [
        { key: "z", finals: "un"        }
     ];
 
-const SmartABCShuangPinInitials = [
+Fireinput.SmartABCShuangPinInitials = [
        { key: "a", initials: "zh"      },
        { key: "b", initials: "b"       },
        { key: "c", initials: "c"       },
@@ -229,7 +229,7 @@ const SmartABCShuangPinInitials = [
        { key: "z", initials: "z"       }
     ];
 
-const SmartABCShuangPinFinals = [
+Fireinput.SmartABCShuangPinFinals = [
        { key: "a", finals: "a"         },
        { key: "b", finals: "ou"        },
        { key: "c", finals: "in,uai"    },
@@ -259,16 +259,16 @@ const SmartABCShuangPinFinals = [
     ];
 
  
-var PinyinSchema = function() {}; 
+Fireinput.pinyinSchema = function() {}; 
 
-PinyinSchema.prototype = 
+Fireinput.pinyinSchema.prototype = 
 {
     debug: 0, 
     pinyinInitials: null,
     pinyinFinals: null,
     pinyinAMBInitialHash: null, 
     pinyinAMBFinalHash: null, 
-    pinyinSchema: SMART_PINYIN, 
+    pinyinSchema: Fireinput.SMART_PINYIN, 
     enableAMBZh: false, 
     enableAMBSh: false, 
     enableAMBCh: false, 
@@ -283,66 +283,66 @@ PinyinSchema.prototype =
 
     setSchema: function(schema)
     {
-       this.pinyinInitials = new FireinputHash(); 
-       this.pinyinFinals = new FireinputHash(); 
+       this.pinyinInitials = new Fireinput.util.hash(); 
+       this.pinyinFinals = new Fireinput.util.hash(); 
        this.pinyinSchema = schema; 
 
        switch(schema)
        {
-          case ZIGUANG_SHUANGPIN: 
-             for(var i=ZiGuangShuangPinInitials.length-1; i>=0; i--)
+          case Fireinput.ZIGUANG_SHUANGPIN: 
+             for(var i=Fireinput.ZiGuangShuangPinInitials.length-1; i>=0; i--)
              {
-                this.pinyinInitials.setItem(ZiGuangShuangPinInitials[i].key, 
-                                       ZiGuangShuangPinInitials[i].initials); 
+                this.pinyinInitials.setItem(Fireinput.ZiGuangShuangPinInitials[i].key, 
+                                       Fireinput.ZiGuangShuangPinInitials[i].initials); 
              }
-             for(var i=ZiGuangShuangPinFinals.length-1; i>=0; i--)
+             for(var i=Fireinput.ZiGuangShuangPinFinals.length-1; i>=0; i--)
              {
-                this.pinyinFinals.setItem(ZiGuangShuangPinFinals[i].key, 
-                                       ZiGuangShuangPinFinals[i].finals); 
+                this.pinyinFinals.setItem(Fireinput.ZiGuangShuangPinFinals[i].key, 
+                                       Fireinput.ZiGuangShuangPinFinals[i].finals); 
              }
           break; 
 
-          case MS_SHUANGPIN: 
-             for(var i=MSShuangPinInitials.length-1; i>=0; i--)
+          case Fireinput.MS_SHUANGPIN: 
+             for(var i=Fireinput.MSShuangPinInitials.length-1; i>=0; i--)
              {
-                this.pinyinInitials.setItem(MSShuangPinInitials[i].key, 
-                                       MSShuangPinInitials[i].initials);
+                this.pinyinInitials.setItem(Fireinput.MSShuangPinInitials[i].key, 
+                                       Fireinput.MSShuangPinInitials[i].initials);
              }
-             for(var i=MSShuangPinFinals.length-1; i>=0; i--)
+             for(var i=Fireinput.MSShuangPinFinals.length-1; i>=0; i--)
              {
-                this.pinyinFinals.setItem(MSShuangPinFinals[i].key, 
-                                       MSShuangPinFinals[i].finals);
-             }
-          break;
-
-          case CHINESESTAR_SHUANGPIN: 
-             for(var i=ChineseStarShuangPinInitials.length-1; i>=0; i--)
-             {
-                this.pinyinInitials.setItem(ChineseStarShuangPinInitials[i].key, 
-                                       ChineseStarShuangPinInitials[i].initials);
-             }
-             for(var i=ChineseStarShuangPinFinals.length-1; i>=0; i--)
-             {
-                this.pinyinFinals.setItem(ChineseStarShuangPinFinals[i].key, 
-                                       ChineseStarShuangPinFinals[i].finals);
+                this.pinyinFinals.setItem(Fireinput.MSShuangPinFinals[i].key, 
+                                       Fireinput.MSShuangPinFinals[i].finals);
              }
           break;
 
-          case SMARTABC_SHUANGPIN: 
-             for(var i=SmartABCShuangPinInitials.length-1; i>=0; i--)
+          case Fireinput.CHINESESTAR_SHUANGPIN: 
+             for(var i=Fireinput.ChineseStarShuangPinInitials.length-1; i>=0; i--)
              {
-                this.pinyinInitials.setItem(SmartABCShuangPinInitials[i].key, 
-                                       SmartABCShuangPinInitials[i].initials);
+                this.pinyinInitials.setItem(Fireinput.ChineseStarShuangPinInitials[i].key, 
+                                       Fireinput.ChineseStarShuangPinInitials[i].initials);
              }
-             for(var i=SmartABCShuangPinFinals.length-1; i>=0; i--)
+             for(var i=Fireinput.ChineseStarShuangPinFinals.length-1; i>=0; i--)
              {
-                this.pinyinFinals.setItem(SmartABCShuangPinFinals[i].key, 
-                                       SmartABCShuangPinFinals[i].finals);
+                this.pinyinFinals.setItem(Fireinput.ChineseStarShuangPinFinals[i].key, 
+                                       Fireinput.ChineseStarShuangPinFinals[i].finals);
+             }
+          break;
+
+          case Fireinput.SMARTABC_SHUANGPIN: 
+             for(var i=Fireinput.SmartABCShuangPinInitials.length-1; i>=0; i--)
+             {
+                this.pinyinInitials.setItem(Fireinput.SmartABCShuangPinInitials[i].key, 
+                                       Fireinput.SmartABCShuangPinInitials[i].initials);
+             }
+             for(var i=Fireinput.SmartABCShuangPinFinals.length-1; i>=0; i--)
+             {
+                this.pinyinFinals.setItem(Fireinput.SmartABCShuangPinFinals[i].key, 
+                                       Fireinput.SmartABCShuangPinFinals[i].finals);
              }
           break;
 
           default: 
-             this.pinyinSchema = SMART_PINYIN; 
+             this.pinyinSchema = Fireinput.SMART_PINYIN; 
           break;
        }
 
@@ -355,30 +355,30 @@ PinyinSchema.prototype =
           return; 
 
        this.setAMBOption();
-       FireinputPref.addObserver(this, false);	
-       this.pinyinAMBInitialHash = new FireinputHash(); 
-       this.pinyinAMBFinalHash = new FireinputHash(); 
+       Fireinput.util.pref.addObserver(this, false);	
+       this.pinyinAMBInitialHash = new Fireinput.util.hash(); 
+       this.pinyinAMBFinalHash = new Fireinput.util.hash(); 
 
        //FIXME: should be based on configuration 
-       for(var i=0; i<PinyinAMBInitials.length; i++)
+       for(var i=0; i<Fireinput.PinyinAMBInitials.length; i++)
        {
-          var strArray = PinyinAMBInitials[i].split(' ');
+          var strArray = Fireinput.PinyinAMBInitials[i].split(' ');
           if(strArray.length < 2) 
              continue; 
-          for(var j=0; j<PinyinFinals.length; j++)
+          for(var j=0; j<Fireinput.PinyinFinals.length; j++)
           {
-               this.pinyinAMBInitialHash.setItem(strArray[0]+PinyinFinals[j], strArray[1]+PinyinFinals[j]); 
+               this.pinyinAMBInitialHash.setItem(strArray[0]+Fireinput.PinyinFinals[j], strArray[1]+Fireinput.PinyinFinals[j]); 
           }
        }
 
-       for(var i=0; i<PinyinAMBFinals.length; i++)
+       for(var i=0; i<Fireinput.PinyinAMBFinals.length; i++)
        {
-          var strArray = PinyinAMBFinals[i].split(' ');
+          var strArray = Fireinput.PinyinAMBFinals[i].split(' ');
           if(strArray.length < 2) 
              continue; 
-          for(var j=0; j<PinyinInitials.length; j++)
+          for(var j=0; j<Fireinput.PinyinInitials.length; j++)
           {
-               this.pinyinAMBFinalHash.setItem(PinyinInitials[j]+strArray[0], PinyinInitials[j]+strArray[1]); 
+               this.pinyinAMBFinalHash.setItem(Fireinput.PinyinInitials[j]+strArray[0], Fireinput.PinyinInitials[j]+strArray[1]); 
           }
           // put final in as well 
           this.pinyinAMBFinalHash.setItem(strArray[0], strArray[1]); 
@@ -402,7 +402,7 @@ PinyinSchema.prototype =
 
     observe: function(subject, topic, data)
     {
-        var name = data.substr(prefDomain.length+1);
+        var name = data.substr(Fireinput.prefDomain.length+1);
         this.setAMBOption(name);
     },
      
@@ -410,27 +410,27 @@ PinyinSchema.prototype =
     {
 
        if(!option || option == "fireinputAMBZh")
-         this.enableAMBZh = FireinputPrefDefault.getAMBOption("fireinputAMBZh");
+         this.enableAMBZh = Fireinput.pref.getAMBOption("fireinputAMBZh");
 
        if(!option || option == "fireinputAMBSh")
-         this.enableAMBSh = FireinputPrefDefault.getAMBOption("fireinputAMBSh");
+         this.enableAMBSh = Fireinput.pref.getAMBOption("fireinputAMBSh");
 
        if(!option || option == "fireinputAMBCh")
-         this.enableAMBCh = FireinputPrefDefault.getAMBOption("fireinputAMBCh");
+         this.enableAMBCh = Fireinput.pref.getAMBOption("fireinputAMBCh");
 
        if(!option || option == "fireinputAMBAng")
-         this.enableAMBAng = FireinputPrefDefault.getAMBOption("fireinputAMBAng");
+         this.enableAMBAng = Fireinput.pref.getAMBOption("fireinputAMBAng");
 
        if(!option || option == "fireinputAMBEng")
-         this.enableAMBEng = FireinputPrefDefault.getAMBOption("fireinputAMBEng");
+         this.enableAMBEng = Fireinput.pref.getAMBOption("fireinputAMBEng");
 
        if(!option || option == "fireinputAMBIng")
-         this.enableAMBIng = FireinputPrefDefault.getAMBOption("fireinputAMBIng");
+         this.enableAMBIng = Fireinput.pref.getAMBOption("fireinputAMBIng");
     },
 
     getAMBKeys: function (ikey)
     {
-       if(this.getSchema() != SMART_PINYIN)
+       if(this.getSchema() != Fireinput.SMART_PINYIN)
           return null; 
 
        var ambKeys = [];
@@ -462,7 +462,7 @@ PinyinSchema.prototype =
     //
     compareAMB: function(ikey, mkey)
     {
-       if(this.getSchema() != SMART_PINYIN)
+       if(this.getSchema() != Fireinput.SMART_PINYIN)
           return false; 
 
        return this.compareAMBInitial(ikey, mkey) || this.compareAMBFinal(ikey, mkey);  
@@ -567,11 +567,11 @@ PinyinSchema.prototype =
                    {
                       for (var ii=0; ii<keyArray.length; ii++)
                       {
-                         keyArray[ii].push({key: firstKey, type: KEY_INITIAL}); 
+                         keyArray[ii].push({key: firstKey, type: Fireinput.KEY_INITIAL}); 
                       }
                    }
                    else
-                      keySet.push({key: firstKey, type: KEY_INITIAL}); 
+                      keySet.push({key: firstKey, type: Fireinput.KEY_INITIAL}); 
                 }
                 else if(ykey == "y")
                 {
@@ -579,7 +579,7 @@ PinyinSchema.prototype =
                    if(firstKey == "o")
                       firstKey = ""; 
 
-                   var keyType = firstKey.length>0 ? KEY_FULL : KEY_FINAL; 
+                   var keyType = firstKey.length>0 ? Fireinput.KEY_FULL : Fireinput.KEY_FINAL; 
                    if(this.pinyinFinals.hasItem(c2))
                    {
                       var finalArray = this.pinyinFinals.getItem(c2).split(",");
@@ -599,7 +599,7 @@ PinyinSchema.prototype =
                       {
                          if(keyArray.length > 0)
                          {
-                            var keyArrayCloned = cloneArray(keyArray); 
+                            var keyArrayCloned = Fireinput.cloneArray(keyArray); 
                             for(var jj=0; jj<keyArrayCloned.length; jj++)
                             {
                                keyArrayCloned[jj].pop(); 
@@ -610,7 +610,7 @@ PinyinSchema.prototype =
                          else
                          {
                             keyArray.push(keySet); 
-                            var keySetCloned = cloneArray(keySet); 
+                            var keySetCloned = Fireinput.cloneArray(keySet); 
                             keySetCloned.pop(); 
                             keySetCloned.push({key: firstKey+finalArray[1], type: keyType}); 
                             keyArray.push(keySetCloned); 
@@ -635,7 +635,7 @@ PinyinSchema.prototype =
             
        }
 
-       // FireinputLog.debug(this, "format: " + format + ", Return format: " + useFormat); 
+       // Fireinput.log.debug(this, "format: " + format + ", Return format: " + useFormat); 
        // mkey: a flag to show if the return has multiple set 
        return {format: useFormat, keyset: keyArray.length > 0 ? keyArray: keySet, mkey: keyArray.length > 0 ? 1:0}; 
     }, 
@@ -655,17 +655,17 @@ PinyinSchema.prototype =
 
        switch(this.pinyinSchema)
        {
-          case ZIGUANG_SHUANGPIN: 
-          case MS_SHUANGPIN: 
-          case CHINESESTAR_SHUANGPIN: 
-          case SMARTABC_SHUANGPIN: 
+          case Fireinput.ZIGUANG_SHUANGPIN: 
+          case Fireinput.MS_SHUANGPIN: 
+          case Fireinput.CHINESESTAR_SHUANGPIN: 
+          case Fireinput.SMARTABC_SHUANGPIN: 
              if(keys.length == 1)
              {
                 var keySet = new Array(); 
                 if(this.pinyinInitials.hasItem(keys))
-                   keySet.push({key: this.pinyinInitials.getItem(keys), type: KEY_INITIAL}); 
+                   keySet.push({key: this.pinyinInitials.getItem(keys), type: Fireinput.KEY_INITIAL}); 
                 else
-                   keySet.push({key: keys, type: KEY_INITIAL}); 
+                   keySet.push({key: keys, type: Fireinput.KEY_INITIAL}); 
                 keyArray.push(keySet); 
                 return keyArray; 
              }
@@ -696,7 +696,7 @@ PinyinSchema.prototype =
                    if(keySet.format == 'ssy')
                    {
                       if(keySet.mkey)
-                         arrayInsert(keyArray, keyArray.length, keySet.keyset); 
+                         Fireinput.arrayInsert(keyArray, keyArray.length, keySet.keyset); 
                       else
                          keyArray.push(keySet.keyset); 
                    }
@@ -709,7 +709,7 @@ PinyinSchema.prototype =
                    if(keySet.format == 'sys')
                    {
                       if(keySet.mkey)
-                         arrayInsert(keyArray, keyArray.length, keySet.keyset); 
+                         Fireinput.arrayInsert(keyArray, keyArray.length, keySet.keyset); 
                       else
                          keyArray.push(keySet.keyset); 
                    }
@@ -738,7 +738,7 @@ PinyinSchema.prototype =
                 {
                    keySet = this.getKeyByFormat(keys, "sysy"); 
                    if(keySet.mkey)
-                      arrayInsert(keyArray, keyArray.length, keySet.keyset); 
+                      Fireinput.arrayInsert(keyArray, keyArray.length, keySet.keyset); 
                    else
                       keyArray.push(keySet.keyset); 
                    return keyArray; 
@@ -748,19 +748,19 @@ PinyinSchema.prototype =
                 {
                    keySet = this.getKeyByFormat(keys, "sssy"); 
                    if(keySet.mkey)
-                      arrayInsert(keyArray, keyArray.length, keySet.keyset); 
+                      Fireinput.arrayInsert(keyArray, keyArray.length, keySet.keyset); 
                    else
                       keyArray.push(keySet.keyset); 
 
                    keySet = this.getKeyByFormat(keys, "sysy"); 
                    if(keySet.mkey)
-                      arrayInsert(keyArray, keyArray.length, keySet.keyset); 
+                      Fireinput.arrayInsert(keyArray, keyArray.length, keySet.keyset); 
                    else
                       keyArray.push(keySet.keyset); 
 
                    keySet = this.getKeyByFormat(keys, "syss"); 
                    if(keySet.mkey)
-                      arrayInsert(keyArray, keyArray.length, keySet.keyset); 
+                      Fireinput.arrayInsert(keyArray, keyArray.length, keySet.keyset); 
                    else
                       keyArray.push(keySet.keyset); 
 
@@ -784,7 +784,7 @@ PinyinSchema.prototype =
              }
           break; 
 
-          case SMART_PINYIN: 
+          case Fireinput.SMART_PINYIN: 
           default: 
              return keys; 
           break; 

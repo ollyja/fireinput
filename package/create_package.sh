@@ -130,7 +130,7 @@ create_package()
 update_version()
 {
   version=$1
-  files='xpi/install.rdf xpi/chrome/content/fireinput/version.js xpi/chrome/content/fireinput/about.html'
+  files='xpi/install.rdf xpi/chrome/content/fireinput/constant.js xpi/chrome/content/fireinput/about.html'
 
   for file in $files 
   do 

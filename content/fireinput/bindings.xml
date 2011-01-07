@@ -82,8 +82,8 @@
             str += (modifiers & Event.ALT_MASK)?'Alt+':'';
             str += (modifiers & Event.SHIFT_MASK)?'Shift+':'';
             str += (modifiers & Event.META_MASK)?'Meta+':''; 
-            if(keyCodeMapper!=null)
-                return str + keyCodeMapper[keyCode];
+            if(Fireinput.keyBinding.keyCodeMapper!=null)
+                return str + Fireinput.keyBinding.keyCodeMapper[keyCode];
             // If no name is set, just use the keyCode
             return str + keyCode;   
           ]]>

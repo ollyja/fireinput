@@ -7,18 +7,19 @@
   title="Fireinput Config"
   orient="horizontal"
   persist="screenX screenY"
-  onload="FireinputConfig.loadWindow();"
+  onload="Fireinput.config.loadWindow();"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <stringbundleset id="stringbundleset">
         <stringbundle id="strings_fireinput" src="chrome://fireinput/locale/fireinput.properties"/>
   </stringbundleset>
 
+  <script type="application/x-javascript" src="chrome://fireinput/content/ns.js"/>
+  <script type="application/x-javascript" src="chrome://fireinput/content/lib.js"/>
+  <script type="application/x-javascript" src="chrome://fireinput/content/utils.js"/>
   <script type="application/x-javascript" src="chrome://fireinput/content/version.js"/>
   <script type="application/x-javascript" src="chrome://fireinput/content/debug.js"/>
   <script type="application/x-javascript" src="chrome://fireinput/content/constant.js"/>
-  <script type="application/x-javascript" src="chrome://fireinput/content/utils.js"/>
-  <script type="application/x-javascript" src="chrome://fireinput/content/lib.js"/>
   <script type="application/x-javascript" src="chrome://fireinput/content/fireinputPrefs.js"/>
   <script type="application/x-javascript" src="chrome://fireinput/content/keybinding.js"/>
   <script type="application/x-javascript" src="chrome://fireinput/content/fireinputConfig.js" />
@@ -279,7 +280,7 @@
 
   <hbox>
     <spacer flex="1"/>
-    <button id="saveButton" label="保存" default="true" oncommand="FireinputConfig.save()"/>
+    <button id="saveButton" label="保存" default="true" oncommand="Fireinput.config.save()"/>
     <button id="cancelButton" label="取消" oncommand="window.close();"/>
   </hbox>
 

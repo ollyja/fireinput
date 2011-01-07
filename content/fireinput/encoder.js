@@ -34,8 +34,7 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-Components.utils.import("resource://fireinput/constant.js");
-var FireinputEncoding = 
+Fireinput.encoding = 
 {
     // debug option 
     debug: 0, 
@@ -44,7 +43,7 @@ var FireinputEncoding =
     encoder: null, 
 
     // default encoding: simplified Chinese 
-    encodingName: ENCODING_ZH, 
+    encodingName: Fireinput.ENCODING_ZH, 
 
     // max chars one call can handle 
     maxStep: 3000, 
@@ -67,7 +66,7 @@ var FireinputEncoding =
     init: function()
     {
        if(!this.encoder)
-          this.encoder = new PinyinEncodingTable();
+          this.encoder = new Fireinput.pinyinEncodingTable();
     }, 
 
     getEncodedString: function(origStr, encoding)
@@ -75,17 +74,17 @@ var FireinputEncoding =
        var str = "";
        // our table is simplified based, no need to switch 
        try {
-          str = FireinputUnicode.getUnicodeString(origStr); 
+          str = Fireinput.util.unicode.getUnicodeString(origStr); 
        } 
        catch(e) { return origStr; }
 
-       if(encoding != ENCODING_BIG5)
+       if(encoding != Fireinput.ENCODING_BIG5)
           return str; 
 
        var eString = new Array(); 
 
        if(!this.encoder)
-          this.encoder = new PinyinEncodingTable();
+          this.encoder = new Fireinput.pinyinEncodingTable();
 
        if(this.encoder.hasBig5Encoding(str)) {
           return this.encoder.switchToBig5(str); 
@@ -100,12 +99,12 @@ var FireinputEncoding =
 
     switchToZH: function()
     {
-       this.switchEncoding(ENCODING_ZH); 
+       this.switchEncoding(Fireinput.ENCODING_ZH); 
     }, 
 
     switchToBig5: function()
     {
-       this.switchEncoding(ENCODING_BIG5); 
+       this.switchEncoding(Fireinput.ENCODING_BIG5); 
     }, 
 
     switchEncoding: function(encoding)
@@ -119,7 +118,7 @@ var FireinputEncoding =
        this.encodedString = new Array(); 
        this.options = null; 
 
-       if(Fireinput.isTargetATextBox(target))
+       if(Fireinput.main.isTargetATextBox(target))
        {
            this.switchEncodingAsync(target.value, encoding, 
                                      { oncomplete: function(p) { target.value = p; }});
@@ -144,7 +143,7 @@ var FireinputEncoding =
     switchEncodingAsync: function(str, encoding, options)
     {
       if(!this.encoder)
-          this.encoder = new PinyinEncodingTable();
+          this.encoder = new Fireinput.pinyinEncodingTable();
 
        if(this.stepTimer)
           clearTimeout(this.stepTimer); 
@@ -164,7 +163,7 @@ var FireinputEncoding =
           var charCode = str.charAt(this.currentStep);
           if(charCode >= '\u4e00')
           {
-             if(this.encodingName == ENCODING_ZH)
+             if(this.encodingName == Fireinput.ENCODING_ZH)
                 this.encodedString[this.encodedString.length] = this.encoder.switchToZH(charCode);
              else 
                 this.encodedString[this.encodedString.length] = this.encoder.switchToBig5(charCode);
@@ -196,7 +195,7 @@ var FireinputEncoding =
     validEncoding: function(charCode, encoding)
     {
        if(!this.encoder)
-          this.encoder = new PinyinEncodingTable();
+          this.encoder = new Fireinput.pinyinEncodingTable();
 
        return this.encoder.validEncoding(charCode, encoding); 
     }

@@ -33,18 +33,18 @@
  *
  * ***** END LICENSE BLOCK ***** 
  */
-//const THEMES_URL = "http://www.fireinput.com/themes/themes.html"; 
-const THEMES_URL = SERVER_URL + "/themes/themes.html"; 
 
-const themeUI = [
+Fireinput.namespace("Fireinput.themes"); 
+
+Fireinput.themes.themes_url = Fireinput.SERVER_URL + "/themes/themes.html"; 
+
+Fireinput.themes.themeUI = [
     {id: "fireinputThemeUser", strKey: "fireinput.theme.mime.label", attribute: "label"},
     {id: "fireinputThemeMenu", strKey: "fireinput.theme.menu.label", attribute: "label"},
     {id: "fireinputThemeDefault", strKey: "fireinput.theme.default.label", attribute: "label"}
 ];
 
-
-var FireinputThemes = 
-{
+Fireinput.themes = Fireinput.extend(Fireinput.themes, {
     initialized: false, 
     
     userEmotionList: [], 
@@ -54,14 +54,14 @@ var FireinputThemes =
        if(!this.initialized || forceLoad) 
        {
           // get default language first 
-          var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
-          for(var i =0; i<themeUI.length; i++)
+          var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
+          for(var i =0; i<this.themeUI.length; i++)
           {
-             var id = themeUI[i].id;
-             var strKey = themeUI[i].strKey;
-             var attr = themeUI[i].attribute;
+             var id = this.themeUI[i].id;
+             var strKey = this.themeUI[i].strKey;
+             var attr = this.themeUI[i].attribute;
 
-             var value = FireinputUtils.getLocaleString(strKey + defaultLanguage);
+             var value = Fireinput.util.getLocaleString(strKey + defaultLanguage);
              var handle = document.getElementById(id);
              if(!handle)
                 continue;
@@ -76,7 +76,7 @@ var FireinputThemes =
              return; 
  
           // register an observer 
-          var os = FireinputXPC.getService("@mozilla.org/observer-service;1", "nsIObserverService");
+          var os = Fireinput.util.xpc.getService("@mozilla.org/observer-service;1", "nsIObserverService");
           os.addObserver(this, "user-theme-changed", false);
        }
 
@@ -85,14 +85,14 @@ var FireinputThemes =
     refreshMenu: function()
     {
        // get default language first 
-       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
-       for(var i =0; i<themeUI.length; i++)
+       var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
+       for(var i =0; i<this.themeUI.length; i++)
        {
-          var id = themeUI[i].id;
-          var strKey = themeUI[i].strKey;
-          var attr = themeUI[i].attribute;
+          var id = this.themeUI[i].id;
+          var strKey = this.themeUI[i].strKey;
+          var attr = this.themeUI[i].attribute;
 
-          var value = FireinputUtils.getLocaleString(strKey + defaultLanguage);
+          var value = Fireinput.util.getLocaleString(strKey + defaultLanguage);
           var handle = document.getElementById(id);
           if(!handle)
              continue;
@@ -103,7 +103,7 @@ var FireinputThemes =
 
     loadRemoteThemes: function()
     {
-       var ajax = new Ajax(); 
+       var ajax = new Fireinput.util.ajax(); 
        if(!ajax)
           return; 
 
@@ -114,7 +114,7 @@ var FireinputThemes =
              onSuccess: function(p) { self.displayThemeMenu(p); },
              onFailure: function(p) { self.displayThemeMenu(p); }
           }); 
-       ajax.request(THEMES_URL); 
+       ajax.request(this.themes_url); 
     }, 
 
     displayThemeMenu: function(p)
@@ -139,16 +139,16 @@ var FireinputThemes =
     addGroup: function(jsonArray)
     {
        // get default language first 
-       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
-       var openingSeparator = document.getElementById("themeOpenSeparator");
-       var closingSeparator = document.getElementById("themeCloseSeparator");
+       var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
+       var openingSeparator = document.getElementById("fireinputThemeOpenSeparator");
+       var closingSeparator = document.getElementById("fireinputThemeCloseSeparator");
        var themeMenu =  document.getElementById("fireinputThemeMenus");
 
        while(openingSeparator.nextSibling && openingSeparator.nextSibling != closingSeparator)
          themeMenu.removeChild(openingSeparator.nextSibling);
     
        // Check configured theme id 
-       var currentTheme = fireinputPrefGetDefault("themeID");
+       var currentTheme = Fireinput.pref.getDefault("themeID");
 
        for(var i=0; i < jsonArray.length; i++)
        {
@@ -169,7 +169,7 @@ var FireinputThemes =
              item.setAttribute("furl", data.furl); 
              item.setAttribute("iurl", data.iurl); 
              item.setAttribute("id", id); 
-             item.setAttribute("oncommand", "FireinputThemes.applyTheme(event.target);");
+             item.setAttribute("oncommand", "Fireinput.themes.applyTheme(event.target);");
              item.setAttribute("checked", (currentTheme == data.id)); 
 
              themeMenu.insertBefore(item, closingSeparator); 
@@ -194,25 +194,25 @@ var FireinputThemes =
        containerBox.style.removeProperty('background-image'); 
        containerBox.style.removeProperty('color');
 */
-       var pos = fireinputPrefGetDefault("IMEBarPosition");
+       var pos = Fireinput.pref.getDefault("IMEBarPosition");
        var imeBar = document.getElementById('fireinputIMEBar_' + pos); 
        imeBar.removeAttribute('fireinputtheme'); 
        imeBar.style.removeProperty('background-image'); 
 
        // deselect the menu item 
-       var currentTheme = fireinputPrefGetDefault("themeID");
+       var currentTheme = Fireinput.pref.getDefault("themeID");
        var menuitemSelected = document.getElementById("fireinput.theme." + currentTheme); 
        if(menuitemSelected)
           menuitemSelected.setAttribute("checked", false); 
 
        // update the pref 
-       fireinputPrefSave('themeID', 'default'); 
+       Fireinput.pref.save('themeID', 'default'); 
     }, 
 
     applyTheme: function(target)
     {
        // deselect the menu first 
-       var currentTheme = fireinputPrefGetDefault("themeID");
+       var currentTheme = Fireinput.pref.getDefault("themeID");
        var menuitemSelected = document.getElementById("fireinput.theme." + currentTheme); 
        if(menuitemSelected)
           menuitemSelected.setAttribute("checked", false); 
@@ -226,7 +226,7 @@ var FireinputThemes =
        // select the menu 
        target.setAttribute("checked", true); 
        // update pref 
-       fireinputPrefSave('themeID', target.getAttribute('themeid')); 
+       Fireinput.pref.save('themeID', target.getAttribute('themeid')); 
     }, 
 
     applyThisTheme: function(fontcolor, furl, iurl)
@@ -238,7 +238,7 @@ var FireinputThemes =
        containerBox.style.setProperty('background-image', "url('" + iurl + "')", "important"); 
        containerBox.style.color = fontcolor; 
 */
-       var pos = fireinputPrefGetDefault("IMEBarPosition");
+       var pos = Fireinput.pref.getDefault("IMEBarPosition");
        var imeBar = document.getElementById('fireinputIMEBar_' + pos); 
        imeBar.setAttribute('fireinputtheme', true); 
        imeBar.style.setProperty('background-image', "url('" + furl + "')", "important"); 
@@ -251,5 +251,5 @@ var FireinputThemes =
 
        // this.loadUserEmotionURL(); 
     }
-};              
+});              
 

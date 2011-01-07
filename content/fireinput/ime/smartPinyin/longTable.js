@@ -34,11 +34,11 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-const MaxSelectionLen = 20;
  
-var FireinputLongTable = 
+Fireinput.longTable = 
 {
     debug: 0, 
+    MaxSelectionLen: 20, 
 
     // current target 
     currentTarget: null, 
@@ -46,7 +46,7 @@ var FireinputLongTable =
 
     showSelection: function()
     {
-       const showSelectionLen = 10; 
+       var showSelectionLen = 10; 
 
        var selectedText = this.getSelection();
        if (!selectedText)
@@ -67,8 +67,8 @@ var FireinputLongTable =
        var selection = focusedWindow.getSelection().toString();
 
        if (selection) {
-          if (selection.length > MaxSelectionLen) {
-          var pattern = new RegExp("^(?:\\s*.){0," + MaxSelectionLen + "}");
+          if (selection.length > this.MaxSelectionLen) {
+          var pattern = new RegExp("^(?:\\s*.){0," + this.MaxSelectionLen + "}");
           pattern.test(selection);
           selection = RegExp.lastMatch;
           }
@@ -79,8 +79,8 @@ var FireinputLongTable =
                          .replace(/#+$/, "")
                          .replace(/\s+/g, " ");
 
-       if (selection.length > MaxSelectionLen)
-          selection = selection.substr(0, MaxSelectionLen);
+       if (selection.length > this.MaxSelectionLen)
+          selection = selection.substr(0, this.MaxSelectionLen);
 
 
        return selection; 
@@ -92,21 +92,21 @@ var FireinputLongTable =
        if (!selectedText)
           return false;
  
-       var ime = FireinputUtils.getCurrentIME(); 
+       var ime = Fireinput.util.getCurrentIME(); 
 
        /* no other IME won't allow add words without keys */
-       if(ime.getIMEType() != SMART_PINYIN)
+       if(ime.getIMEType() != Fireinput.SMART_PINYIN)
           return; 
 
-       var keys = FireinputImporter.getPhrasePinyinKey(selectedText);
+       var keys = Fireinput.importer.getPhrasePinyinKey(selectedText);
        if(!keys || keys.length <= 0)
           return;
 
-       FireinputLog.debug(this, "Phrase: " + selectedText + ", Got keys: " + keys.join(","));
+       Fireinput.log.debug(this, "Phrase: " + selectedText + ", Got keys: " + keys.join(","));
 
        for(var i=0; i<keys.length; i++)
        {
-          ime.storeUserAddPhrase(FireinputUnicode.convertFromUnicode(selectedText), keys[i], 0);
+          ime.storeUserAddPhrase(Fireinput.util.unicode.convertFromUnicode(selectedText), keys[i], 0);
        }
     },
 
@@ -116,10 +116,10 @@ var FireinputLongTable =
        if(!element || !element.target)
           return; 
 
-       var ime = FireinputUtils.getCurrentIME(); 
+       var ime = Fireinput.util.getCurrentIME(); 
 
        /* no other IME won't allow add words without keys */
-       if(ime.getIMEType() != SMART_PINYIN)
+       if(ime.getIMEType() != Fireinput.SMART_PINYIN)
           return; 
 
        if(!this.currentTarget || !this.currentTarget.target)
@@ -156,24 +156,24 @@ var FireinputLongTable =
  
     flush: function(str)
     {
-       FireinputLog.debug(this, "str: " + str);
+       Fireinput.log.debug(this, "str: " + str);
        var result = contextReader.start(str);
        if(!result || result.length <= 0)
          return; 
 
-       var ime = FireinputUtils.getCurrentIME();
+       var ime = Fireinput.util.getCurrentIME();
 
        for(var i=0; i<result.length; i++)
        {
-          var keys = FireinputImporter.getPhrasePinyinKey(result[i]);
+          var keys = Fireinput.importer.getPhrasePinyinKey(result[i]);
           if(!keys || keys.length <= 0)
             continue; 
 
-          FireinputLog.debug(this, "Phrase: " + result[i] + ", Got keys: " + keys.join(","));
+          Fireinput.log.debug(this, "Phrase: " + result[i] + ", Got keys: " + keys.join(","));
 
           for(var n=0; n<keys.length; n++)
           {
-             ime.storeUserAddPhrase(FireinputUnicode.convertFromUnicode(result[i]), keys[n], 0, null, false);
+             ime.storeUserAddPhrase(Fireinput.util.unicode.convertFromUnicode(result[i]), keys[n], 0, null, false);
           }
        }
     }

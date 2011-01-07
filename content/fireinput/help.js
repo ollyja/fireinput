@@ -33,32 +33,32 @@
  *
  * ***** END LICENSE BLOCK ***** 
  */
+Fireinput.namespace("Fireinput.help");
 
-const RELEASE_NEW = "http://www.fireinput.com/wiki/Release_Page"; 
-const DEVRELEASE_NEW = "http://www.fireinput.com/releases/test.html"; 
+Fireinput.help.RELEASE_NEW = "http://www.fireinput.com/wiki/Release_Page"; 
+Fireinput.help.DEVRELEASE_NEW = "http://www.fireinput.com/releases/test.html"; 
 
-const helpUI = [
-    {id: "helpMenuHome", strKey: "fireinput.help.home", attribute: "label"},
-    {id: "helpMenuDoc", strKey: "fireinput.help.document", attribute: "label"},
-    {id: "helpMenuKey", strKey: "fireinput.help.shortkey", attribute: "label"},
-    {id: "helpMenuEditor", strKey: "fireinput.help.editor", attribute: "label"},
-    {id: "helpNewRelease", strKey: "fireinput.help.newrelease", attribute: "label"},
-    {id: "helpMenuAbout", strKey: "fireinput.help.about", attribute: "label"},
-    {id: "helpMenuDonate", strKey: "fireinput.help.donate", attribute: "label"}
+Fireinput.help.helpUI = [
+    {id: "fireinputHelpMenuHome", strKey: "fireinput.help.home", attribute: "label"},
+    {id: "fireinputHelpMenuDoc", strKey: "fireinput.help.document", attribute: "label"},
+    {id: "fireinputHelpMenuKey", strKey: "fireinput.help.shortkey", attribute: "label"},
+    {id: "fireinputHelpMenuEditor", strKey: "fireinput.help.editor", attribute: "label"},
+    {id: "fireinputHelpNewRelease", strKey: "fireinput.help.newrelease", attribute: "label"},
+    {id: "fireinputHelpMenuAbout", strKey: "fireinput.help.about", attribute: "label"},
+    {id: "fireinputHelpMenuDonate", strKey: "fireinput.help.donate", attribute: "label"}
 ]; 
 
-const helpSite = {
+Fireinput.help.helpSite = {
     home: "http://www.fireinput.com",
-    release: RELEASE_NEW, 
-    devrelease: DEVRELEASE_NEW, 
+    release: this.RELEASE_NEW, 
+    devrelease: this.DEVRELEASE_NEW, 
     docs: "http://www.fireinput.com/wiki/Document_Page",
     shortkey: "chrome://fireinput/content/shortkey.html",
     contribute: "http://www.fireinput.com/contribute.html"
 }; 
 
 
-var FireinputHelp = 
-{
+Fireinput.help = Fireinput.extend(Fireinput.help, {
     initialized: false,
 
     load: function(forceLoad)
@@ -79,24 +79,24 @@ var FireinputHelp =
     refreshMenu: function()
     {
        // get default language first 
-       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
+       var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
        // update UI 
-       for(var i =0; i<helpUI.length; i++)
+       for(var i =0; i<this.helpUI.length; i++)
        {
-          var id = helpUI[i].id;
+          var id = this.helpUI[i].id;
           var handle = document.getElementById(id);
           if(!handle)
              continue;
 
-          var strKey = helpUI[i].strKey;
-          var attr = helpUI[i].attribute;
+          var strKey = this.helpUI[i].strKey;
+          var attr = this.helpUI[i].attribute;
 
-          var value = FireinputUtils.getLocaleString(strKey + defaultLanguage);
+          var value = Fireinput.util.getLocaleString(strKey + defaultLanguage);
           // to check whether the shortcut keystring exists 
           var found =value.match(/%(.+)%/i);
           if(found)
           {
-             var keystring = FireinputKeyBinding.getKeyString(found[1]);
+             var keystring = Fireinput.keyBinding.getKeyString(found[1]);
              value = value.replace(found[0], keystring);
           }
 
@@ -107,30 +107,30 @@ var FireinputHelp =
 
     showSite: function(site)
     {
-       var url = helpSite[site]; 
+       var url = this.helpSite[site]; 
        if (url)
-          FireinputUtils.loadURI(url); 
+          Fireinput.util.loadURI(url); 
     },
 
     showRelease: function()
     {
-       var element = document.getElementById("helpNewRelease");
+       var element = document.getElementById("fireinputHelpNewRelease");
        this.showSite(element.getAttribute("release")); 
     }, 
 
     openEditor: function()
     {
-       FireinputUtils.loadURI("chrome://fireinput/content/editor.html"); 
+       Fireinput.util.loadURI("chrome://fireinput/content/editor.html"); 
     },
     
     showAbout: function()
     {
-       FireinputUtils.loadURI("chrome://fireinput/content/about.html"); 
+       Fireinput.util.loadURI("chrome://fireinput/content/about.html"); 
     }, 
 
     checkNewRelease: function()
     {
-       var ajax = new Ajax();
+       var ajax = new Fireinput.util.ajax();
        if(!ajax)
           return;
 
@@ -142,7 +142,7 @@ var FireinputHelp =
              onSuccess: function(p) { self.displayNewReleaseMenuItem(p); }
           });
 
-       ajax.request(RELEASE_NEW);
+       ajax.request(this.RELEASE_NEW);
     },
 
     displayNewReleaseMenuItem: function(p)
@@ -158,7 +158,7 @@ var FireinputHelp =
 
        version = version[1]; 
        var newVersionArray = version.split('.'); 
-       var curVersionArray = FIREINPUT_VERSION.split('.'); 
+       var curVersionArray = Fireinput.FIREINPUT_VERSION.split('.'); 
 
        if(curVersionArray.length <= 1) 
           return; 
@@ -203,7 +203,7 @@ var FireinputHelp =
    
     showNewRelease: function(version)
     {   
-       var element = document.getElementById("helpNewRelease"); 
+       var element = document.getElementById("fireinputHelpNewRelease"); 
        element.style.display = ""; 
        element.style.color = "red"; 
        element.setAttribute("label", element.getAttribute("label") + " " + version);
@@ -212,10 +212,10 @@ var FireinputHelp =
        element = document.getElementById("fireinputHelp"); 
        element.style.color = "red"; 
 
-       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
+       var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
 
        element = document.getElementById("fireinputNewVersion");
-       var msg = FireinputUtils.getLocaleString("fireinput.help.newrelease.text" + defaultLanguage);
+       var msg = Fireinput.util.getLocaleString("fireinput.help.newrelease.text" + defaultLanguage);
        msg = msg.replace(/%VERSION%/, version); 
        element.setAttribute("label", msg); 
 
@@ -226,12 +226,12 @@ var FireinputHelp =
 
     checkNewDevRelease: function()
     {
-       var buildDateArray = FIREINPUT_VERSION.match(/[\d\.]+_(\d{4})(\d{2})(\d{2})/); 
+       var buildDateArray = Fireinput.FIREINPUT_VERSION.match(/[\d\.]+_(\d{4})(\d{2})(\d{2})/); 
        // just return if it's not dev release 
        if(!buildDateArray || buildDateArray.length < 4)
           return; 
 
-       var ajax = new Ajax();
+       var ajax = new Fireinput.util.ajax();
        if(!ajax)
           return;
 
@@ -243,7 +243,7 @@ var FireinputHelp =
              onSuccess: function(p) { self.displayNewDevReleaseMenuItem(p); }
           });
 
-       ajax.request(DEVRELEASE_NEW);
+       ajax.request(this.DEVRELEASE_NEW);
     },
 
     displayNewDevReleaseMenuItem: function(p)
@@ -258,7 +258,7 @@ var FireinputHelp =
           return; 
 
        var newBuildDateArray = version[2].match(/(\d{4})(\d{2})(\d{2})/); 
-       var curBuildDateArray = FIREINPUT_VERSION.match(/[\d\.]+_(\d{4})(\d{2})(\d{2})/); 
+       var curBuildDateArray = Fireinput.FIREINPUT_VERSION.match(/[\d\.]+_(\d{4})(\d{2})(\d{2})/); 
        if(!newBuildDateArray || newBuildDateArray.length < 3)
           return; 
 
@@ -276,7 +276,7 @@ var FireinputHelp =
    
     showNewDevRelease: function(version, buildDateArray)
     {   
-       var element = document.getElementById("helpNewRelease"); 
+       var element = document.getElementById("fireinputHelpNewRelease"); 
        element.style.display = ""; 
        element.style.color = "red"; 
        element.setAttribute("label", element.getAttribute("label") + " " + version + " " + buildDateArray.join("/"));
@@ -285,10 +285,10 @@ var FireinputHelp =
        element = document.getElementById("fireinputHelp"); 
        element.style.color = "red"; 
 
-       var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
+       var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
 
        element = document.getElementById("fireinputNewVersion");
-       var msg = FireinputUtils.getLocaleString("fireinput.help.newdevrelease.text" + defaultLanguage);
+       var msg = Fireinput.util.getLocaleString("fireinput.help.newdevrelease.text" + defaultLanguage);
        msg = msg.replace(/%VERSION%/, version + " " + buildDateArray.join("/")); 
        element.setAttribute("label", msg); 
 
@@ -296,6 +296,6 @@ var FireinputHelp =
        element = document.getElementById("fireinputNewVersionPanel");
        element.style.display = "";
     }
-}; 
+}); 
 
 

@@ -36,7 +36,7 @@
 
 // Constants
 
-var FireinputStream = 
+Fireinput.stream = 
 {
     loadData: function(url)
     {
@@ -46,7 +46,7 @@ var FireinputStream =
 
     readLine: function(url)
     {
-       var ioService = FireinputXPC.getIOService(); 
+       var ioService = Fireinput.util.xpc.getIOService(); 
 
        var channel;
        var stream;
@@ -63,7 +63,7 @@ var FireinputStream =
 
        try
        {
-          var sis = FireinputXPC.getService("@mozilla.org/scriptableinputstream;1", "nsIScriptableInputStream");
+          var sis = Fireinput.util.xpc.getService("@mozilla.org/scriptableinputstream;1", "nsIScriptableInputStream");
           sis.init(stream);
 
           var segments = [];
@@ -75,7 +75,7 @@ var FireinputStream =
           sis.close();
           var text = segments.join("");
 
-          // var data = FireinputUnicode.getUnicodeString(text); 
+          // var data = Fireinput.util.unicode.getUnicodeString(text); 
           var lines = text.split(/\r\n|\r|\n/);
           return lines;
         }
@@ -89,7 +89,7 @@ var FireinputStream =
 
     loadDataAsync: function(uri, user)
     {
-       var ioService = FireinputXPC.getIOService(); 
+       var ioService = Fireinput.util.xpc.getIOService(); 
 
        var channel = ioService.newChannelFromURI(uri);
        function processCallback(line)
@@ -106,7 +106,7 @@ var FireinputStream =
             if(func)
                func.call(caller);
        }
-       var observer = new StreamObserver(processCallback, completeCallback, DATA_TEXT);
+       var observer = new StreamObserver(processCallback, completeCallback, Fireinput.DATA_TEXT);
        try {
          channel.asyncOpen(observer, null);
        }
@@ -118,7 +118,7 @@ var FireinputStream =
 
     loadXHTMLDataAsync: function(url, user)
     {
-       var ioService = FireinputXPC.getIOService(); 
+       var ioService = Fireinput.util.xpc.getIOService(); 
 
        var uri = ioService.newFileURI(url);
        var channel = ioService.newChannelFromURI(uri);
@@ -136,13 +136,13 @@ var FireinputStream =
             if(func)
                func.call(caller);
        }
-       var observer = new StreamObserver(processCallback, completeCallback, DATA_XML);
+       var observer = new StreamObserver(processCallback, completeCallback, Fireinput.DATA_XML);
        channel.asyncOpen(observer, null);
     },
 
     checkAccess: function(uri)
     {
-       var ioService = FireinputXPC.getIOService();
+       var ioService = Fireinput.util.xpc.getIOService();
 
        var channel = ioService.newChannelFromURI(uri);
        var ret = false; 
@@ -196,16 +196,16 @@ StreamObserver.prototype =
    
        for(var i=lines.length-1; i>=0; i--)
        {
-       //      var data = FireinputUnicode.getUnicodeString(lines[i]);
+       //      var data = Fireinput.util.unicode.getUnicodeString(lines[i]);
              this.processCB(lines[i]);
        }
     },
 
     onDataAvailable: function(request, context, inStr, sourceOffset, count)
     {
-       var sis = FireinputXPC.createInstance("@mozilla.org/scriptableinputstream;1", "nsIScriptableInputStream");
+       var sis = Fireinput.util.xpc.createInstance("@mozilla.org/scriptableinputstream;1", "nsIScriptableInputStream");
        sis.init(inStr);
-       if(this.dataType == DATA_XML)
+       if(this.dataType == Fireinput.DATA_XML)
           this.processXMLData(this.data.join("") + sis.read(count));
        else 
           this.processData(this.data.join("") + sis.read(count));

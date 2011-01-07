@@ -33,7 +33,9 @@
  *
  * ***** END LICENSE BLOCK ***** 
  */
-var imeInterfaceUI = [ /* all button tooltips */ {
+Fireinput.namespace("Fireinput.main"); 
+
+Fireinput.main.imeInterfaceUI = [ /* all button tooltips */ {
    id: "fireinputToggleHalfButton",
    strKey: "fireinput.toggle.half.button",
    attribute: "tooltiptext"
@@ -74,7 +76,7 @@ var imeInterfaceUI = [ /* all button tooltips */ {
    attribute: "tooltiptext"
 },
 {
-   id: "inputMethod",
+   id: "fireinputInputMethod",
    strKey: "fireinput.switch.inputmethod.button",
    attribute: "tooltiptext"
 },
@@ -173,22 +175,20 @@ var imeInterfaceUI = [ /* all button tooltips */ {
 ];
 
 
-var imeInputModeValues = [{
-   name: ENCODING_ZH,
+Fireinput.main.imeInputModeValues = [{
+   name: Fireinput.ENCODING_ZH,
    label: "fireinput.method.chinese.value"
 },
 {
-   name: ENCODING_BIG5,
+   name: Fireinput.ENCODING_BIG5,
    label: "fireinput.method.big5.value"
 },
 {
-   name: ENCODING_EN,
+   name: Fireinput.ENCODING_EN,
    label: "fireinput.method.english.value"
 }];
 
-Components.utils.import("resource://fireinput/constant.js"); 
-
-top.Fireinput = {
+Fireinput.main = Fireinput.extend(Fireinput.main, {
    // debug: 0 disable, non-zero enable 
    debug: 0,
    // Fireinput statusbar status 
@@ -203,10 +203,10 @@ top.Fireinput = {
    // IME mode. The mode can ZH or EN. Chinese can only be typed under ZH mode 
    // Shortkey: type v if enable english mode, and space will resume original mode back 
    // reset by space /enter or target change 
-   myIMEMode: IME_MODE_ZH,
+   myIMEMode: Fireinput.IME_MODE_ZH,
 
    // Input mode. It will decide which encoding will be used(Simplified Chinese or Big5)
-   myInputMode: ENCODING_ZH,
+   myInputMode: Fireinput.ENCODING_ZH,
 
    // caret focus event 
    myEvent: null,
@@ -226,7 +226,7 @@ top.Fireinput = {
    myAllowInputKey: "",
 
    // IME Schema 
-   myIMESchema: SMART_PINYIN,
+   myIMESchema: Fireinput.SMART_PINYIN,
 
    // long table 
    myLongTable: null,
@@ -242,18 +242,18 @@ top.Fireinput = {
 
    // fireinput init function. 
    initialize: function () {
-      FireinputPref.addObserver(this, false);
+      Fireinput.util.pref.addObserver(this, false);
       this.registerFireinputObserver();
 
 
       // register event listener to trigger when context menu is invoked.
       try {
-         document.getElementById('contentAreaContextMenu').addEventListener('popupshowing', fireinput_onPopupShowing, false);
+         document.getElementById('contentAreaContextMenu').addEventListener('popupshowing', this.fireinputContext.bind(this), false);
       } catch (e) {}
 
       // initialize  the open hotkey 
       var handle = document.getElementById("key_enableFireinput");
-      var openKey = fireinputPrefGetDefault("openKey");
+      var openKey = Fireinput.pref.getDefault("openKey");
       if (/,/.test(openKey)) {
          var openKeys = openKey.split(",");
          if (handle) handle.setAttribute("modifiers", openKeys[0]);
@@ -264,10 +264,10 @@ top.Fireinput = {
       this.initIMEBarPosition();
 
       // load shortkey settings 
-      FireinputKeyBinding.init();
+      Fireinput.keyBinding.init();
 
       // init user data directory if necessary 
-      FireinputUtils.initUserDataDir();
+      Fireinput.util.initUserDataDir();
 
       this.toggleIMEMenu();
 
@@ -278,22 +278,22 @@ top.Fireinput = {
       this.loadIMEPref();
 
       // initialize Pref interfaces 
-      fireinputPrefInit();
+      Fireinput.pref.init();
 
       this.loadIMEPrefByID("fireinputStatusBar", "fireinput.statusbar.tooltip.open", "tooltiptext");
 
       // for first run only 
-      FireinputVersion.checkFirstRun();
+      Fireinput.version.checkFirstRun();
 
       // register 	
-      var gs = FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+      var gs = Fireinput.util.xpc.getService("@fireinput.com/fireinput;1", "nsIFireinput");
       gs.register(window);
 
    },
 
    registerFireinputObserver: function () {
       // register an observer 
-      var os = FireinputXPC.getService("@mozilla.org/observer-service;1", "nsIObserverService");
+      var os = Fireinput.util.xpc.getService("@mozilla.org/observer-service;1", "nsIObserverService");
       // monitor application quit event 
       os.addObserver(this, "quit-application-requested", false);
    },
@@ -301,12 +301,12 @@ top.Fireinput = {
    // Patch from christop...: In order to save memory we check if myIME was created in another window
    // already. Only if not, we create myIME in current window using getDefaultIME()
    getIME: function () {
-      var gs = FireinputXPC.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+      var gs = Fireinput.util.xpc.getService("@fireinput.com/fireinput;1", "nsIFireinput");
       var fi = gs.getChromeWindow() ? gs.getChromeWindow().getFireinput() : null;
 
       if (!fi) {
          window.getFireinput = function () {
-            return this.Fireinput;
+            return Fireinput;
          }
          return this.getDefaultIME();
       }
@@ -325,23 +325,23 @@ top.Fireinput = {
    },
 
    getDefaultIME: function () {
-      this.myIMESchema = fireinputPrefGetDefault("defaultInputMethod");
+      this.myIMESchema = Fireinput.pref.getDefault("defaultInputMethod");
 
       var ime = null;
 
       switch (this.myIMESchema) {
-      case ZHENGMA:
-         ime = new Zhengma();
+      case Fireinput.ZHENGMA:
+         ime = new Fireinput.zhengmaEngine();
          break;
-      case CANGJIE_5:
-         ime = new Cangjie();
+      case Fireinput.CANGJIE_5:
+         ime = new Fireinput.cangjieEngine();
          break;
-      case WUBI_86:
-      case WUBI_98:
-         ime = new Wubi();
+      case Fireinput.WUBI_86:
+      case Fireinput.WUBI_98:
+         ime = new Fireinput.wubiEngine();
          break;
       default:
-         ime = new SmartPinyin();
+         ime = new Fireinput.smartPinyinEngine();
          break;
       }
 
@@ -352,30 +352,30 @@ top.Fireinput = {
       ime.loadTable();
       this.myAllowInputKey = ime.getAllowedInputKey();
       // disable conflict shortkey 
-      FireinputKeyBinding.disableConflictKey(this.myAllowInputKey);
+      Fireinput.keyBinding.disableConflictKey(this.myAllowInputKey);
       return ime;
    },
 
 
    toggleIMEMenu: function () {
-      var hideIMEList = fireinputPrefGetDefault("hiddenInputMethod") || "";
-      var supportIMEList = fireinputPrefGetDefault("inputMethodList");
+      var hideIMEList = Fireinput.pref.getDefault("hiddenInputMethod") || "";
+      var supportIMEList = Fireinput.pref.getDefault("inputMethodList");
       supportIMEList = supportIMEList ? supportIMEList.split(",") : [];
       hideIMEList = hideIMEList.split(",");
 
       // hide autoInsert first. AutoInsert is only for Wubi or Canjie(not sure)
-      var autoInsertHandle = document.getElementById("autoInsert");
+      var autoInsertHandle = document.getElementById("fireinputAutoInsert");
       autoInsertHandle.style.display = "none";
 
       // check for hidden IME list 
-      if (!inArray(supportIMEList, ZHENGMA) || inArray(hideIMEList, ZHENGMA)) {
+      if (!Fireinput.inArray(supportIMEList, Fireinput.ZHENGMA) || Fireinput.inArray(hideIMEList, Fireinput.ZHENGMA)) {
          var handle = document.getElementById("menuZhengma");
          if (handle) handle.style.display = "none";
          var handle = document.getElementById("imeZhengma");
          if (handle) handle.style.display = "none";
       }
       else {
-         this.myEnabledIME.push(ZHENGMA);
+         this.myEnabledIME.push(Fireinput.ZHENGMA);
          var handle = document.getElementById("menuZhengma");
          if (handle) handle.style.display = "";
          var handle = document.getElementById("imeZhengma");
@@ -383,14 +383,14 @@ top.Fireinput = {
          autoInsertHandle.style.display = "";
       }
 
-      if (!inArray(supportIMEList, WUBI_86) || inArray(hideIMEList, WUBI_86)) {
+      if (!Fireinput.inArray(supportIMEList, Fireinput.WUBI_86) || Fireinput.inArray(hideIMEList, Fireinput.WUBI_86)) {
          var handle = document.getElementById("menuWubi86");
          if (handle) handle.style.display = "none";
          var handle = document.getElementById("imeWubi86");
          if (handle) handle.style.display = "none";
       }
       else {
-         this.myEnabledIME.push(WUBI_86);
+         this.myEnabledIME.push(Fireinput.WUBI_86);
          var handle = document.getElementById("menuWubi86");
          if (handle) handle.style.display = "";
          var handle = document.getElementById("imeWubi86");
@@ -398,7 +398,7 @@ top.Fireinput = {
          autoInsertHandle.style.display = "";
       }
 
-      if (!inArray(supportIMEList, WUBI_98) || inArray(hideIMEList, WUBI_98)) {
+      if (!Fireinput.inArray(supportIMEList, Fireinput.WUBI_98) || Fireinput.inArray(hideIMEList, Fireinput.WUBI_98)) {
          var handle = document.getElementById("menuWubi98");
          if (handle) handle.style.display = "none";
          var handle = document.getElementById("imeWubi98");
@@ -406,7 +406,7 @@ top.Fireinput = {
 
       }
       else {
-         this.myEnabledIME.push(WUBI_98);
+         this.myEnabledIME.push(Fireinput.WUBI_98);
          var handle = document.getElementById("menuWubi98");
          if (handle) handle.style.display = "";
          var handle = document.getElementById("imeWubi98");
@@ -414,14 +414,14 @@ top.Fireinput = {
 
          autoInsertHandle.style.display = "";
       }
-      if (!inArray(supportIMEList, CANGJIE_5) || inArray(hideIMEList, CANGJIE_5)) {
+      if (!Fireinput.inArray(supportIMEList, Fireinput.CANGJIE_5) || Fireinput.inArray(hideIMEList, Fireinput.CANGJIE_5)) {
          var handle = document.getElementById("menuCangjie5");
          if (handle) handle.style.display = "none";
          var handle = document.getElementById("imeCangjie5");
          if (handle) handle.style.display = "none";
       }
       else {
-         this.myEnabledIME.push(CANGJIE_5);
+         this.myEnabledIME.push(Fireinput.CANGJIE_5);
          var handle = document.getElementById("menuCangjie5");
          if (handle) handle.style.display = "";
          var handle = document.getElementById("imeCangjie5");
@@ -430,7 +430,7 @@ top.Fireinput = {
          autoInsertHandle.style.display = "";
       }
 
-      if (!inArray(supportIMEList, SMART_PINYIN)) {
+      if (!Fireinput.inArray(supportIMEList, Fireinput.SMART_PINYIN)) {
          var handle = document.getElementById("fireinputAMB");
          if (handle) handle.style.display = "none";
       }
@@ -439,14 +439,14 @@ top.Fireinput = {
          if (handle) handle.style.display = "";
       }
 
-      if (!inArray(supportIMEList, SMART_PINYIN) || inArray(hideIMEList, SMART_PINYIN)) {
+      if (!Fireinput.inArray(supportIMEList, Fireinput.SMART_PINYIN) || Fireinput.inArray(hideIMEList, Fireinput.SMART_PINYIN)) {
          var handle = document.getElementById("menuPinyinQuan");
          if (handle) handle.style.display = "none";
          var handle = document.getElementById("imePinyinQuan");
          if (handle) handle.style.display = "none";
       }
       else {
-         this.myEnabledIME.push(SMART_PINYIN);
+         this.myEnabledIME.push(Fireinput.SMART_PINYIN);
          var handle = document.getElementById("menuPinyinQuan");
          if (handle) handle.style.display = "";
          var handle = document.getElementById("imePinyinQuan");
@@ -454,56 +454,56 @@ top.Fireinput = {
 
       }
 
-      if (!inArray(supportIMEList, ZIGUANG_SHUANGPIN) || inArray(hideIMEList, ZIGUANG_SHUANGPIN)) {
+      if (!Fireinput.inArray(supportIMEList, Fireinput.ZIGUANG_SHUANGPIN) || Fireinput.inArray(hideIMEList, Fireinput.ZIGUANG_SHUANGPIN)) {
          var handle = document.getElementById("menuPinyinShuangZiGuang");
          if (handle) handle.style.display = "none";
          var handle = document.getElementById("imePinyinShuangZiGuang");
          if (handle) handle.style.display = "none";
       }
       else {
-         this.myEnabledIME.push(ZIGUANG_SHUANGPIN);
+         this.myEnabledIME.push(Fireinput.ZIGUANG_SHUANGPIN);
          var handle = document.getElementById("menuPinyinShuangZiGuang");
          if (handle) handle.style.display = "";
          var handle = document.getElementById("imePinyinShuangZiGuang");
          if (handle) handle.style.display = "";
       }
 
-      if (!inArray(supportIMEList, MS_SHUANGPIN) || inArray(hideIMEList, MS_SHUANGPIN)) {
+      if (!Fireinput.inArray(supportIMEList, Fireinput.MS_SHUANGPIN) || Fireinput.inArray(hideIMEList, Fireinput.MS_SHUANGPIN)) {
          var handle = document.getElementById("menuPinyinShuangMS");
          if (handle) handle.style.display = "none";
          var handle = document.getElementById("imePinyinShuangMS");
          if (handle) handle.style.display = "none";
       }
       else {
-         this.myEnabledIME.push(MS_SHUANGPIN);
+         this.myEnabledIME.push(Fireinput.MS_SHUANGPIN);
          var handle = document.getElementById("menuPinyinShuangMS");
          if (handle) handle.style.display = "";
          var handle = document.getElementById("imePinyinShuangMS");
          if (handle) handle.style.display = "";
       }
 
-      if (!inArray(supportIMEList, CHINESESTAR_SHUANGPIN) || inArray(hideIMEList, CHINESESTAR_SHUANGPIN)) {
+      if (!Fireinput.inArray(supportIMEList, Fireinput.CHINESESTAR_SHUANGPIN) || Fireinput.inArray(hideIMEList, Fireinput.CHINESESTAR_SHUANGPIN)) {
          var handle = document.getElementById("menuPinyinShuangChineseStar");
          if (handle) handle.style.display = "none";
          var handle = document.getElementById("imePinyinShuangChineseStar");
          if (handle) handle.style.display = "none";
       }
       else {
-         this.myEnabledIME.push(CHINESESTAR_SHUANGPIN);
+         this.myEnabledIME.push(Fireinput.CHINESESTAR_SHUANGPIN);
          var handle = document.getElementById("menuPinyinShuangChineseStar");
          if (handle) handle.style.display = "";
          var handle = document.getElementById("imePinyinShuangChineseStar");
          if (handle) handle.style.display = "";
       }
 
-      if (!inArray(supportIMEList, SMARTABC_SHUANGPIN) || inArray(hideIMEList, SMARTABC_SHUANGPIN)) {
+      if (!Fireinput.inArray(supportIMEList, Fireinput.SMARTABC_SHUANGPIN) || Fireinput.inArray(hideIMEList, Fireinput.SMARTABC_SHUANGPIN)) {
          var handle = document.getElementById("menuPinyinShuangSmartABC");
          if (handle) handle.style.display = "none";
          var handle = document.getElementById("imePinyinShuangSmartABC");
          if (handle) handle.style.display = "none";
       }
       else {
-         this.myEnabledIME.push(SMARTABC_SHUANGPIN);
+         this.myEnabledIME.push(Fireinput.SMARTABC_SHUANGPIN);
          var handle = document.getElementById("menuPinyinShuangSmartABC");
          if (handle) handle.style.display = "";
          var handle = document.getElementById("imePinyinShuangSmartABC");
@@ -516,21 +516,21 @@ top.Fireinput = {
       this.myEnabledIME = [];
       this.toggleIMEMenu();
       // if default IME has been disabled, just choose next available one 
-      if (!inArray(this.myEnabledIME, this.myIMESchema)) {
+      if (!Fireinput.inArray(this.myEnabledIME, this.myIMESchema)) {
          this.switchInputMethod();
       }
    },
 
    loadIMEPrefByID: function (id, strKey, attribute) {
-      var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
-      var value = FireinputUtils.getLocaleString(strKey + defaultLanguage);
+      var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
+      var value = Fireinput.util.getLocaleString(strKey + defaultLanguage);
       var handle = document.getElementById(id);
       if (!handle) return;
 
       // to check whether the shortcut keystring exists 
       var found = value.match(/%(.+)%/i);
       if (found) {
-         var keystring = FireinputKeyBinding.getKeyString(found[1]);
+         var keystring = Fireinput.keyBinding.getKeyString(found[1]);
          value = value.replace(found[0], keystring);
       }
 
@@ -540,24 +540,24 @@ top.Fireinput = {
    loadIMEPref: function (name) {
       // get default language first 
       if (!name || name == "interfaceLanguage") {
-         var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
+         var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
 
          // update UI 
-         for (var i = imeInterfaceUI.length - 1; i >= 0; i--) {
-            var id = imeInterfaceUI[i].id;
+         for (var i = Fireinput.main.imeInterfaceUI.length - 1; i >= 0; i--) {
+            var id = Fireinput.main.imeInterfaceUI[i].id;
 
             var handle = document.getElementById(id);
             if (!handle) continue;
 
-            var strKey = imeInterfaceUI[i].strKey;
-            var attr = imeInterfaceUI[i].attribute;
+            var strKey = Fireinput.main.imeInterfaceUI[i].strKey;
+            var attr = Fireinput.main.imeInterfaceUI[i].attribute;
 
-            var value = FireinputUtils.getLocaleString(strKey + defaultLanguage);
+            var value = Fireinput.util.getLocaleString(strKey + defaultLanguage);
             // to check whether the shortcut keystring exists 
             var found = value.match(/%(\w+)%/ig);
             if (found) {
                for (var n = 0; n < found.length; n++) {
-                  var keystring = FireinputKeyBinding.getKeyString(found[n].replace(/%/g, ''));
+                  var keystring = Fireinput.keyBinding.getKeyString(found[n].replace(/%/g, ''));
                   value = value.replace(found[n], keystring);
                }
             }
@@ -570,11 +570,11 @@ top.Fireinput = {
 
          // refresh menu if language is changed 
          if (name) {
-            FireinputHelp.refreshMenu();
-            FireinputThemes.refreshMenu();
-            FireinputSpecialChar.refreshMenu();
-            FireinputEmotions.refreshMenu();
-            fireinputPrefInit();
+            Fireinput.help.refreshMenu();
+            Fireinput.themes.refreshMenu();
+            Fireinput.specialChar.refreshMenu();
+            Fireinput.emotions.refreshMenu();
+            Fireinput.pref.init();
          }
 
          this.loadIMEPrefByID("fireinputToggleIMEButton", "fireinput.method.chinese.value", "label");
@@ -583,10 +583,10 @@ top.Fireinput = {
       //update value. The label of menu should be updated if language is changed  
       if (!name || name == "defaultInputMethod" || name == "interfaceLanguage") {
          var value = this.myIMESchema;
-         if (name == "defaultInputMethod") value = fireinputPrefGetDefault("defaultInputMethod");
+         if (name == "defaultInputMethod") value = Fireinput.pref.getDefault("defaultInputMethod");
 
-         var element = document.getElementById("inputMethod");
-         element.setAttribute("label", FireinputUtils.getIMENameString(value));
+         var element = document.getElementById("fireinputInputMethod");
+         element.setAttribute("label", Fireinput.util.getIMENameString(value));
          element.setAttribute("value", value);
 
          // only toggle input method if the setting has been updated 
@@ -594,7 +594,7 @@ top.Fireinput = {
       }
 
       if (!name || name == "saveHistory") {
-         this.mySaveHistory = fireinputPrefGetDefault("saveHistory");
+         this.mySaveHistory = Fireinput.pref.getDefault("saveHistory");
       }
 
       if (name && name == 'IMEBarPosition') {
@@ -603,16 +603,16 @@ top.Fireinput = {
 
       if (!name || name == "wordselectionNum") {
          // we don't have do this when defaultIME is created as it will be initialized here anyway 
-         this.myIME.setNumWordSelection(fireinputPrefGetDefault("wordselectionNum"));
+         this.myIME.setNumWordSelection(Fireinput.pref.getDefault("wordselectionNum"));
       }
 
       // reset IMEPanel pref 
-      FireinputIMEPanel.initPref();
+      Fireinput.imePanel.initPref();
    },
 
 
    toggleFireinput: function (forceOpen, forceLoad) {
-      var pos = fireinputPrefGetDefault("IMEBarPosition");
+      var pos = Fireinput.pref.getDefault("IMEBarPosition");
       var id = document.getElementById("fireinputIMEBar_" + pos);
       var toggleOff = forceOpen == undefined ? !id.hidden : !forceOpen;
       id.hidden = toggleOff;
@@ -621,24 +621,24 @@ top.Fireinput = {
       if (!toggleOff) {
          this.loadIMEPrefByID("fireinputStatusBar", "fireinput.statusbar.tooltip.close", "tooltiptext");
 
-         window.addEventListener('keypress', fireinput_onKeyPress, true);
-         //	  window.addEventListener('keydown', fireinput_onKeyDown, true);
-         window.addEventListener('keyup', fireinput_onKeyUp, true);
+         window.addEventListener('keypress', this.keyPressListener.bind(this), true);
+         //	  window.addEventListener('keydown', this.keyDownListener.bind(this), true);
+         window.addEventListener('keyup', this.keyUpListener.bind(this), true);
          this.myInputStatus = true;
-         this.setInputMode(fireinputPrefGetDefault("defaultInputEncoding"));
+         this.setInputMode(Fireinput.pref.getDefault("defaultInputEncoding"));
          this.displayAjaxService(forceLoad == undefined ? false : forceLoad);
       }
       else {
          // close the IME inputbar 
          if (this.myIMEInputBarStatus) {
-            FireinputIMEPanel.hideAndCleanInput();
+            Fireinput.imePanel.hideAndCleanInput();
          }
          this.resetIME();
 
          this.loadIMEPrefByID("fireinputStatusBar", "fireinput.statusbar.tooltip.open", "tooltiptext");
-         window.removeEventListener('keypress', fireinput_onKeyPress, true);
-         //          window.removeEventListener('keydown', fireinput_onKeyDown, true);
-         window.removeEventListener('keyup', fireinput_onKeyUp, true);
+         window.removeEventListener('keypress', this.keyPressListener.bind(this), true);
+         //          window.removeEventListener('keydown', this.keyDownListener.bind(this), true);
+         window.removeEventListener('keyup', this.keyUpListener.bind(this), true);
       }
    },
 
@@ -646,11 +646,11 @@ top.Fireinput = {
       if (!this.myRunStatus) return;
       // if it's input enabled, disable it and turn off key listener 
       if (this.myInputStatus) {
-         FireinputIMEPanel.hideAndCleanInput();
+         Fireinput.imePanel.hideAndCleanInput();
          this.resetIME();
-         window.removeEventListener('keypress', fireinput_onKeyPress, true);
-         //          window.removeEventListener('keydown', fireinput_onKeyDown, true);
-         window.removeEventListener('keyup', fireinput_onKeyUp, true);
+         window.removeEventListener('keypress', this.keyPressListener.bind(this), true);
+         //          window.removeEventListener('keydown', this.keyDownListener.bind(this), true);
+         window.removeEventListener('keyup', this.keyUpListener.bind(this), true);
       }
    },
 
@@ -659,9 +659,9 @@ top.Fireinput = {
 
       if (!this.myInputStatus) {
          this.myInputStatus = true;
-         window.addEventListener('keypress', fireinput_onKeyPress, true);
-         //          window.addEventListener('keydown', fireinput_onKeyDown, true);
-         window.addEventListener('keyup', fireinput_onKeyUp, true);
+         window.addEventListener('keypress', this.keyPressListener.bind(this), true);
+         //          window.addEventListener('keydown', this.keyDownListener.bind(this), true);
+         window.addEventListener('keyup', this.keyUpListener.bind(this), true);
       }
    },
 
@@ -676,7 +676,7 @@ top.Fireinput = {
    toggleIME: function () {
       if (!this.myRunStatus) return;
 
-      if (this.myInputStatus) this.setInputMode(ENCODING_EN);
+      if (this.myInputStatus) this.setInputMode(Fireinput.ENCODING_EN);
       else this.setInputMode(this.myInputMode);
    },
 
@@ -717,7 +717,7 @@ top.Fireinput = {
          h.style.display = "";
 
          h = document.getElementById('fireinputMessage');
-         var str = document.getElementById("inputMethod").getAttribute("label");
+         var str = document.getElementById("fireinputInputMethod").getAttribute("label");
          str = str + "输入法字库没有安装, 点击安装词库";
          h.setAttribute("label", str);
          h.onclick = function () {
@@ -733,39 +733,39 @@ top.Fireinput = {
    toggleInputMethod: function () {
       // close the IME inputbar 
       if (this.myIMEInputBarStatus) {
-         FireinputIMEPanel.hideAndCleanInput();
+         Fireinput.imePanel.hideAndCleanInput();
       }
       this.myIMEInputBarStatus = false;
 
-      var method = document.getElementById("inputMethod").getAttribute("value");
+      var method = document.getElementById("fireinputInputMethod").getAttribute("value");
       if (this.myIMESchema == method) return;
 
-      if (method == WUBI_86 || method == WUBI_98) {
+      if (method == Fireinput.WUBI_86 || method == Fireinput.WUBI_98) {
          if (this.myIME) this.myIME.flushUserTable();
          this.myIME = null;
-         this.myIME = new Wubi();
+         this.myIME = new Fireinput.wubiEngine();
          this.myIME.setSchema(method);
          this.myIME.loadTable();
       }
-      else if (method == CANGJIE_5) {
+      else if (method == Fireinput.CANGJIE_5) {
          if (this.myIME) this.myIME.flushUserTable();
          this.myIME = null;
-         this.myIME = new Cangjie();
+         this.myIME = new Fireinput.cangjieEngine();
          this.myIME.setSchema(method);
          this.myIME.loadTable();
       }
-      else if (method == ZHENGMA) {
+      else if (method == Fireinput.ZHENGMA) {
          if (this.myIME) this.myIME.flushUserTable();
          this.myIME = null;
-         this.myIME = new Zhengma();
+         this.myIME = new Fireinput.zhengmaEngine();
          this.myIME.setSchema(method);
          this.myIME.loadTable();
       }
-      else if (this.myIMESchema > SMARTABC_SHUANGPIN || this.myIMESchema < SMART_PINYIN) {
+      else if (this.myIMESchema > Fireinput.SMARTABC_SHUANGPIN || this.myIMESchema < Fireinput.SMART_PINYIN) {
          // we need to load table only if the current schema is not pinyin schema. Otherwise just set new schema 
          if (this.myIME) this.myIME.flushUserTable();
          this.myIME = null;
-         this.myIME = new SmartPinyin();
+         this.myIME = new Fireinput.smartPinyinEngine();
          this.myIME.setSchema(method);
          this.myIME.loadTable();
       }
@@ -774,22 +774,22 @@ top.Fireinput = {
       this.myIMESchema = method;
 
       // enable zh input 
-      this.setInputMode(fireinputPrefGetDefault("defaultInputEncoding"));
+      this.setInputMode(Fireinput.pref.getDefault("defaultInputEncoding"));
 
       // set num of word choice 
-      this.myIME.setNumWordSelection(fireinputPrefGetDefault("wordselectionNum"));
+      this.myIME.setNumWordSelection(Fireinput.pref.getDefault("wordselectionNum"));
 
       this.myAllowInputKey = this.myIME.getAllowedInputKey();
       // disable conflict shortkey 
-      FireinputKeyBinding.disableConflictKey(this.myAllowInputKey);
+      Fireinput.keyBinding.disableConflictKey(this.myAllowInputKey);
 
       // notify to all regarding this change 
-      this.notify(FIREINPUT_IME_CHANGED);
+      this.notify(Fireinput.FIREINPUT_IME_CHANGED);
    },
 
    // loop through next enabled input method 
    switchInputMethod: function () {
-      var method = document.getElementById("inputMethod").getAttribute("value");
+      var method = document.getElementById("fireinputInputMethod").getAttribute("value");
       var i = 0;
       for (; i < this.myEnabledIME.length; i++) {
          if (method == this.myEnabledIME[i]) break;
@@ -797,16 +797,16 @@ top.Fireinput = {
       if (i >= this.myEnabledIME.length - 1) i = -1;
 
       // update ime/schema in pref 
-      fireinputPrefSave('defaultInputMethod', this.myEnabledIME[i + 1]);
+      Fireinput.pref.save('defaultInputMethod', this.myEnabledIME[i + 1]);
    },
 
    getModeString: function (mode) {
-      for (var i = imeInputModeValues.length - 1; i >= 0; i--) {
-         if (mode == imeInputModeValues[i].name) return imeInputModeValues[i].label;
+      for (var i = Fireinput.main.imeInputModeValues.length - 1; i >= 0; i--) {
+         if (mode == Fireinput.main.imeInputModeValues[i].name) return Fireinput.main.imeInputModeValues[i].label;
       }
 
       // otherwise return first one 
-      return imeInputModeValues[0].label;
+      return Fireinput.main.imeInputModeValues[0].label;
 
    },
 
@@ -817,13 +817,13 @@ top.Fireinput = {
       this.myIMEMode = mode;
 
       switch (mode) {
-      case IME_MODE_ZH:
+      case Fireinput.IME_MODE_ZH:
          var modeString = this.getModeString(this.myInputMode);
          this.loadIMEPrefByID("fireinputToggleIMEButton", modeString, "label");
          // we need to check whether the schema has been enabled or not 
          this.isIMESchemaEnabled();
          break;
-      case IME_MODE_EN:
+      case Fireinput.IME_MODE_EN:
          var modeString = this.getModeString(mode);
          this.loadIMEPrefByID("fireinputToggleIMEButton", modeString, "label");
          break;
@@ -835,19 +835,19 @@ top.Fireinput = {
    toggleIMEMode: function () {
       if (!this.myInputStatus) return;
 
-      if (this.myIMEMode == IME_MODE_ZH) this.setIMEMode(IME_MODE_EN);
-      else this.setIMEMode(IME_MODE_ZH);
+      if (this.myIMEMode == Fireinput.IME_MODE_ZH) this.setIMEMode(Fireinput.IME_MODE_EN);
+      else this.setIMEMode(Fireinput.IME_MODE_ZH);
    },
 
    toggleDisableIMEMode: function () {
       // if IME inputStatus is still true, disable it regardless of ime_mode 
       if (this.myInputStatus) {
          this.myInputStatus = false;
-         this.setIMEMode(IME_MODE_EN);
+         this.setIMEMode(Fireinput.IME_MODE_EN);
       }
       else {
          this.myInputStatus = true;
-         this.setIMEMode(IME_MODE_ZH);
+         this.setIMEMode(Fireinput.IME_MODE_ZH);
       }
    },
 
@@ -855,16 +855,16 @@ top.Fireinput = {
       var modeString = this.getModeString(mode);
       this.loadIMEPrefByID("fireinputToggleIMEButton", modeString, "label");
       switch (mode) {
-      case ENCODING_ZH:
-      case ENCODING_BIG5:
+      case Fireinput.ENCODING_ZH:
+      case Fireinput.ENCODING_BIG5:
          this.myInputMode = mode;
-         this.myIMEMode = IME_MODE_ZH;
+         this.myIMEMode = Fireinput.IME_MODE_ZH;
          this.myIME.setEncoding(mode);
          // this.enableIME(); 
          this.isIMESchemaEnabled();
          break;
-      case ENCODING_EN:
-         this.myIMEMode = IME_MODE_EN;
+      case Fireinput.ENCODING_EN:
+         this.myIMEMode = Fireinput.IME_MODE_EN;
          // this.disableIME(); 
          break;
       default:
@@ -873,41 +873,41 @@ top.Fireinput = {
    },
 
    toggleInputMode: function () {
-      if (this.myIMEMode == IME_MODE_EN) {
-         this.setInputMode(ENCODING_ZH);
-         fireinputPrefSave("defaultInputEncoding", ENCODING_ZH);
+      if (this.myIMEMode == Fireinput.IME_MODE_EN) {
+         this.setInputMode(Fireinput.ENCODING_ZH);
+         Fireinput.pref.save("defaultInputEncoding", Fireinput.ENCODING_ZH);
 
          return;
       }
 
       switch (this.myInputMode) {
-      case ENCODING_ZH:
-         this.setInputMode(ENCODING_BIG5);
+      case Fireinput.ENCODING_ZH:
+         this.setInputMode(Fireinput.ENCODING_BIG5);
          // remember encoding 
-         fireinputPrefSave("defaultInputEncoding", ENCODING_BIG5);
+         Fireinput.pref.save("defaultInputEncoding", Fireinput.ENCODING_BIG5);
          break;
 
-      case ENCODING_BIG5:
-         this.setInputMode(ENCODING_EN);
+      case Fireinput.ENCODING_BIG5:
+         this.setInputMode(Fireinput.ENCODING_EN);
          break;
       default:
-         this.setInputMode(ENCODING_ZH);
+         this.setInputMode(Fireinput.ENCODING_ZH);
       }
    },
 
    toggleEncodingMode: function () {
-      if (this.myIMEMode == IME_MODE_EN) return;
+      if (this.myIMEMode == Fireinput.IME_MODE_EN) return;
 
       switch (this.myInputMode) {
-      case ENCODING_ZH:
-         this.setInputMode(ENCODING_BIG5);
+      case Fireinput.ENCODING_ZH:
+         this.setInputMode(Fireinput.ENCODING_BIG5);
          // remember encoding 
-         fireinputPrefSave("defaultInputEncoding", ENCODING_BIG5);
+         Fireinput.pref.save("defaultInputEncoding", Fireinput.ENCODING_BIG5);
          break;
 
-      case ENCODING_BIG5:
-         this.setInputMode(ENCODING_ZH);
-         fireinputPrefSave("defaultInputEncoding", ENCODING_ZH);
+      case Fireinput.ENCODING_BIG5:
+         this.setInputMode(Fireinput.ENCODING_ZH);
+         Fireinput.pref.save("defaultInputEncoding", Fireinput.ENCODING_ZH);
          break;
       }
 
@@ -960,13 +960,13 @@ top.Fireinput = {
       // init add table menu 
       var hidden = !(gContextMenu.isTextSelected);
       if (!hidden) {
-         var selectedText = FireinputLongTable.showSelection();
+         var selectedText = Fireinput.longTable.showSelection();
          if (!selectedText) {
             document.getElementById('fireinputContextEnhanceWordTable').hidden = !hidden;
             return;
          }
-         var defaultLanguage = fireinputPrefGetDefault("interfaceLanguage");
-         var value = FireinputUtils.getLocaleString("fireinput.wordtable.enhance" + defaultLanguage);
+         var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
+         var value = Fireinput.util.getLocaleString("fireinput.wordtable.enhance" + defaultLanguage);
 
          var handle = document.getElementById('fireinputContextEnhanceWordTable');
          label = value + '"' + selectedText + '"';
@@ -983,22 +983,22 @@ top.Fireinput = {
          if (this.myIME) this.myIME.flushUserTable();
       }
 
-      if (topic == "nsPref:changed" && data && data.indexOf(prefDomain) != -1) {
-         var name = data.substr(prefDomain.length + 1);
+      if (topic == "nsPref:changed" && data && data.indexOf(Fireinput.prefDomain) != -1) {
+         var name = data.substr(Fireinput.prefDomain.length + 1);
          this.updatePref(name);
 
 
          // we need to reload key settings just in case if anything has been changed 
          if (data && data.match(/Key$/)) {
-            FireinputKeyBinding.refreshKeySetting();
+            Fireinput.keyBinding.refreshKeySetting();
             // short key might have been changed, re-disable/enable conflict shortkeys 
-            FireinputKeyBinding.disableConflictKey(this.myAllowInputKey);
+            Fireinput.keyBinding.disableConflictKey(this.myAllowInputKey);
             // simulate a interface language  
             this.loadIMEPref('interfaceLanguage');
          }
 
          // if hiddenInputMethod option is changed, reload IME menu and settings 
-         if (data == prefDomain + ".hiddenInputMethod") this.reloadIMEMenu();
+         if (data == Fireinput.prefDomain + ".hiddenInputMethod") this.reloadIMEMenu();
       }
    },
 
@@ -1008,8 +1008,8 @@ top.Fireinput = {
 
    notify: function (nevent) {
       switch (nevent) {
-      case FIREINPUT_IME_CHANGED:
-         FireinputUtils.notify(null, "fireinput-ime-changed", this.getCurrentIME().getIMEType() + '');
+      case Fireinput.FIREINPUT_IME_CHANGED:
+         Fireinput.util.notify(null, "fireinput-ime-changed", this.getCurrentIME().getIMEType() + '');
          break;
       }
 
@@ -1017,8 +1017,8 @@ top.Fireinput = {
    },
 
    initIMEBarPosition: function () {
-      var pos = fireinputPrefGetDefault("IMEBarPosition");
-      var rempos = (pos == IME_BAR_BOTTOM) ? IME_BAR_TOP : IME_BAR_BOTTOM;
+      var pos = Fireinput.pref.getDefault("IMEBarPosition");
+      var rempos = (pos == Fireinput.IME_BAR_BOTTOM) ? Fireinput.IME_BAR_TOP : Fireinput.IME_BAR_BOTTOM;
 
       var el = document.getElementById("fireinputIMEBar_" + rempos);
       if (el.firstChild) {
@@ -1027,8 +1027,8 @@ top.Fireinput = {
    },
 
    toggleIMEBarPosition: function () {
-      var pos = fireinputPrefGetDefault("IMEBarPosition");
-      var rempos = (pos == IME_BAR_BOTTOM) ? IME_BAR_TOP : IME_BAR_BOTTOM;
+      var pos = Fireinput.pref.getDefault("IMEBarPosition");
+      var rempos = (pos == Fireinput.IME_BAR_BOTTOM) ? Fireinput.IME_BAR_TOP : Fireinput.IME_BAR_BOTTOM;
 
       var oldPanel = null;
       var el = document.getElementById("fireinputIMEBar_" + rempos);
@@ -1053,7 +1053,7 @@ top.Fireinput = {
       this.loadIMEPref();
 
       // initialize Pref interfaces 
-      fireinputPrefInit();
+      Fireinput.pref.init();
 
       this.toggleFireinput(true, true);
 
@@ -1082,7 +1082,7 @@ top.Fireinput = {
       };
 
       if (target instanceof XULElement && target.id == "urlbar") {
-         if (fireinputPrefGetDefault("enableUrlbarInput")) return {
+         if (Fireinput.pref.getDefault("enableUrlbarInput")) return {
             target: target,
             originalTarget: originalTarget,
             valid: true,
@@ -1191,7 +1191,7 @@ top.Fireinput = {
 
       if (this.myEventDispatch) return; 
 
-      if (event.keyCode == FireinputKeyBinding.getKeyActionCode("quickToggleIMEKey")) {
+      if (event.keyCode == Fireinput.keyBinding.getKeyActionCode("quickToggleIMEKey")) {
          if (this.myChangeIMEModeEvent) {
             this.myChangeIMEModeEvent = false;
             this.toggleIMEMode();
@@ -1206,11 +1206,11 @@ top.Fireinput = {
    keyDownListener: function (event) {
       if (this.myEventDispatch) return; 
 
-      // FireinputLog.debug(this, "this.myRunStatus: " + this.myRunStatus +", this.myIMEInputBarStatus: " + this.myIMEInputBarStatus); 
+      // Fireinput.log.debug(this, "this.myRunStatus: " + this.myRunStatus +", this.myIMEInputBarStatus: " + this.myIMEInputBarStatus); 
       // monitor key which has action associated. For those keys without action associated, 
       // it will be handled individually.  
       if (!this.myIMEInputBarStatus) {
-         FireinputKeyBinding.checkKeyEvent(event);
+         Fireinput.keyBinding.checkKeyEvent(event);
       }
 
       // if fireinput is not enabled, just return here 
@@ -1218,7 +1218,7 @@ top.Fireinput = {
 
       var keyCode = event.keyCode;
 
-      if (event.keyCode == FireinputKeyBinding.getKeyActionCode("quickToggleIMEKey")) {
+      if (event.keyCode == Fireinput.keyBinding.getKeyActionCode("quickToggleIMEKey")) {
          var now = new Date().getTime();
          // let trigger a timer here. If two continuous quickToggleIMEKeys are pressed, it will disable fireinput in global manner. 
          // it could only be re-enabled by another two continuous presses 
@@ -1242,7 +1242,7 @@ top.Fireinput = {
          }
 
          if (keyCode == KeyEvent.DOM_VK_RETURN) {
-            FireinputWebSearch.load();
+            Fireinput.webSearch.load();
             return;
 
          }
@@ -1250,7 +1250,7 @@ top.Fireinput = {
 
       // handle alt + ctrl + shift + D to load debug panel 
       if (event.shiftKey && event.ctrlKey && event.altKey && keyCode == KeyEvent.DOM_VK_D) {
-         FireinputLog.showDebug();
+         Fireinput.log.showDebug();
          return;
       }
 
@@ -1272,7 +1272,7 @@ top.Fireinput = {
          if (this.myIMEInputBarStatus) {
             event.preventDefault();
             event.stopPropagation();
-            FireinputIMEPanel.hideAndCleanInput();
+            Fireinput.imePanel.hideAndCleanInput();
             return;
          }
          return;
@@ -1282,11 +1282,11 @@ top.Fireinput = {
       if (keyCode == KeyEvent.DOM_VK_HOME) {
          if (!this.myIMEInputBarStatus) return;
 
-         if (FireinputIMEPanel.getComposeEnabled() || FireinputIMEPanel.getIMEInputFieldFocusedStatus()) return;
+         if (Fireinput.imePanel.getComposeEnabled() || Fireinput.imePanel.getIMEInputFieldFocusedStatus()) return;
 
          event.preventDefault();
 
-         FireinputIMEPanel.prevSel("HOME");
+         Fireinput.imePanel.prevSel("HOME");
          return;
       }
 
@@ -1294,19 +1294,19 @@ top.Fireinput = {
       if (keyCode == KeyEvent.DOM_VK_END) {
          if (!this.myIMEInputBarStatus) return;
 
-         if (FireinputIMEPanel.getComposeEnabled()) return;
+         if (Fireinput.imePanel.getComposeEnabled()) return;
 
-         if (FireinputIMEPanel.getIMEInputFieldFocusedStatus()) {
+         if (Fireinput.imePanel.getIMEInputFieldFocusedStatus()) {
             var idf = document.getElementById("fireinputField");
             if (idf.selectionEnd < idf.value.length) {
-               FireinputIMEPanel.setInputChar(idf.value);
-               FireinputIMEPanel.findCharWithDelay();
+               Fireinput.imePanel.setInputChar(idf.value);
+               Fireinput.imePanel.findCharWithDelay();
             }
             return;
          }
 
          event.preventDefault();
-         FireinputIMEPanel.nextSel("END");
+         Fireinput.imePanel.nextSel("END");
          return;
       }
 
@@ -1316,10 +1316,10 @@ top.Fireinput = {
          if (this.myIMEInputBarStatus) return;
 
          event.preventDefault();
-         // FireinputLog.debug(this,"F2: " + FireinputIMEPanel.getLastSelectedElementValue()); 
-         FireinputUtils.insertCharAtCaret(this.myTarget, FireinputIMEPanel.getLastSelectedElementValue());
+         // Fireinput.log.debug(this,"F2: " + Fireinput.imePanel.getLastSelectedElementValue()); 
+         Fireinput.util.insertCharAtCaret(this.myTarget, Fireinput.imePanel.getLastSelectedElementValue());
          // add into long table 
-         if (this.mySaveHistory) FireinputLongTable.notify(this.myTarget);
+         if (this.mySaveHistory) Fireinput.longTable.notify(this.myTarget);
 
          return;
       }
@@ -1329,29 +1329,29 @@ top.Fireinput = {
          if (!this.myIMEInputBarStatus) return;
 
          // inputField is focused 
-         if (FireinputIMEPanel.getComposeEnabled()) return;
+         if (Fireinput.imePanel.getComposeEnabled()) return;
          var idf = document.getElementById("fireinputField");
-         //FireinputLog.debug(this,"idf.value:" + idf.value);
+         //Fireinput.log.debug(this,"idf.value:" + idf.value);
          if (idf.selectionStart <= 1) {
             // it's at the beginning 
-            if (FireinputComposer.hasSet()) {
+            if (Fireinput.composer.hasSet()) {
                // the composer is formed. Now we need to disable last composed word 
-               var key = FireinputComposer.removeLastFromPanel();
+               var key = Fireinput.composer.removeLastFromPanel();
                if (key) {
                   var pos = key.length + 1;
                   idf.value = key + idf.value;
                   idf.setSelectionRange(pos, pos)
-                  FireinputIMEPanel.setInputChar(key);
-                  FireinputIMEPanel.findCharWithDelay();
+                  Fireinput.imePanel.setInputChar(key);
+                  Fireinput.imePanel.findCharWithDelay();
                }
             }
          }
          else {
             // there are still some room on the left. Show the selected word from 0 until this position 
             var subInputKeys = idf.value.substring(0, idf.selectionStart - 1);
-            // FireinputLog.debug(this,"subInputKeys:" + subInputKeys);
-            FireinputIMEPanel.setInputChar(subInputKeys);
-            FireinputIMEPanel.findCharWithDelay();
+            // Fireinput.log.debug(this,"subInputKeys:" + subInputKeys);
+            Fireinput.imePanel.setInputChar(subInputKeys);
+            Fireinput.imePanel.findCharWithDelay();
          }
 
       }
@@ -1361,13 +1361,13 @@ top.Fireinput = {
          if (!this.myIMEInputBarStatus) return;
 
          // inputField is focused 
-         if (FireinputIMEPanel.getComposeEnabled()) return;
+         if (Fireinput.imePanel.getComposeEnabled()) return;
          var idf = document.getElementById("fireinputField");
          if ((idf.selectionEnd + 1) <= idf.value.length) {
             // there are still some room on the right. Show the selected word from 0 until this position 
             var subInputKeys = idf.value.substring(0, idf.selectionEnd + 1);
-            FireinputIMEPanel.setInputChar(subInputKeys);
-            FireinputIMEPanel.findCharWithDelay();
+            Fireinput.imePanel.setInputChar(subInputKeys);
+            Fireinput.imePanel.findCharWithDelay();
          }
       }
 
@@ -1375,44 +1375,44 @@ top.Fireinput = {
       // backspace: remove the input bar. If the input bar is empty, remove target value 
       if (keyCode == KeyEvent.DOM_VK_BACK_SPACE) {
          // inputField is focused 
-         if (FireinputIMEPanel.getComposeEnabled()) return;
+         if (Fireinput.imePanel.getComposeEnabled()) return;
 
          if (this.myIMEInputBarStatus) {
             var id = document.getElementById("fireinputIMEContainer");
             var idf = document.getElementById("fireinputField");
-            if (idf.value.length == 0 && !FireinputComposer.hasSet()) {
+            if (idf.value.length == 0 && !Fireinput.composer.hasSet()) {
                id.hidePopup();
             }
             else {
                event.preventDefault();
 
-               FireinputIMEPanel.setInputChar(idf.value);
+               Fireinput.imePanel.setInputChar(idf.value);
 
-               if (FireinputIMEPanel.getInputChar().length > 0) {
+               if (Fireinput.imePanel.getInputChar().length > 0) {
                   var selectionEnd = idf.selectionEnd;
                   idf.value = idf.value.substring(0, selectionEnd - 1) + idf.value.substring(selectionEnd, idf.value.length);
-                  FireinputIMEPanel.setInputChar(idf.value);
-                  FireinputUtils.setCaretTo(idf, selectionEnd - 1);
+                  Fireinput.imePanel.setInputChar(idf.value);
+                  Fireinput.util.setCaretTo(idf, selectionEnd - 1);
                }
                // if the caret is not at the end of position, only select the char from 0 to this position 
-               if (FireinputIMEPanel.getInputChar().length <= 0 || idf.selectionStart <= 0) {
-                  var key = FireinputComposer.removeLastFromPanel();
+               if (Fireinput.imePanel.getInputChar().length <= 0 || idf.selectionStart <= 0) {
+                  var key = Fireinput.composer.removeLastFromPanel();
                   if (key) {
                      idf.value = key + idf.value.substring(0, idf.value.length);
-                     FireinputIMEPanel.setInputChar(key);
-                     FireinputUtils.setCaretTo(idf, key.length);
+                     Fireinput.imePanel.setInputChar(key);
+                     Fireinput.util.setCaretTo(idf, key.length);
                   }
                }
                else if (idf.selectionStart != idf.value.length) {
                   var subInputKeys = idf.value.substring(0, idf.selectionStart);
-                  FireinputIMEPanel.setInputChar(subInputKeys);
+                  Fireinput.imePanel.setInputChar(subInputKeys);
                }
 
                if (idf.value.length == 0) {
                   id.hidePopup();
                   return;
                }
-               FireinputIMEPanel.findCharWithDelay();
+               Fireinput.imePanel.findCharWithDelay();
             }
          }
 
@@ -1420,20 +1420,20 @@ top.Fireinput = {
       }
 
       // page down for next 
-      if (FireinputKeyBinding.isTrue("pageDownKey", event)) {
+      if (Fireinput.keyBinding.isTrue("pageDownKey", event)) {
          if (this.myIMEInputBarStatus) {
             event.preventDefault();
             event.stopPropagation();
-            FireinputIMEPanel.nextSel();
+            Fireinput.imePanel.nextSel();
          }
          return;
       }
       // page up for previous 
-      if (FireinputKeyBinding.isTrue("pageUpKey", event)) {
+      if (Fireinput.keyBinding.isTrue("pageUpKey", event)) {
          if (this.myIMEInputBarStatus) {
             event.preventDefault();
             event.stopPropagation();
-            FireinputIMEPanel.prevSel();
+            Fireinput.imePanel.prevSel();
          }
 
          return;
@@ -1448,32 +1448,32 @@ top.Fireinput = {
       if (event.getPreventDefault()) return;
 
       // enter: select the highlight column. If the input bar is not activated, go to default action 
-      if (FireinputKeyBinding.isTrue("selectFirstKey", event) || event.keyCode == KeyEvent.DOM_VK_RETURN) {
+      if (Fireinput.keyBinding.isTrue("selectFirstKey", event) || event.keyCode == KeyEvent.DOM_VK_RETURN) {
          // here we try to trim the long sentence. Surely we should have a better way to organize this. 
          // maybe a fast text search library or sth ? 
          if (!this.myIMEInputBarStatus && event.keyCode == KeyEvent.DOM_VK_RETURN) {
-            if (this.mySaveHistory) FireinputLongTable.notify(this.myTarget);
+            if (this.mySaveHistory) Fireinput.longTable.notify(this.myTarget);
             return true;
          }
 
          if (this.myIMEInputBarStatus) {
-            FireinputIMEPanel.insertCharByIndex(event, 1);
+            Fireinput.imePanel.insertCharByIndex(event, 1);
          }
          return true;
       }
 
       // handle the second 
-      if (FireinputKeyBinding.isTrue("selectSecondKey", event)) {
+      if (Fireinput.keyBinding.isTrue("selectSecondKey", event)) {
          if (this.myIMEInputBarStatus) {
-            FireinputIMEPanel.insertCharByIndex(event, 2);
+            Fireinput.imePanel.insertCharByIndex(event, 2);
          }
 
          return true;
       }
 
-      if (FireinputKeyBinding.isTrue("selectThirdKey", event)) {
+      if (Fireinput.keyBinding.isTrue("selectThirdKey", event)) {
          if (this.myIMEInputBarStatus) {
-            FireinputIMEPanel.insertCharByIndex(event, 3);
+            Fireinput.imePanel.insertCharByIndex(event, 3);
          }
          return true;
       }
@@ -1483,7 +1483,7 @@ top.Fireinput = {
 
    keyPressListener: function (event) {
       if (!this.myRunStatus) return;
-      if (this.myEventDispatch) return; 
+      if (this.myEventDispatch) return ; 
 
       var keyCode = event.keyCode;
       var charCode = event.charCode;
@@ -1497,7 +1497,7 @@ top.Fireinput = {
       if (event.altKey || event.ctrlKey || event.metaKey || (event.shiftKey && !(keyCode || charCode))) return;
 
       // return here if the mode is non-chinese mode 
-      if (this.myIMEMode != IME_MODE_ZH) return;
+      if (this.myIMEMode != Fireinput.IME_MODE_ZH) return;
 
       // somehow if the key is pressed too fast following a valid inputchar, the keydown event might not be triggered
       // we need to check them here again. Please note that the test shows the issue only show up in one-char press, 
@@ -1515,9 +1515,9 @@ top.Fireinput = {
 
       // the IME mode needs to be reset if the target has changed 
       // if(this.myTarget && this.myTarget.target != target)
-      //   this.setIMEMode(IME_MODE_ZH);
+      //   this.setIMEMode(Fireinput.IME_MODE_ZH);
       // keep the real event and target if inputfield has been focused 
-      if (!FireinputIMEPanel.getIMEInputFieldFocusedStatus() && !FireinputIMEPanel.getComposeEnabled() && 
+      if (!Fireinput.imePanel.getIMEInputFieldFocusedStatus() && !Fireinput.imePanel.getComposeEnabled() && 
           (typeof(this.myTarget.target) == 'undefined' || this.myTarget.target != target)) {
          this.myEvent = event;
          this.myTarget.event = event;
@@ -1541,7 +1541,7 @@ top.Fireinput = {
       // 1..2..9
       if (charCode > KeyEvent.DOM_VK_0 && charCode <= KeyEvent.DOM_VK_9) {
          if (this.myIMEInputBarStatus) {
-            FireinputIMEPanel.insertCharByIndex(event, key);
+            Fireinput.imePanel.insertCharByIndex(event, key);
          }
 
          return;
@@ -1551,7 +1551,7 @@ top.Fireinput = {
       if (this.myAllowInputKey.indexOf(key) >= 0) {
          // don't relay on input event. It's slow. 
          // return if compose is enabled 
-         if (FireinputIMEPanel.getComposeEnabled()) {
+         if (Fireinput.imePanel.getComposeEnabled()) {
             return;
          }
 
@@ -1571,8 +1571,8 @@ top.Fireinput = {
             }
             else if (!documentTarget) {
                // HTML input/textarea element 
-               xpos = FireinputUtils.findPosX(target) - FireinputUtils.getDocumentScrollLeft(document.commandDispatcher.focusedWindow.document);
-               ypos = FireinputUtils.findPosY(target) - FireinputUtils.getDocumentScrollTop(document.commandDispatcher.focusedWindow.document);
+               xpos = Fireinput.util.findPosX(target) - Fireinput.util.getDocumentScrollLeft(document.commandDispatcher.focusedWindow.document);
+               ypos = Fireinput.util.findPosY(target) - Fireinput.util.getDocumentScrollTop(document.commandDispatcher.focusedWindow.document);
 
                ypos += target.clientHeight;
 
@@ -1602,8 +1602,8 @@ top.Fireinput = {
                //	        if(ypos > (window.innerHeight - 20))
                //                   ypos = window.innerHeight - 20; 
                if (ypos <= 20) ypos = 20;
-               //FireinputLog.debug(this,"xpos:" + xpos); 
-               //FireinputLog.debug(this,"ypos:" + ypos); 
+               //Fireinput.log.debug(this,"xpos:" + xpos); 
+               //Fireinput.log.debug(this,"ypos:" + ypos); 
                var id = document.getElementById("fireinputIMEContainer");
                id.openPopup(document.documentElement, "after_pointer", xpos, ypos);
             }
@@ -1611,9 +1611,9 @@ top.Fireinput = {
                // rich editor 
                var p = target.frameElement;
 
-               xpos = FireinputUtils.findPosX(p);
-               ypos = FireinputUtils.findPosY(p);
-               // FireinputLog.debug(this, "p: " + p + ", tagname: " + p.tagName + ", id: " + p.id);
+               xpos = Fireinput.util.findPosX(p);
+               ypos = Fireinput.util.findPosY(p);
+               // Fireinput.log.debug(this, "p: " + p + ", tagname: " + p.tagName + ", id: " + p.id);
                // some iframes are inside of another iframe. To get the top iframe, we need to 
                // loop through the parentNode to find out whic one is first iframe. Not sure what the 
                // best way to do here 
@@ -1623,8 +1623,8 @@ top.Fireinput = {
                   if (parentNode.nodeType == 9) {
                      parentNode = parentNode.defaultView.frameElement;
                      if (parentNode && parentNode.tagName == 'IFRAME') {
-                        xpos += FireinputUtils.findPosX(parentNode);
-                        ypos += FireinputUtils.findPosY(parentNode);
+                        xpos += Fireinput.util.findPosX(parentNode);
+                        ypos += Fireinput.util.findPosY(parentNode);
                         p = parentNode;
                      }
                      else break;
@@ -1639,12 +1639,12 @@ top.Fireinput = {
                // gmail main body is built of iframe. So we need to check both ownerDocument and contentDocument 
                // scroll attribute to ajust popup position 
                if (p != target.frameElement) {
-                  xpos -= (FireinputUtils.getDocumentScrollLeft(p.ownerDocument) + FireinputUtils.getDocumentScrollLeft(p.contentDocument));
-                  ypos -= (FireinputUtils.getDocumentScrollTop(p.ownerDocument) + FireinputUtils.getDocumentScrollTop(p.contentDocument));
+                  xpos -= (Fireinput.util.getDocumentScrollLeft(p.ownerDocument) + Fireinput.util.getDocumentScrollLeft(p.contentDocument));
+                  ypos -= (Fireinput.util.getDocumentScrollTop(p.ownerDocument) + Fireinput.util.getDocumentScrollTop(p.contentDocument));
                }
                else {
-                  xpos -= FireinputUtils.getDocumentScrollLeft(p.ownerDocument);
-                  ypos -= FireinputUtils.getDocumentScrollTop(p.ownerDocument);
+                  xpos -= Fireinput.util.getDocumentScrollLeft(p.ownerDocument);
+                  ypos -= Fireinput.util.getDocumentScrollTop(p.ownerDocument);
                }
 
                // var frameHeight = p.contentDocument.height; 
@@ -1688,7 +1688,7 @@ top.Fireinput = {
             // The reason I have to put here is because textbox won't be able to initialize correctly without first assign the value 
             // thus either idf.selectionEnd or idf.value will throw exception. It only happens when fireinput is loaded first time 
             var idf = document.getElementById("fireinputField");
-            FireinputIMEPanel.setInputChar(key);
+            Fireinput.imePanel.setInputChar(key);
             idf.value = key;
          }
          else {
@@ -1703,30 +1703,30 @@ top.Fireinput = {
                var selectionEnd = idf.selectionEnd;
                var fvalue = idf.value.substring(0, selectionEnd) + key;
                idf.value = fvalue + idf.value.substring(selectionEnd, idf.value.length);
-               FireinputIMEPanel.setInputChar(fvalue);
-               FireinputUtils.setCaretTo(idf, selectionEnd + 1);
+               Fireinput.imePanel.setInputChar(fvalue);
+               Fireinput.util.setCaretTo(idf, selectionEnd + 1);
             }
             else {
-               FireinputIMEPanel.setInputChar(FireinputIMEPanel.getInputChar() + key);
+               Fireinput.imePanel.setInputChar(Fireinput.imePanel.getInputChar() + key);
                idf.value += key;
             }
          }
 
-         // FireinputLog.debug(this,"idf.value:" + idf.value);
-         FireinputLog.debug(this, "call findChar when idf.value:" + idf.value);
+         // Fireinput.log.debug(this,"idf.value:" + idf.value);
+         Fireinput.log.debug(this, "call findChar when idf.value:" + idf.value);
          //The findchar has to invoked here to resolve the performance issue 
          
          //set tab index, so it has chance to take this browser's on-demand data as high priority 
          var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
          this.myIME.setBrowserIndex(tabIndex);
 
-         FireinputIMEPanel.findChar(true);
+         Fireinput.imePanel.findChar(true);
          return;
       }
 
       // use single quot to separate pinyin input 
       if (this.myIMEInputBarStatus) {
-         if (key == "'" && !FireinputIMEPanel.getComposeEnabled()) {
+         if (key == "'" && !Fireinput.imePanel.getComposeEnabled()) {
             event.preventDefault();
             var idf = document.getElementById("fireinputField");
             // only one is allowed
@@ -1735,11 +1735,11 @@ top.Fireinput = {
                   var selectionEnd = idf.selectionEnd;
                   var fvalue = idf.value.substring(0, selectionEnd) + key;
                   idf.value = fvalue + idf.value.substring(selectionEnd, idf.value.length);
-                  FireinputIMEPanel.setInputChar(fvalue);
-                  FireinputUtils.setCaretTo(idf, selectionEnd + 1);
+                  Fireinput.imePanel.setInputChar(fvalue);
+                  Fireinput.util.setCaretTo(idf, selectionEnd + 1);
                }
                else {
-                  FireinputIMEPanel.setInputChar(FireinputIMEPanel.getInputChar() + key);
+                  Fireinput.imePanel.setInputChar(Fireinput.imePanel.getInputChar() + key);
                   idf.value += key;
                }
                return;
@@ -1747,7 +1747,7 @@ top.Fireinput = {
          }
 
          // won't allow any other chars if IME inputbar is opened 
-         if (key != "'") // && (FireinputIMEPanel.getIMEInputFieldFocusedStatus() || FireinputIMEPanel.getComposeEnabled()))
+         if (key != "'") // && (Fireinput.imePanel.getIMEInputFieldFocusedStatus() || Fireinput.imePanel.getComposeEnabled()))
          {
             event.preventDefault();
             event.stopPropagation();
@@ -1761,17 +1761,17 @@ top.Fireinput = {
             event.preventDefault();
             event.stopPropagation();
             for (var s in fullLetter) {
-               FireinputUtils.insertCharAtCaret(this.myTarget, fullLetter[s]);
+               Fireinput.util.insertCharAtCaret(this.myTarget, fullLetter[s]);
             }
          }
          else if (typeof(fullLetter) != "undefined") {
             event.preventDefault();
             event.stopPropagation();
-            FireinputUtils.insertCharAtCaret(this.myTarget, fullLetter);
+            Fireinput.util.insertCharAtCaret(this.myTarget, fullLetter);
          }
 
          // time to flush long table 
-         if (this.mySaveHistory) FireinputLongTable.notify(this.myTarget);
+         if (this.mySaveHistory) Fireinput.longTable.notify(this.myTarget);
       }
 
       return;
@@ -1779,21 +1779,21 @@ top.Fireinput = {
 
    IMEWindowHidden: function () {
       // restore the focus to target if inputfield has been focused 
-      if (FireinputIMEPanel.getIMEInputFieldFocusedStatus() || FireinputIMEPanel.getComposeEnabled()) {
-         FireinputUtils.setFocus(this.myTarget.target);
+      if (Fireinput.imePanel.getIMEInputFieldFocusedStatus() || Fireinput.imePanel.getComposeEnabled()) {
+         Fireinput.util.setFocus(this.myTarget.target);
          this.myTarget.focused = 1;
       }
 
-      FireinputComposer.reset();
+      Fireinput.composer.reset();
       this.myIMEInputBarStatus = false;
-      FireinputIMEPanel.setIMEInputFieldFocusedStatus(false);
-      FireinputIMEPanel.hideAndCleanInput();
+      Fireinput.imePanel.setIMEInputFieldFocusedStatus(false);
+      Fireinput.imePanel.hideAndCleanInput();
    },
 
    IMEWindowShown: function () {
       // if the first few input key too fast, the hidden event is ahead of shown event(because of GUI time consuming). 
       // In this case, this.myIMEInputBarStatus might be false, and we certainly don't want to change focus again 
-      if (this.myIMEInputBarStatus) FireinputUtils.setFocus(document.getElementById("fireinputField"));
+      if (this.myIMEInputBarStatus) Fireinput.util.setFocus(document.getElementById("fireinputField"));
    },
 
    IMEWindowShowing: function () {
@@ -1803,16 +1803,16 @@ top.Fireinput = {
    },
 
    displayAjaxService: function (forceLoad) {
-      FireinputSpecialChar.load(forceLoad);
-      FireinputThemes.load(forceLoad);
-      FireinputEmotions.load(forceLoad);
-      FireinputHelp.load(forceLoad);
-      FireinputTable.load(forceLoad);
+      Fireinput.specialChar.load(forceLoad);
+      Fireinput.themes.load(forceLoad);
+      Fireinput.emotions.load(forceLoad);
+      Fireinput.help.load(forceLoad);
+      Fireinput.table.load(forceLoad);
    },
 
    insertSpecialCharAt: function (event, sourceType, insertMode) {
       var clickTarget = event.target;
-      // FireinputLog.debug(this, "value=" + clickTarget.value); 
+      // Fireinput.log.debug(this, "value=" + clickTarget.value); 
       var target = document.commandDispatcher.focusedElement;
       var documentTarget = false;
       if (target) {
@@ -1848,7 +1848,7 @@ top.Fireinput = {
          inputTarget.selectionEnd = target.selectionEnd;
       }
 
-      FireinputUtils.insertCharAtCaret(inputTarget, value, sourceType, insertMode);
+      Fireinput.util.insertCharAtCaret(inputTarget, value, sourceType, insertMode);
    },
 
    showConfig: function (module, param) {
@@ -1873,16 +1873,22 @@ top.Fireinput = {
    displayADString: function () {
       var ADString = "\n——————————————————————————\n";
       ADString += "火输中文输入法(Fireinput.com)";
-      FireinputUtils.insertCharAtCaret(this.myTarget, ADString);
+      Fireinput.util.insertCharAtCaret(this.myTarget, ADString);
    }
 
 
-};
+});
+
+// link getCurrentIME to Fireinput, so the component leve will be okay */
+Fireinput.getCurrentIME = function() {
+   return Fireinput.main.getCurrentIME(); 
+}
+
 
 // Create event listener.
-window.addEventListener('load', fireinput_onLoad, false);
-window.addEventListener('keydown', fireinput_onKeyDown, true);
-window.addEventListener('mousedown', fireinput_onMouseDown, true);
+window.addEventListener('load', Fireinput.main.initialize.bind(Fireinput.main), false);
+window.addEventListener('keydown', Fireinput.main.keyDownListener.bind(Fireinput.main), true);
+window.addEventListener('mousedown', Fireinput.main.mouseDownListener.bind(Fireinput.main), true);
 
 // Add a function to window object to return Fireinput object 
 /*
@@ -1893,32 +1899,8 @@ window.getFireinput=  function()
 */
 // event handlers 
 
-function fireinput_onLoad() {
-   Fireinput.initialize();
-}
-
-function fireinput_onKeyUp(event) {
-   Fireinput.keyUpListener(event);
-}
-
-function fireinput_onKeyDown(event) {
-   Fireinput.keyDownListener(event);
-}
-
-function fireinput_onKeyPress(event) {
-   Fireinput.keyPressListener(event);
-}
-
-function fireinput_onPopupShowing(event) {
-   Fireinput.fireinputContext(event);
-}
-
-function fireinput_onMouseDown(event) {
-   Fireinput.mouseDownListener(event);
-}
-
 // monitor page loads and switches 
 window.addEventListener("load", function (e) {
-   contextReader.init();
+   Fireinput.contextReader.init();
 }, false);
 

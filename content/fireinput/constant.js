@@ -34,88 +34,85 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-var EXPORTED_SYMBOLS = [
-   "SERVER_URL", "prefDomain", "LANGUAGE_EN", "LANGUAGE_ZH", 
-   "IME_SMART_PINYIN", "IME_WUBI", "IME_CANGJIE", "IME_ZHENGMA", 
-   "SMART_PINYIN", "ZIGUANG_SHUANGPIN", "MS_SHUANGPIN", "CHINESESTAR_SHUANGPIN", 
-   "SMARTABC_SHUANGPIN", "WUBI_86", "WUBI_98", "CANGJIE_5", 
-   "ZHENGMA", "KEY_FINAL", "KEY_INITIAL", "KEY_FULL", 
-   "KEY_SWING", "ENCODING_ZH", "ENCODING_BIG5", "ENCODING_EN", 
-   "IME_MODE_ZH", "IME_MODE_EN", "IMAGE_SOURCE_TYPE", "IMAGE_INSERT_BBCODE_URL", 
-   "IMAGE_INSERT_URL", "DATA_XML", "DATA_TEXT", "IME_BAR_BOTTOM", 
-   "IME_BAR_TOP", "PINYIN_WORD_LOOKUP", "PINYIN_PHRASE_LOOKUP", "FIREINPUT_IME_CHANGED", 
-   "FIREINPUT_TABLE_UPDATED", "PinyinInitials", "PinyinFinals"
-];  
+// this should be updated everytime a new release is ready 
+Fireinput.FIREINPUT_VERSION = "%FIREINPUT_VERSION%";
+
 
 // fireinput service url 
-const SERVER_URL = "http://www.fireinput.com/";
+Fireinput.SERVER_URL = "http://www.fireinput.com/";
 
 // Perference domain 
-const prefDomain = "extensions.fireinput";
+Fireinput.prefDomain = "extensions.fireinput";
 
 // Language 
-const LANGUAGE_EN   = ""; // don't have to specify; match properties file  
-const LANGUAGE_ZH   = "zh"; 
+Fireinput.LANGUAGE_EN   = ""; // don't have to specify; match properties file  
+Fireinput.LANGUAGE_ZH   = "zh"; 
 
 // IME 
-const IME_SMART_PINYIN = "Smart Pinyin"; 
-const IME_WUBI         = "Wubi"; 
-const IME_CANGJIE      = "Cangjie"
-const IME_ZHENGMA      = "Zhengma"
+Fireinput.IME_SMART_PINYIN = "Smart Pinyin"; 
+Fireinput.IME_WUBI         = "Wubi"; 
+Fireinput.IME_CANGJIE      = "Cangjie"
+Fireinput.IME_ZHENGMA      = "Zhengma"
 
 // Smart Pinyin Keyboard schema 
-const SMART_PINYIN          = "1"; 
-const ZIGUANG_SHUANGPIN     = "2"; 
-const MS_SHUANGPIN          = "3"; 
-const CHINESESTAR_SHUANGPIN = "4"; 
-const SMARTABC_SHUANGPIN    = "5"; 
-const WUBI_86               = "6"; 
-const WUBI_98               = "7"; 
-const CANGJIE_5             = "8";
-const ZHENGMA               = "9";
+Fireinput.SMART_PINYIN          = "1"; 
+Fireinput.ZIGUANG_SHUANGPIN     = "2"; 
+Fireinput.MS_SHUANGPIN          = "3"; 
+Fireinput.CHINESESTAR_SHUANGPIN = "4"; 
+Fireinput.SMARTABC_SHUANGPIN    = "5"; 
+Fireinput.WUBI_86               = "6"; 
+Fireinput.WUBI_98               = "7"; 
+Fireinput.CANGJIE_5             = "8";
+Fireinput.ZHENGMA               = "9";
 
 // Pinyin key type 
-const KEY_FINAL   = 1;
-const KEY_INITIAL = 2;
-const KEY_FULL    = 3;
-const KEY_SWING   = 4;
+Fireinput.KEY_FINAL   = 1;
+Fireinput.KEY_INITIAL = 2;
+Fireinput.KEY_FULL    = 3;
+Fireinput.KEY_SWING   = 4;
+
+// full/half mode 
+Fireinput.HALF_LETTER_MODE = 1;
+Fireinput.FULL_LETTER_MODE = 2;
+Fireinput.HALF_PUNCT_MODE = 3;
+Fireinput.FULL_PUNCT_MODE = 4;
 
 // encoding 
-const ENCODING_ZH   = "ZH";
-const ENCODING_BIG5 = "BIG5";
-const ENCODING_EN   = "EN";
+Fireinput.ENCODING_ZH   = "ZH";
+Fireinput.ENCODING_BIG5 = "BIG5";
+Fireinput.ENCODING_EN   = "EN";
 
 // IME mode 
-const IME_MODE_ZH   = "ZH";
-const IME_MODE_EN   = "EN";
+Fireinput.IME_MODE_ZH   = "ZH";
+Fireinput.IME_MODE_EN   = "EN";
 
 // insert source type 
-const IMAGE_SOURCE_TYPE = 1;
+Fireinput.IMAGE_SOURCE_TYPE = 1;
 
 // insert image mode 
-const IMAGE_INSERT_BBCODE_URL = 1; 
-const IMAGE_INSERT_URL        = 2; 
+Fireinput.IMAGE_INSERT_BBCODE_URL = 1; 
+Fireinput.IMAGE_INSERT_URL        = 2; 
 
 // Save data format 
-const DATA_XML		= 1; 
-const DATA_TEXT		= 2; 
+Fireinput.DATA_XML		= 1; 
+Fireinput.DATA_TEXT		= 2; 
 
 // IME bar position 
-const IME_BAR_BOTTOM   = "bottom";
-const IME_BAR_TOP   = "top";
+Fireinput.IME_BAR_BOTTOM   = "bottom";
+Fireinput.IME_BAR_TOP   = "top";
 
 // pinyin input table type 
-const PINYIN_WORD_LOOKUP = 1;
-const PINYIN_PHRASE_LOOKUP = 2;
+Fireinput.PINYIN_WORD_LOOKUP = 1;
+Fireinput.PINYIN_PHRASE_LOOKUP = 2;
 
 // fireinput event list 
-const FIREINPUT_IME_CHANGED = 1; 
-const FIREINPUT_TABLE_UPDATED = 2; 
+Fireinput.FIREINPUT_IME_CHANGED = 1; 
+Fireinput.FIREINPUT_TABLE_UPDATED = 2; 
 
-const PinyinInitials = [ "b", "c", "ch", "d", "f", "g", "h", "j", "k", "l", "m",
+Fireinput.PinyinInitials = [ "b", "c", "ch", "d", "f", "g", "h", "j", "k", "l", "m",
                           "n", "p","q", "r", "s", "sh", "t", "w", "x", "y", "z", "zh"];
 
-const PinyinFinals = ["a","ai", "an", "ang", "ao", "e", "ei", "en", "eng", "er",
+Fireinput.PinyinFinals = ["a","ai", "an", "ang", "ao", "e", "ei", "en", "eng", "er",
                        "i", "ia", "ian", "iang", "iao", "ie", "in", "ing", "io", "ion", "iong",
                        "iou", "iu", "o", "on", "ong", "ou", "u", "ua", "uai", "uan",
                        "uang", "ue", "uei", "uen", "ueng", "ui", "un", "uo", "v", "van",

@@ -35,9 +35,9 @@
  */
 
  
-var PinyinEncodingTable = function() { this.initialize(); }; 
+Fireinput.pinyinEncodingTable = function() { this.initialize(); }; 
 
-PinyinEncodingTable.prototype = extend(new FireinputIME(), 
+Fireinput.pinyinEncodingTable.prototype = Fireinput.extend(new Fireinput.imeEngine(), 
 {
     debug: 0, 
 
@@ -47,19 +47,19 @@ PinyinEncodingTable.prototype = extend(new FireinputIME(),
 
     initialize: function()
     {
-       var ios = FireinputXPC.getIOService(); 
+       var ios = Fireinput.util.xpc.getIOService(); 
        var path = this.getDataPath();
        var datafile = ios.newURI(path + this.getPinyinTransformFile(), null, null);
 
-       this.big5EncodingHash = new FireinputHash();
-       this.simpEncodingHash = new FireinputHash();
+       this.big5EncodingHash = new Fireinput.util.hash();
+       this.simpEncodingHash = new Fireinput.util.hash();
 
        var options = {
           caller: this,
           onavailable: this.getCodeLine
        };
 
-       FireinputStream.loadDataAsync(datafile, options);
+       Fireinput.stream.loadDataAsync(datafile, options);
     },
 
     getCodeLine: function(str)
@@ -69,8 +69,8 @@ PinyinEncodingTable.prototype = extend(new FireinputIME(),
        if(strArray.length < 2)
           return;
 
-       var str0 = FireinputUnicode.getUnicodeString(strArray[0]); 
-       var str1 = FireinputUnicode.getUnicodeString(strArray[1]); 
+       var str0 = Fireinput.util.unicode.getUnicodeString(strArray[0]); 
+       var str1 = Fireinput.util.unicode.getUnicodeString(strArray[1]); 
        
        this.simpEncodingHash.setItem(str0, str1);
        this.big5EncodingHash.setItem(str1, str0);
@@ -99,16 +99,16 @@ PinyinEncodingTable.prototype = extend(new FireinputIME(),
 
     validEncoding: function(charCode, encoding)
     {
-       charCode = FireinputUnicode.getUnicodeString(charCode); 
+       charCode = Fireinput.util.unicode.getUnicodeString(charCode); 
 
        switch(encoding)
        {
-          case ENCODING_ZH: 
+          case Fireinput.ENCODING_ZH: 
              return (this.simpEncodingHash.hasItem(charCode) || 
                 !this.big5EncodingHash.hasItem(charCode)); 
               
           break; 
-          case ENCODING_BIG5: 
+          case Fireinput.ENCODING_BIG5: 
              return (!this.simpEncodingHash.hasItem(charCode) || 
                 this.big5EncodingHash.hasItem(charCode)); 
           break; 
