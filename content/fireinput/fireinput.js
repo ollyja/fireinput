@@ -543,14 +543,14 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
 
          // update UI 
-         for (var i = Fireinput.main.imeInterfaceUI.length - 1; i >= 0; i--) {
-            var id = Fireinput.main.imeInterfaceUI[i].id;
+         for (var i = this.imeInterfaceUI.length - 1; i >= 0; i--) {
+            var id = this.imeInterfaceUI[i].id;
 
             var handle = document.getElementById(id);
             if (!handle) continue;
 
-            var strKey = Fireinput.main.imeInterfaceUI[i].strKey;
-            var attr = Fireinput.main.imeInterfaceUI[i].attribute;
+            var strKey = this.imeInterfaceUI[i].strKey;
+            var attr = this.imeInterfaceUI[i].attribute;
 
             var value = Fireinput.util.getLocaleString(strKey + defaultLanguage);
             // to check whether the shortcut keystring exists 
@@ -801,12 +801,12 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    },
 
    getModeString: function (mode) {
-      for (var i = Fireinput.main.imeInputModeValues.length - 1; i >= 0; i--) {
-         if (mode == Fireinput.main.imeInputModeValues[i].name) return Fireinput.main.imeInputModeValues[i].label;
+      for (var i = this.imeInputModeValues.length - 1; i >= 0; i--) {
+         if (mode == this.imeInputModeValues[i].name) return this.imeInputModeValues[i].label;
       }
 
       // otherwise return first one 
-      return Fireinput.main.imeInputModeValues[0].label;
+      return this.imeInputModeValues[0].label;
 
    },
 

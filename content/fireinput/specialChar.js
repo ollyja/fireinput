@@ -167,7 +167,7 @@ Fireinput.specialChar = Fireinput.extend(Fireinput.specialChar, {
           element.setAttribute("label", label);
           this.initialized = true;
 
-          this.addGroup(document.getElementById("fireinputSpecialCharMenuItems")); 
+          this.addGroup(); 
        }
     }, 
 

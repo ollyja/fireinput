@@ -119,7 +119,7 @@
 </toolbar> 
 
 <toolbox id="navigator-toolbox">
-   <toolbar id="fireinputIMEBar_top" hidden="true" align="center" fullscreentoolbar="true">
+   <toolbar id="fireinputIMEBar_top" name="Fireinput Chinese IME" hidden="true" align="center" fullscreentoolbar="true">
       <hbox id="fireinputOptionBox">
         <toolbarbutton id="fireinputMenu" tooltiptext="Fireinput menu">
             <menupopup id="fireinputMenuItems" position="after_pointer">
@@ -280,7 +280,7 @@
 
 
 <vbox id="appcontent">
-   <toolbar id="fireinputIMEBar_bottom" hidden="true" align="center" fullscreentoolbar="true">
+   <toolbar id="fireinputIMEBar_bottom" name="Fireinput Chinese IME" hidden="true" align="center" fullscreentoolbar="true">
       <hbox id="fireinputOptionBox">
         <toolbarbutton id="fireinputMenu" tooltiptext="Fireinput menu">
             <menupopup id="fireinputMenuItems" position="before_start">

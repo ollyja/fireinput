@@ -106,7 +106,7 @@ Fireinput.stream =
             if(func)
                func.call(caller);
        }
-       var observer = new StreamObserver(processCallback, completeCallback, Fireinput.DATA_TEXT);
+       var observer = new this.streamObserver(processCallback, completeCallback, Fireinput.DATA_TEXT);
        try {
          channel.asyncOpen(observer, null);
        }
@@ -136,7 +136,7 @@ Fireinput.stream =
             if(func)
                func.call(caller);
        }
-       var observer = new StreamObserver(processCallback, completeCallback, Fireinput.DATA_XML);
+       var observer = new this.streamObserver(processCallback, completeCallback, Fireinput.DATA_XML);
        channel.asyncOpen(observer, null);
     },
 
@@ -161,7 +161,7 @@ Fireinput.stream =
 
 // ************************************************************************************************
 
-function StreamObserver(processCB, completeCB, dataType)
+Fireinput.stream.streamObserver = function(processCB, completeCB, dataType)
 {
     this.processCB = processCB; 
     this.completeCB = completeCB; 
@@ -169,7 +169,7 @@ function StreamObserver(processCB, completeCB, dataType)
     this.data = [];
 }   
 
-StreamObserver.prototype =
+Fireinput.stream.streamObserver.prototype =
 {
     onStartRequest: function(request, context)
     {

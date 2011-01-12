@@ -152,7 +152,7 @@ textbox.keyinputbox {
   background-color: white; 
 }
 
-#inputMethod, #fireinputMenu, #fireinputSpecialCharMenu,#fireinputEmotionMenu {
+#fireinputInputMethod, #fireinputMenu, #fireinputSpecialCharMenu,#fireinputEmotionMenu {
     -moz-binding: url("chrome://fireinput/content/bindings.xml#buttonmenu");
 }
 
