@@ -190,7 +190,7 @@ Fireinput.main.imeInputModeValues = [{
 
 Fireinput.main = Fireinput.extend(Fireinput.main, {
    // debug: 0 disable, non-zero enable 
-   debug: 0,
+   debug: 1,
    // Fireinput statusbar status 
    myRunStatus: false,
    // IME mode. False for english mode, otherwise it's IME mode 
@@ -618,12 +618,19 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       id.hidden = toggleOff;
       this.myRunStatus = !toggleOff;
 
+      /* record a binding reference so we can remove it later */
+      if(!Fireinput.main.keyPressListenerBinding) {
+         Fireinput.main.keyPressListenerBinding = Fireinput.main.keyPressListener.bind(Fireinput.main); 
+         Fireinput.main.keyUpListenerBinding = Fireinput.main.keyUpListener.bind(Fireinput.main); 
+      }
+
       if (!toggleOff) {
          this.loadIMEPrefByID("fireinputStatusBar", "fireinput.statusbar.tooltip.close", "tooltiptext");
 
-         window.addEventListener('keypress', this.keyPressListener.bind(this), true);
+
+         window.addEventListener('keypress', Fireinput.main.keyPressListenerBinding, true);
          //	  window.addEventListener('keydown', this.keyDownListener.bind(this), true);
-         window.addEventListener('keyup', this.keyUpListener.bind(this), true);
+         window.addEventListener('keyup', Fireinput.main.keyUpListenerBinding, true);
          this.myInputStatus = true;
          this.setInputMode(Fireinput.pref.getDefault("defaultInputEncoding"));
          this.displayAjaxService(forceLoad == undefined ? false : forceLoad);
@@ -636,9 +643,9 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          this.resetIME();
 
          this.loadIMEPrefByID("fireinputStatusBar", "fireinput.statusbar.tooltip.open", "tooltiptext");
-         window.removeEventListener('keypress', this.keyPressListener.bind(this), true);
+         window.removeEventListener('keypress', Fireinput.main.keyPressListenerBinding, true);
          //          window.removeEventListener('keydown', this.keyDownListener.bind(this), true);
-         window.removeEventListener('keyup', this.keyUpListener.bind(this), true);
+         window.removeEventListener('keyup', Fireinput.main.keyUpListenerBinding, true);
       }
    },
 
