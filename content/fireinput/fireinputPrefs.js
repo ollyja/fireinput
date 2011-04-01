@@ -249,9 +249,9 @@ Fireinput.pref.save = function(menuitem, ovalue) {
           var value = menuitem.getAttribute("value");
           try 
           {
-             Fireinput.pref.setPref(option,"STRING", value); 
+             Fireinput.util.pref.setPref(option,"STRING", value); 
           }
-          catch(e) {}; 
+          catch(e) {alert(e);}; 
        }
 
        if(type == "checkbox")

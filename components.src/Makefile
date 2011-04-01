@@ -1,5 +1,5 @@
-IDLC=/usr/lib/xulrunner-1.9.1/xpidl
-INC=/usr/share/idl/xulrunner-sdk-1.9.1/stable
+IDLC=/usr/lib/xulrunner-1.9.2/xpidl
+INC=/usr/share/idl/xulrunner-sdk-1.9.2/
 XPTS=nsIFireinput.xpt
 
 all: $(XPTS)
