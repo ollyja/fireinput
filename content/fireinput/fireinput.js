@@ -245,7 +245,6 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       Fireinput.util.pref.addObserver(this, false);
       this.registerFireinputObserver();
 
-
       // register event listener to trigger when context menu is invoked.
       try {
          document.getElementById('contentAreaContextMenu').addEventListener('popupshowing', this.fireinputContext.bind(this), false);
@@ -1889,25 +1888,22 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
 // link getCurrentIME to Fireinput, so the component leve will be okay */
 Fireinput.getCurrentIME = function() {
    return Fireinput.main.getCurrentIME(); 
-}
-
-
-// Create event listener.
-window.addEventListener('load', Fireinput.main.initialize.bind(Fireinput.main), false);
-window.addEventListener('keydown', Fireinput.main.keyDownListener.bind(Fireinput.main), true);
-window.addEventListener('mousedown', Fireinput.main.mouseDownListener.bind(Fireinput.main), true);
-
-// Add a function to window object to return Fireinput object 
-/*
-window.getFireinput=  function()
-{
-  return this.Fireinput; 
 }; 
-*/
-// event handlers 
 
-// monitor page loads and switches 
+window.setTimeout(function() {
+   // Create event listener.
+   window.addEventListener('keydown', Fireinput.main.keyDownListener.bind(Fireinput.main), true);
+   window.addEventListener('mousedown', Fireinput.main.mouseDownListener.bind(Fireinput.main), true);
+
+}, 5000); 
+
+// init Fireinput and monitor page loads and switches 
 window.addEventListener("load", function (e) {
-   Fireinput.contextReader.init();
+   // delay load to have better performance 
+   window.setTimeout(function() {
+      Fireinput.main.initialize(); 
+      Fireinput.contextReader.init();
+   }, 5000); 
+
 }, false);
 

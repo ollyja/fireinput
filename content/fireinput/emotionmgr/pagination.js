@@ -44,7 +44,7 @@ Fireinput.pagination = {
        this.totalPages = parseInt(this.pageinfo.page.length / this.numPerPage) + mod; 
        this.paginateId = paginateId; 
        var initialpage = (pageinfo.selectedpage<this.totalPages)? pageinfo.selectedpage : 0; 
-       this.buildFireinput.pagination(initialpage)
+       this.buildPagination(initialpage)
        this.selectPage(initialpage)
      
     }, 
@@ -95,7 +95,7 @@ Fireinput.pagination = {
        this.selectRemotePage(selectedPage - this.startPage);
     }, 
 
-    buildFireinput.pagination: function(selectedpage)
+    buildPagination: function(selectedpage)
     {
        if (!this.pageinfo || this.pageinfo.page.length <= 0)
           var paginateHTML="" 
