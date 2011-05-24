@@ -108,18 +108,12 @@
 
 <toolbarpalette id="BrowserToolbarPalette">
       <toolbarbutton id="fireinput-toolbarbutton" label="Fireinput(火输)"
-                     class="chromeclass-toolbar-additional"
+                     class="toolbarbutton-1 chromeclass-toolbar-additional"
                      oncommand="Fireinput.main.toggleFireinput()" tooltiptext="Fireinput Chinese IME For Firefox"/>
 </toolbarpalette>
 
-<toolbar id="TabsToolbar">
-      <toolbarbutton id="fireinput-toolbarbutton" label="Fireinput(火输)"
-                     class="toolbarbutton-1 chromeclass-toolbar-additional" insertafter="alltabs-button"
-                     oncommand="Fireinput.main.toggleFireinput()" tooltiptext="Fireinput Chinese IME For Firefox"/>
-</toolbar> 
-
 <toolbox id="navigator-toolbox">
-   <toolbar id="fireinputIMEBar_top" name="Fireinput Chinese IME" hidden="true" align="center" fullscreentoolbar="true">
+   <toolbar id="fireinputIMEBar_top" toolbarname="Fireinput Chinese IME" hidden="true" checked="true" align="center" fullscreentoolbar="true">
       <hbox id="fireinputOptionBox">
         <toolbarbutton id="fireinputMenu" tooltiptext="Fireinput menu">
             <menupopup id="fireinputMenuItems" position="after_pointer">
@@ -280,7 +274,7 @@
 
 
 <vbox id="appcontent">
-   <toolbar id="fireinputIMEBar_bottom" name="Fireinput Chinese IME" hidden="true" align="center" fullscreentoolbar="true">
+   <toolbar id="fireinputIMEBar_bottom" toolbarname="Fireinput Chinese IME" hidden="true" checked="true" align="center" fullscreentoolbar="true">
       <hbox id="fireinputOptionBox">
         <toolbarbutton id="fireinputMenu" tooltiptext="Fireinput menu">
             <menupopup id="fireinputMenuItems" position="before_start">
@@ -419,8 +413,8 @@
  
         <toolbarseparator collapsed="false" style="margin-left:5px; margin-right: 5px"/> 
         <label id="fireinputSearchButton" value="" onclick="Fireinput.webSearch.searchWeb()"/>
+
         <textbox id="fireinputSearchbox" class="fireinputSearchbox"
-                     onfocus="Fireinput.webSearch.searchboxOnFocus(event)" 
                      onkeypress="Fireinput.webSearch.goSearchbox(event)"/>
         <toolbarseparator collapsed="false" style="margin-left:5px"/> 
         <toolbarbutton id="fireinputIMEBarCloseButton" class="toolbarbutton-icon" tooltiptext="" oncommand="Fireinput.main.toggleFireinput();"/>

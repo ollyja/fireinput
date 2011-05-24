@@ -6,7 +6,7 @@ statusbarpanel#fireinputStatusBar {
   cursor: pointer; 
 }
 
-#fireinput-toolbarbutton {
+#fireinput-toolbarbutton, #fireinput-tabtoolbarbutton{
   list-style-image: url("chrome://fireinput/skin/fireinput.png");
 }
 
@@ -15,4 +15,5 @@ toolbar[iconsize="small"] #fireinput-toolbarbutton > .toolbarbutton-icon {
   width: 18px;
   height: 18px;
 }
+
 

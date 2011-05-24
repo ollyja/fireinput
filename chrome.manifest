@@ -5,6 +5,7 @@ skin    fireinput-os classic  skin/classic/linux/ os=Linux
 skin    fireinput-os classic  skin/classic/win/ os=WINNT
 skin    fireinput-os classic  skin/classic/mac/ os=Darwin
 overlay chrome://browser/content/browser.xul chrome://fireinput/content/browserOverlay.xul
+style   chrome://global/content/customizeToolbar.xul chrome://fireinput/content/browserOverlay.css
 locale  fireinput en-US locale/en-US/
 component {b3d34bb1-405f-485d-a11b-39d90de735b4} components/fireinputService.js
 contract @fireinput.com/fireinput;1 {b3d34bb1-405f-485d-a11b-39d90de735b4}

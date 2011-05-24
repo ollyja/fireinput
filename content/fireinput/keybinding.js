@@ -272,18 +272,18 @@ Fireinput.keyBinding = Fireinput.extend(Fireinput.keyBinding,
           var commands = keyAction.command.split(".");
           if(commands && commands.length >= 2)
           {
-             var func = window; 
+             var myfunc = window; 
              for(var i =0; i<commands.length; i++) {
-               var o  = func[commands[i]] || {}; 
+               var o  = myfunc[commands[i]] || {}; 
                if(typeof(o) == 'function') {
-                  func = o.bind(func); 
+                  myfunc = o.bind(myfunc); 
                }
                else {
-                  func = o; 
+                  myfunc = o; 
                }
 
              }
-             func.call(window, event); 
+             myfunc.call(window, event); 
           }
           else if(commands)
           {

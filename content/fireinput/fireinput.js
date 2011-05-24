@@ -1890,12 +1890,9 @@ Fireinput.getCurrentIME = function() {
    return Fireinput.main.getCurrentIME(); 
 }; 
 
-window.setTimeout(function() {
-   // Create event listener.
-   window.addEventListener('keydown', Fireinput.main.keyDownListener.bind(Fireinput.main), true);
-   window.addEventListener('mousedown', Fireinput.main.mouseDownListener.bind(Fireinput.main), true);
-
-}, 5000); 
+// Create event listener.
+window.addEventListener('keydown', Fireinput.main.keyDownListener.bind(Fireinput.main), true);
+window.addEventListener('mousedown', Fireinput.main.mouseDownListener.bind(Fireinput.main), true);
 
 // init Fireinput and monitor page loads and switches 
 window.addEventListener("load", function (e) {
