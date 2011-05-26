@@ -265,6 +265,31 @@ Fireinput.table = Fireinput.extend(Fireinput.table, {
        // update lastTableUpdate time and re-schedule checking 
        Fireinput.pref.save('lastTableUpdate', current.toString());
        this.checkTableUpdate(); 
+    },
+
+    addWordToServer: function(inputword, inputkey, imetype)
+    {
+       /* we only update if imetype is pinyin and schema is pinyin */
+       if(imetype != Fireinput.SMART_PINYIN)
+         return; 
+
+       var params = "inputword="+encodeURIComponent(inputword) + "&inputkey="+encodeURIComponent(inputkey) + "&imetype=" + imetype;
+       params += "&name=" + encodeURIComponent("火输拼音") + "&email=" + encodeURIComponent("fireinput@fireinput.com");
+       params += "&takeone=1";
+
+       var url = "/table/addnew.php";
+       var ajax = new Fireinput.util.ajax();
+       var self = this;
+       ajax.setOptions(
+        {
+          method: 'post',
+          postBody: params,
+          contentType: 'application/x-www-form-urlencoded',
+          onSuccess: function(p) { alert('okay:' + p.responseText);},
+          onFailure: function(p) {alert('fail:' + p.responseText); },
+        });
+
+       ajax.request(Fireinput.SERVER_URL + url);
     }
    
 }); 

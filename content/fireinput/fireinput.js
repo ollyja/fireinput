@@ -1900,7 +1900,7 @@ window.addEventListener("load", function (e) {
    window.setTimeout(function() {
       Fireinput.main.initialize(); 
       Fireinput.contextReader.init();
-   }, 5000); 
+   }, 1000); 
 
 }, false);
 

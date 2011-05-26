@@ -476,7 +476,7 @@ Fireinput.imePanel =
           if(composeWord.key.length <= 0 && key.length <= 0 && !outputAll)
           {
              var id = document.getElementById("fireinputIMEContainer");
-	     id.hidePopup(); 
+             id.hidePopup(); 
              return; 
           }
 
@@ -487,7 +487,7 @@ Fireinput.imePanel =
           if(hideInput)
           {
              var id = document.getElementById("fireinputIMEContainer");
-	     id.hidePopup(); 
+             id.hidePopup(); 
              // also clear off the input bar 
              var idf = document.getElementById("fireinputField");
              idf.value = ""; 
@@ -518,6 +518,13 @@ Fireinput.imePanel =
              newPhraseArray.push({key: composeWord.key + " " + key, word: composeWord.word + word}); 
              //Fireinput.log.debug(this, "newPhraseArray: " + composeWord.key + " " + key + ", word: " +  composeWord.word + word); 
              Fireinput.main.getCurrentIME().storeUserPhrase(newPhraseArray); 
+             //This is new word. Update to server 
+             if(Fireinput.pref.getDefault("enableWordSharing")) {
+               var w = Fireinput.util.unicode.getUnicodeString((composeWord.word + word).replace(/\d+/g, ""));
+               Fireinput.table.addWordToServer(w, composeWord.key + " " + key, 
+                                               Fireinput.pref.getDefault("defaultInputMethod"));
+
+             }
           }
           else if(this.myUpdateFreq && ufreq)
              Fireinput.main.getCurrentIME().updateFrequency(word, key);
