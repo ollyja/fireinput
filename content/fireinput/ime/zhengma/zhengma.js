@@ -116,7 +116,7 @@ Fireinput.zhengmaEngine.prototype =  Fireinput.extend(new Fireinput.imeEngine(),
        var str = ""; 
        for(var i=0; i<length; i++)
        {
-          str += "z"; 
+          str += "/"; 
        }
        return str; 
     }, 
@@ -146,7 +146,7 @@ Fireinput.zhengmaEngine.prototype =  Fireinput.extend(new Fireinput.imeEngine(),
           this.keyZhengmaHash.setItem(key,strArray.join(","));
 
        // build key map table in a format as: 
-       // a => { "z" => array(), "zz" => array(), "zzz"=> array(), "zzzz"=> array()}
+       // a => { "/" => array(), "//" => array(), "///"=> array(), "////"=> array()}
        
        var initialChar = key.substring(0,1);
        if(this.keyMapTable.hasItem(initialChar))
@@ -359,7 +359,7 @@ Fireinput.zhengmaEngine.prototype =  Fireinput.extend(new Fireinput.imeEngine(),
 
     getAllowedInputKey: function()
     {
-       return "abcdefghijklmnopqrstuvwxyz"; 
+       return "abcdefghijklmnopqrstuvwxyz/"; 
     },
 
     setEncoding: function(encoding)
@@ -489,7 +489,7 @@ Fireinput.zhengmaEngine.prototype =  Fireinput.extend(new Fireinput.imeEngine(),
     getValidWord: function(key)
     {
        Fireinput.log.debug(this,"key: " + key);
-       if(key.indexOf('z') <= 0)
+       if(key.indexOf('/') <= 0)
        {
           return this.getValidWordWithKey(key); 
        }
@@ -508,7 +508,7 @@ Fireinput.zhengmaEngine.prototype =  Fireinput.extend(new Fireinput.imeEngine(),
        var regexpStr = key.replace(/z/g, "\\S"); 
        var validWord = new Array(); 
 
-       // let check whether there are "z"s
+       // let check whether there are "/"s
        for(var i=0; i<keyList.length; i++)
        {
           if(new RegExp(regexpStr).test(keyList[i]))
@@ -532,7 +532,7 @@ Fireinput.zhengmaEngine.prototype =  Fireinput.extend(new Fireinput.imeEngine(),
        if(!this.keyZhengmaHash.hasItem(key))
        {
           // if first key is z, try zmode 
-          if(key.substr(0, 1) == 'z')
+          if(key.substr(0, 1) == '/')
           {
              return Fireinput.specialChar.getZMode(key);
           }
@@ -595,7 +595,7 @@ Fireinput.zhengmaEngine.prototype =  Fireinput.extend(new Fireinput.imeEngine(),
 
        // append zmode list 
        // if first key is z, try zmode 
-       if(key.substr(0, 1) == 'z')
+       if(key.substr(0, 1) == '/')
        {
           var zArray =  Fireinput.specialChar.getZMode(key);
           if(zArray)

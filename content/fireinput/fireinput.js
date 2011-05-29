@@ -216,29 +216,25 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    // save user typing history 
    mySaveHistory: true,
 
-   // half/full letter mode 
-   myHalfMode: 0,
-
-   // half/full letter mode 
-   myPunctMode: 0,
-
    // allow Input Keys
    myAllowInputKey: "",
 
    // IME Schema 
    myIMESchema: Fireinput.SMART_PINYIN,
 
-   // long table 
-   myLongTable: null,
-
    // removed ime panel - used to position switch 
-   myRemovedFireinputPanel: null,
+   myRemovedFireinputPanel: [],
 
    // a list of enabled IME 
    myEnabledIME: [],
 
    // event dispatch mode. 
    myEventDispatch: false, 
+
+   //per tab setting 
+   mySettingTabs: [], 
+   //tab event added 
+   myTabIMEPanelEventStatus: false, 
 
    // fireinput init function. 
    initialize: function () {
@@ -301,6 +297,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    // already. Only if not, we create myIME in current window using getDefaultIME()
    getIME: function () {
       var gs = Fireinput.util.xpc.getService("@fireinput.com/fireinput;1", "nsIFireinput");
+
       var fi = gs.getChromeWindow() ? gs.getChromeWindow().getFireinput() : null;
 
       if (!fi) {
@@ -362,150 +359,154 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       supportIMEList = supportIMEList ? supportIMEList.split(",") : [];
       hideIMEList = hideIMEList.split(",");
 
+      var doc = Fireinput.util.getDocument(); 
+      if(!doc)
+         return; 
+
       // hide autoInsert first. AutoInsert is only for Wubi or Canjie(not sure)
-      var autoInsertHandle = document.getElementById("fireinputAutoInsert");
+      var autoInsertHandle = Fireinput.util.getElementById(doc, "menuitem", "fireinputAutoInsert");
       autoInsertHandle.style.display = "none";
 
       // check for hidden IME list 
       if (!Fireinput.inArray(supportIMEList, Fireinput.ZHENGMA) || Fireinput.inArray(hideIMEList, Fireinput.ZHENGMA)) {
-         var handle = document.getElementById("menuZhengma");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuZhengma");
          if (handle) handle.style.display = "none";
-         var handle = document.getElementById("imeZhengma");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imeZhengma");
          if (handle) handle.style.display = "none";
       }
       else {
          this.myEnabledIME.push(Fireinput.ZHENGMA);
-         var handle = document.getElementById("menuZhengma");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuZhengma");
          if (handle) handle.style.display = "";
-         var handle = document.getElementById("imeZhengma");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imeZhengma");
          if (handle) handle.style.display = "";
          autoInsertHandle.style.display = "";
       }
 
       if (!Fireinput.inArray(supportIMEList, Fireinput.WUBI_86) || Fireinput.inArray(hideIMEList, Fireinput.WUBI_86)) {
-         var handle = document.getElementById("menuWubi86");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuWubi86");
          if (handle) handle.style.display = "none";
-         var handle = document.getElementById("imeWubi86");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imeWubi86");
          if (handle) handle.style.display = "none";
       }
       else {
          this.myEnabledIME.push(Fireinput.WUBI_86);
-         var handle = document.getElementById("menuWubi86");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuWubi86");
          if (handle) handle.style.display = "";
-         var handle = document.getElementById("imeWubi86");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imeWubi86");
          if (handle) handle.style.display = "";
          autoInsertHandle.style.display = "";
       }
 
       if (!Fireinput.inArray(supportIMEList, Fireinput.WUBI_98) || Fireinput.inArray(hideIMEList, Fireinput.WUBI_98)) {
-         var handle = document.getElementById("menuWubi98");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuWubi98");
          if (handle) handle.style.display = "none";
-         var handle = document.getElementById("imeWubi98");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imeWubi98");
          if (handle) handle.style.display = "none";
 
       }
       else {
          this.myEnabledIME.push(Fireinput.WUBI_98);
-         var handle = document.getElementById("menuWubi98");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuWubi98");
          if (handle) handle.style.display = "";
-         var handle = document.getElementById("imeWubi98");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imeWubi98");
          if (handle) handle.style.display = "";
 
          autoInsertHandle.style.display = "";
       }
       if (!Fireinput.inArray(supportIMEList, Fireinput.CANGJIE_5) || Fireinput.inArray(hideIMEList, Fireinput.CANGJIE_5)) {
-         var handle = document.getElementById("menuCangjie5");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuCangjie5");
          if (handle) handle.style.display = "none";
-         var handle = document.getElementById("imeCangjie5");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imeCangjie5");
          if (handle) handle.style.display = "none";
       }
       else {
          this.myEnabledIME.push(Fireinput.CANGJIE_5);
-         var handle = document.getElementById("menuCangjie5");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuCangjie5");
          if (handle) handle.style.display = "";
-         var handle = document.getElementById("imeCangjie5");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imeCangjie5");
          if (handle) handle.style.display = "";
 
          autoInsertHandle.style.display = "";
       }
 
       if (!Fireinput.inArray(supportIMEList, Fireinput.SMART_PINYIN)) {
-         var handle = document.getElementById("fireinputAMB");
+         var handle = Fireinput.util.getElementById(doc, "menu", "fireinputAMB");
          if (handle) handle.style.display = "none";
       }
       else {
-         var handle = document.getElementById("fireinputAMB");
+         var handle = Fireinput.util.getElementById(doc, "menu", "fireinputAMB");
          if (handle) handle.style.display = "";
       }
 
       if (!Fireinput.inArray(supportIMEList, Fireinput.SMART_PINYIN) || Fireinput.inArray(hideIMEList, Fireinput.SMART_PINYIN)) {
-         var handle = document.getElementById("menuPinyinQuan");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuPinyinQuan");
          if (handle) handle.style.display = "none";
-         var handle = document.getElementById("imePinyinQuan");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imePinyinQuan");
          if (handle) handle.style.display = "none";
       }
       else {
          this.myEnabledIME.push(Fireinput.SMART_PINYIN);
-         var handle = document.getElementById("menuPinyinQuan");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuPinyinQuan");
          if (handle) handle.style.display = "";
-         var handle = document.getElementById("imePinyinQuan");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imePinyinQuan");
          if (handle) handle.style.display = "";
 
       }
 
       if (!Fireinput.inArray(supportIMEList, Fireinput.ZIGUANG_SHUANGPIN) || Fireinput.inArray(hideIMEList, Fireinput.ZIGUANG_SHUANGPIN)) {
-         var handle = document.getElementById("menuPinyinShuangZiGuang");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuPinyinShuangZiGuang");
          if (handle) handle.style.display = "none";
-         var handle = document.getElementById("imePinyinShuangZiGuang");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imePinyinShuangZiGuang");
          if (handle) handle.style.display = "none";
       }
       else {
          this.myEnabledIME.push(Fireinput.ZIGUANG_SHUANGPIN);
-         var handle = document.getElementById("menuPinyinShuangZiGuang");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuPinyinShuangZiGuang");
          if (handle) handle.style.display = "";
-         var handle = document.getElementById("imePinyinShuangZiGuang");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imePinyinShuangZiGuang");
          if (handle) handle.style.display = "";
       }
 
       if (!Fireinput.inArray(supportIMEList, Fireinput.MS_SHUANGPIN) || Fireinput.inArray(hideIMEList, Fireinput.MS_SHUANGPIN)) {
-         var handle = document.getElementById("menuPinyinShuangMS");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuPinyinShuangMS");
          if (handle) handle.style.display = "none";
-         var handle = document.getElementById("imePinyinShuangMS");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imePinyinShuangMS");
          if (handle) handle.style.display = "none";
       }
       else {
          this.myEnabledIME.push(Fireinput.MS_SHUANGPIN);
-         var handle = document.getElementById("menuPinyinShuangMS");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuPinyinShuangMS");
          if (handle) handle.style.display = "";
-         var handle = document.getElementById("imePinyinShuangMS");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imePinyinShuangMS");
          if (handle) handle.style.display = "";
       }
 
       if (!Fireinput.inArray(supportIMEList, Fireinput.CHINESESTAR_SHUANGPIN) || Fireinput.inArray(hideIMEList, Fireinput.CHINESESTAR_SHUANGPIN)) {
-         var handle = document.getElementById("menuPinyinShuangChineseStar");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuPinyinShuangChineseStar");
          if (handle) handle.style.display = "none";
-         var handle = document.getElementById("imePinyinShuangChineseStar");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imePinyinShuangChineseStar");
          if (handle) handle.style.display = "none";
       }
       else {
          this.myEnabledIME.push(Fireinput.CHINESESTAR_SHUANGPIN);
-         var handle = document.getElementById("menuPinyinShuangChineseStar");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuPinyinShuangChineseStar");
          if (handle) handle.style.display = "";
-         var handle = document.getElementById("imePinyinShuangChineseStar");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imePinyinShuangChineseStar");
          if (handle) handle.style.display = "";
       }
 
       if (!Fireinput.inArray(supportIMEList, Fireinput.SMARTABC_SHUANGPIN) || Fireinput.inArray(hideIMEList, Fireinput.SMARTABC_SHUANGPIN)) {
-         var handle = document.getElementById("menuPinyinShuangSmartABC");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuPinyinShuangSmartABC");
          if (handle) handle.style.display = "none";
-         var handle = document.getElementById("imePinyinShuangSmartABC");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imePinyinShuangSmartABC");
          if (handle) handle.style.display = "none";
       }
       else {
          this.myEnabledIME.push(Fireinput.SMARTABC_SHUANGPIN);
-         var handle = document.getElementById("menuPinyinShuangSmartABC");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "menuPinyinShuangSmartABC");
          if (handle) handle.style.display = "";
-         var handle = document.getElementById("imePinyinShuangSmartABC");
+         var handle = Fireinput.util.getElementById(doc, "menuitem", "imePinyinShuangSmartABC");
          if (handle) handle.style.display = "";
       }
    },
@@ -536,16 +537,48 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       handle.setAttribute(attribute, value);
    },
 
+   loadIMEPanelPrefByID: function (id, strKey, attribute) {
+      var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
+      var value = Fireinput.util.getLocaleString(strKey + defaultLanguage);
+      var doc =  Fireinput.util.getDocument(); 
+      if(!doc)
+         return; 
+
+      var handle = Fireinput.util.getElementById(doc, "*", id); 
+      if (!handle) return;
+
+      // to check whether the shortcut keystring exists 
+      var found = value.match(/%(.+)%/i);
+      if (found) {
+         var keystring = Fireinput.keyBinding.getKeyString(found[1]);
+         value = value.replace(found[0], keystring);
+      }
+
+      handle.setAttribute(attribute, value);
+   }, 
+
    loadIMEPref: function (name) {
+
+
+      /* toggle before any proceeding to avoid id duplication */
+      if (name && name == 'IMEBarPosition') {
+         this.toggleIMEBarPosition();
+      }
+
+      var doc = Fireinput.util.getDocument(); 
+      if(!doc)
+         return; 
+
       // get default language first 
       if (!name || name == "interfaceLanguage") {
          var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
 
+      
          // update UI 
          for (var i = this.imeInterfaceUI.length - 1; i >= 0; i--) {
             var id = this.imeInterfaceUI[i].id;
 
-            var handle = document.getElementById(id);
+            var handle = Fireinput.util.getElementById(doc, "*", id);
             if (!handle) continue;
 
             var strKey = this.imeInterfaceUI[i].strKey;
@@ -576,7 +609,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
             Fireinput.pref.init();
          }
 
-         this.loadIMEPrefByID("fireinputToggleIMEButton", "fireinput.method.chinese.value", "label");
+         this.loadIMEPanelPrefByID("fireinputToggleIMEButton", "fireinput.method.chinese.value", "label");
       }
 
       //update value. The label of menu should be updated if language is changed  
@@ -584,9 +617,12 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          var value = this.myIMESchema;
          if (name == "defaultInputMethod") value = Fireinput.pref.getDefault("defaultInputMethod");
 
-         var element = document.getElementById("fireinputInputMethod");
-         element.setAttribute("label", Fireinput.util.getIMENameString(value));
-         element.setAttribute("value", value);
+         
+         var element = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputInputMethod"); 
+         if(element) {
+            element.setAttribute("label", Fireinput.util.getIMENameString(value));
+            element.setAttribute("value", value);
+         }
 
          // only toggle input method if the setting has been updated 
          if (name == "defaultInputMethod") this.toggleInputMethod();
@@ -596,9 +632,6 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          this.mySaveHistory = Fireinput.pref.getDefault("saveHistory");
       }
 
-      if (name && name == 'IMEBarPosition') {
-         this.toggleIMEBarPosition();
-      }
 
       if (!name || name == "wordselectionNum") {
          // we don't have do this when defaultIME is created as it will be initialized here anyway 
@@ -612,29 +645,87 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
 
    toggleFireinput: function (forceOpen, forceLoad) {
       var pos = Fireinput.pref.getDefault("IMEBarPosition");
-      var id = document.getElementById("fireinputIMEBar_" + pos);
-      var toggleOff = forceOpen == undefined ? !id.hidden : !forceOpen;
-      id.hidden = toggleOff;
-      this.myRunStatus = !toggleOff;
+
+      var toggleOff =  false; 
+      if(pos == Fireinput.IME_BAR_FLOATING) {
+         var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
+         var imePanel = document.getElementById("fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabIndex); 
+
+         if(imePanel && !imePanel.hidden) {
+            imePanel.hidden = true; 
+            this.updateIMETabSetting("inputstatus", false); 
+            this.updateIMETabSetting("runstatus", false); 
+            this.myInputStatus = false; 
+            this.myRunStatus = false; 
+         }
+         else {
+
+            /* show panel */
+            var newBar = this.showFloatingIMEBar(); 
+            if(newBar) {
+               /* reset old setting */
+               this.mySettingTabs[tabIndex] = [];
+
+               /* reload all other modules */
+               this.toggleIMEMenu();
+               this.loadIMEPref();
+               // initialize Pref interfaces 
+               Fireinput.pref.init();
+
+               this.setLetterMode(); 
+               this.setPunctMode(); 
+               this.displayAjaxService(true);
+            }
+
+            this.setInputMode(Fireinput.pref.getDefault("defaultInputEncoding"));
+            this.myInputStatus = this.myIMEMode != Fireinput.IME_MODE_EN; 
+            this.updateIMETabSetting("inputstatus", this.myInputStatus); 
+            this.updateIMETabSetting("runstatus", true); 
+            this.myRunStatus = true; 
+         }
+
+      }
+      else {
+         var id = document.getElementById("fireinputIMEBar_" + pos);
+         var toggleOff = forceOpen == undefined ? !id.hidden : !forceOpen;
+         id.hidden = toggleOff;
+      }
 
       /* record a binding reference so we can remove it later */
       if(!Fireinput.main.keyPressListenerBinding) {
          Fireinput.main.keyPressListenerBinding = Fireinput.main.keyPressListener.bind(Fireinput.main); 
          Fireinput.main.keyUpListenerBinding = Fireinput.main.keyUpListener.bind(Fireinput.main); 
+         Fireinput.main.tabSelectListenerBinding = Fireinput.main.tabSelectListener.bind(Fireinput.main); 
       }
 
-      if (!toggleOff) {
+      if(pos == Fireinput.IME_BAR_FLOATING ) {
+         /* we only add event once for floating ime panel */
+         if(this.myTabIMEPanelEventStatus == false) {
+            this.loadIMEPrefByID("fireinputStatusBar", "fireinput.statusbar.tooltip.close", "tooltiptext");
+            window.addEventListener('keypress', Fireinput.main.keyPressListenerBinding, true);
+            //	  window.addEventListener('keydown', this.keyDownListener.bind(this), true);
+            window.addEventListener('keyup', Fireinput.main.keyUpListenerBinding, true);
+
+            // monitor tab select 
+            gBrowser.tabContainer.addEventListener("TabSelect", Fireinput.main.tabSelectListenerBinding, true);
+            this.myTabIMEPanelEventStatus = true; 
+         }
+
+         return; 
+      }
+      else  if (!toggleOff) {
+         this.myRunStatus = !toggleOff;
          this.loadIMEPrefByID("fireinputStatusBar", "fireinput.statusbar.tooltip.close", "tooltiptext");
-
-
          window.addEventListener('keypress', Fireinput.main.keyPressListenerBinding, true);
          //	  window.addEventListener('keydown', this.keyDownListener.bind(this), true);
          window.addEventListener('keyup', Fireinput.main.keyUpListenerBinding, true);
+         gBrowser.tabContainer.addEventListener("TabSelect", Fireinput.main.tabSelectListenerBinding, true);
          this.myInputStatus = true;
          this.setInputMode(Fireinput.pref.getDefault("defaultInputEncoding"));
          this.displayAjaxService(forceLoad == undefined ? false : forceLoad);
       }
       else {
+         this.myRunStatus = !toggleOff;
          // close the IME inputbar 
          if (this.myIMEInputBarStatus) {
             Fireinput.imePanel.hideAndCleanInput();
@@ -645,6 +736,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          window.removeEventListener('keypress', Fireinput.main.keyPressListenerBinding, true);
          //          window.removeEventListener('keydown', this.keyDownListener.bind(this), true);
          window.removeEventListener('keyup', Fireinput.main.keyUpListenerBinding, true);
+         gBrowser.tabContainer.removeEventListener("TabSelect", Fireinput.main.tabSelectListenerBinding, true);
       }
    },
 
@@ -743,7 +835,11 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       }
       this.myIMEInputBarStatus = false;
 
-      var method = document.getElementById("fireinputInputMethod").getAttribute("value");
+      var doc = Fireinput.util.getDocument(); 
+      if(!doc) 
+         return; 
+
+      var method = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputInputMethod").getAttribute("value");
       if (this.myIMESchema == method) return;
 
       if (method == Fireinput.WUBI_86 || method == Fireinput.WUBI_98) {
@@ -795,7 +891,10 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
 
    // loop through next enabled input method 
    switchInputMethod: function () {
-      var method = document.getElementById("fireinputInputMethod").getAttribute("value");
+      var doc = Fireinput.util.getDocument(); 
+      if(!doc) 
+         return; 
+      var method = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputInputMethod").getAttribute("value");
       var i = 0;
       for (; i < this.myEnabledIME.length; i++) {
          if (method == this.myEnabledIME[i]) break;
@@ -825,17 +924,18 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       switch (mode) {
       case Fireinput.IME_MODE_ZH:
          var modeString = this.getModeString(this.myInputMode);
-         this.loadIMEPrefByID("fireinputToggleIMEButton", modeString, "label");
+         this.loadIMEPanelPrefByID("fireinputToggleIMEButton", modeString, "label");
          // we need to check whether the schema has been enabled or not 
          this.isIMESchemaEnabled();
          break;
       case Fireinput.IME_MODE_EN:
          var modeString = this.getModeString(mode);
-         this.loadIMEPrefByID("fireinputToggleIMEButton", modeString, "label");
+         this.loadIMEPanelPrefByID("fireinputToggleIMEButton", modeString, "label");
          break;
       default:
          return;
       }
+      this.updateIMETabSetting("imemode", this.myIMEMode); 
    },
 
    toggleIMEMode: function () {
@@ -859,7 +959,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
 
    setInputMode: function (mode) {
       var modeString = this.getModeString(mode);
-      this.loadIMEPrefByID("fireinputToggleIMEButton", modeString, "label");
+      this.loadIMEPanelPrefByID("fireinputToggleIMEButton", modeString, "label");
       switch (mode) {
       case Fireinput.ENCODING_ZH:
       case Fireinput.ENCODING_BIG5:
@@ -876,6 +976,10 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       default:
          return;
       }
+
+      /* update per tab setting if necessary */
+      this.updateIMETabSetting("inputmode", this.myInputMode); 
+      this.updateIMETabSetting("imemode", this.myIMEMode); 
    },
 
    toggleInputMode: function () {
@@ -919,40 +1023,89 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
 
    },
 
-   toggleHalfMode: function () {
+   setLetterMode: function() {
+     var doc = Fireinput.util.getDocument();
+      if(!doc)
+         return;
       if (this.myIME.isHalfLetterMode()) {
-         var id = document.getElementById("fireinputToggleHalfButton");
+         var id = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputToggleHalfButton");
+         if (id) {
+            id.style.listStyleImage = "url('chrome://fireinput/skin/half-letter.png')";
+         }
+      }
+      else {
+         var id = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputToggleHalfButton");
+         if (id) {
+            id.style.listStyleImage = "url('chrome://fireinput/skin/full-letter.png')";
+         }
+
+      }
+
+   },
+
+   toggleLetterMode: function () {
+      var doc = Fireinput.util.getDocument(); 
+      if(!doc) 
+         return; 
+      if (this.myIME.isHalfLetterMode()) {
+         var id = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputToggleHalfButton");
          if (id) {
             id.style.listStyleImage = "url('chrome://fireinput/skin/full-letter.png')";
             this.myIME.setFullLetterMode();
          }
       }
       else {
-         var id = document.getElementById("fireinputToggleHalfButton");
+         var id = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputToggleHalfButton");
          if (id) {
             id.style.listStyleImage = "url('chrome://fireinput/skin/half-letter.png')";
             this.myIME.setHalfLetterMode();
          }
 
       }
+      /* update letter mode */
+      this.updateIMETabSetting("lettermode", this.myIME.isHalfLetterMode()); 
+   },
+
+   setPunctMode: function() {
+      var doc = Fireinput.util.getDocument();
+      if(!doc)
+         return;
+      if (this.myIME.isHalfPunctMode()) {
+         var id = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputTogglePunctButton");
+         if (id) {
+            id.style.listStyleImage = "url('chrome://fireinput/skin/half-punct.png')";
+         }
+      }
+      else {
+         var id = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputTogglePunctButton");
+         if (id) {
+            id.style.listStyleImage = "url('chrome://fireinput/skin/full-punct.png')";
+         }
+
+      }
    },
 
    togglePunctMode: function () {
+      var doc = Fireinput.util.getDocument(); 
+      if(!doc)
+         return; 
       if (this.myIME.isHalfPunctMode()) {
-         var id = document.getElementById("fireinputTogglePunctButton");
+         var id = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputTogglePunctButton");
          if (id) {
             id.style.listStyleImage = "url('chrome://fireinput/skin/full-punct.png')";
             this.myIME.setFullPunctMode();
          }
       }
       else {
-         var id = document.getElementById("fireinputTogglePunctButton");
+         var id = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputTogglePunctButton");
          if (id) {
             id.style.listStyleImage = "url('chrome://fireinput/skin/half-punct.png')";
             this.myIME.setHalfPunctMode();
          }
 
       }
+      /* update punct mode */
+      this.updateIMETabSetting("punctmode", this.myIME.isHalfPunctMode());
    },
 
    onClickStatusIcon: function (event) {
@@ -1022,44 +1175,140 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       return true;
    },
 
+   showFloatingIMEBar: function() {
+      /* create floating panel */
+      var browserEl = gBrowser.selectedBrowser.parentNode.parentNode;
+      var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
+      var id = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabIndex;
+      var el = document.getElementById(id); 
+      if(el) {
+         el.hidden = false; 
+         return false; 
+      }
+
+      el =  document.createElement("vbox"); 
+      el.id  = id; 
+      el.setAttribute("layer", true); 
+      el.appendChild(this.myRemovedFireinputPanel[Fireinput.IME_BAR_TOP].cloneNode(true)); 
+      var e = browserEl.insertBefore(el, gBrowser.selectedBrowser.parentNode);   
+      e.className = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + " left";
+      el.style.top = this.getBrowserBoxesHeight() + "px";
+      return true; 
+   },
+   
+   getBrowserBoxesHeight: function() {
+      var topPos = 1; 
+      var h = document.getElementById("navigator-toolbox");
+      if(h)
+         topPos += h.boxObject.height;
+
+      if(gBrowser.getNotificationBox()) {
+         var aNotification = gBrowser.getNotificationBox();
+         var notifications = aNotification.allNotifications;
+         for (var n = notifications.length - 1; n >= 0; n--) {
+              if(typeof(notifications[n].boxObject) != 'undefined')
+                topPos += notifications[n].boxObject.height;
+         }
+      }
+      return topPos; 
+   }, 
+
+   closeAllFloatingBars: function() {
+
+      var floatingPanels = gBrowser.selectedBrowser.parentNode.parentNode.getElementsByClassName("fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING); 
+      if(floatingPanels && floatingPanels.length > 0) {
+         for(var i=0; i<floatingPanels.length; i++)
+           /* completely remove it */
+            floatingPanels[i].parentNode.removeChild(floatingPanels[i]); 
+   
+         // also disable all listening events 
+         window.removeEventListener('keypress', Fireinput.main.keyPressListenerBinding, true);
+         window.removeEventListener('keyup', Fireinput.main.keyUpListenerBinding, true);
+         gBrowser.tabContainer.removeEventListener("TabSelect", Fireinput.main.tabSelectListenerBinding, false);
+         this.myTabIMEPanelEventStatus = false; 
+      }
+   
+      return floatingPanels && floatingPanels.length > 0; 
+   },
+
+   updateIMETabSetting: function(key, value) {
+      var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
+      if(typeof(this.mySettingTabs[tabIndex]) == 'undefined')
+         this.mySettingTabs[tabIndex] = []; 
+
+      this.mySettingTabs[tabIndex][key] = value;
+   },
+
    initIMEBarPosition: function () {
       var pos = Fireinput.pref.getDefault("IMEBarPosition");
+      if(pos == Fireinput.IME_BAR_FLOATING) {
+         /* remove all others */
+         var imeEl = document.getElementById("fireinputIMEBar_" + Fireinput.IME_BAR_TOP);
+         this.myRemovedFireinputPanel[Fireinput.IME_BAR_TOP] = imeEl.removeChild(imeEl.firstChild);
+         imeEl = document.getElementById("fireinputIMEBar_" + Fireinput.IME_BAR_BOTTOM);
+         this.myRemovedFireinputPanel[Fireinput.IME_BAR_BOTTOM] = imeEl.removeChild(imeEl.firstChild);
+
+         return; 
+      }
+
+      /* top or bottom position, just hide one */
       var rempos = (pos == Fireinput.IME_BAR_BOTTOM) ? Fireinput.IME_BAR_TOP : Fireinput.IME_BAR_BOTTOM;
 
       var el = document.getElementById("fireinputIMEBar_" + rempos);
       if (el.firstChild) {
-         this.myRemovedFireinputPanel = el.removeChild(el.firstChild);
+         this.myRemovedFireinputPanel[rempos] = el.removeChild(el.firstChild);
       }
    },
 
    toggleIMEBarPosition: function () {
       var pos = Fireinput.pref.getDefault("IMEBarPosition");
-      var rempos = (pos == Fireinput.IME_BAR_BOTTOM) ? Fireinput.IME_BAR_TOP : Fireinput.IME_BAR_BOTTOM;
+      if(pos == Fireinput.IME_BAR_FLOATING) {
+         var imeEl = document.getElementById("fireinputIMEBar_" + Fireinput.IME_BAR_TOP);
+         if(imeEl.firstChild) 
+            this.myRemovedFireinputPanel[Fireinput.IME_BAR_TOP] = imeEl.removeChild(imeEl.firstChild);
 
-      var oldPanel = null;
-      var el = document.getElementById("fireinputIMEBar_" + rempos);
-      if (el.firstChild) {
-         oldPanel = el.removeChild(el.firstChild);
+         imeEl.hidden = true; 
+
+         imeEl = document.getElementById("fireinputIMEBar_" + Fireinput.IME_BAR_BOTTOM);
+         if(imeEl.firstChild) 
+            this.myRemovedFireinputPanel[Fireinput.IME_BAR_BOTTOM] = imeEl.removeChild(imeEl.firstChild);
+         imeEl.hidden = true; 
       }
-      el.hidden = true;
+      else {
+ 
+         /* close all floating bars */           
+         this.closeAllFloatingBars(); 
 
-      // if sth wrong. don't proceed 
-      if (!oldPanel) return;
+         var rempos = (pos == Fireinput.IME_BAR_BOTTOM) ? Fireinput.IME_BAR_TOP : Fireinput.IME_BAR_BOTTOM;
 
-      // new position 
-      el = document.getElementById("fireinputIMEBar_" + pos);
-      if (!el.firstChild) {
-         el.appendChild(this.myRemovedFireinputPanel);
+         var oldPanel = null;
+         var el = document.getElementById("fireinputIMEBar_" + rempos);
+         if (el.firstChild) {
+            oldPanel = el.removeChild(el.firstChild);
+         }
+         else if(this.myRemovedFireinputPanel[rempos]) {
+            oldPanel = this.myRemovedFireinputPanel[rempos]; 
+         }
+
+         el.hidden = true;
+
+         // if sth wrong. don't proceed 
+         if (!oldPanel) return;
+
+         // new position 
+         el = document.getElementById("fireinputIMEBar_" + pos);
+         if (!el.firstChild) {
+            el.appendChild(this.myRemovedFireinputPanel[pos]);
+         }
+         el.hidden = false;
+
+         this.myRemovedFireinputPanel[rempos] = oldPanel;
+         this.toggleIMEMenu();
+         this.loadIMEPref();
+
+         // initialize Pref interfaces 
+         Fireinput.pref.init();
       }
-      el.hidden = false;
-
-      this.myRemovedFireinputPanel = oldPanel;
-
-      this.toggleIMEMenu();
-      this.loadIMEPref();
-
-      // initialize Pref interfaces 
-      Fireinput.pref.init();
 
       this.toggleFireinput(true, true);
 
@@ -1182,6 +1431,60 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          valid: true,
          documentTarget: documentTarget
       };
+
+   },
+
+   tabSelectListener: function(event) {
+      var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
+      if(typeof(this.mySettingTabs[tabIndex]) != 'undefined') {
+         var doc = Fireinput.util.getDocument();
+         if(!doc)
+            return;
+
+         //always input method keep to default, no matter what  
+         var schema = Fireinput.pref.getDefault("defaultInputMethod");
+         var element = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputInputMethod");
+         if(element) {
+            element.setAttribute("label", Fireinput.util.getIMENameString(schema));
+            element.setAttribute("value", schema);
+         }
+
+         // zh/big5/en encoding can be anything 
+         this.myInputMode = typeof(this.mySettingTabs[tabIndex].inputmode) == 'undefined' ? 
+                            Fireinput.pref.getDefault("defaultInputEncoding") : this.mySettingTabs[tabIndex].inputmode; 
+
+         var modeString = this.getModeString(this.myInputMode);
+         this.loadIMEPanelPrefByID("fireinputToggleIMEButton", modeString, "label");
+
+         /* update encoding */
+         if(this.myInputMode != Fireinput.ENCODING_EN)
+            this.myIME.setEncoding(this.myInputMode);
+
+         /* zh or en */
+         this.myIMEMode   = typeof(this.mySettingTabs[tabIndex].imemode) == 'undefined' ? 
+                            this.myInputMode : this.mySettingTabs[tabIndex].imemode;
+         this.myIMEMode = this.myInputMode== Fireinput.ENCODING_EN ? Fireinput.IME_MODE_EN : Fireinput.IME_MODE_ZH;
+
+         /* input status */
+         this.myInputStatus = typeof(this.mySettingTabs[tabIndex].inputstatus) == 'undefined' ?
+                              this.myInputMode != Fireinput.ENCODING_EN : this.mySettingTabs[tabIndex].inputstatus; 
+
+         this.myRunStatus   = typeof(this.mySettingTabs[tabIndex].runstatus) == 'undefined' ?
+                              true : this.mySettingTabs[tabIndex].runstatus; 
+
+         var halflettermode   = typeof(this.mySettingTabs[tabIndex].lettermode) == 'undefined' ? 
+                              this.myIME.isHalfLetterMode() : this.mySettingTabs[tabIndex].lettermode; 
+
+         halflettermode ? this.myIME.setHalfLetterMode() : this.myIME.setFullLetterMode(); 
+         this.setLetterMode(); 
+
+         var halfpunctmode   = typeof(this.mySettingTabs[tabIndex].punctmode) == 'undefined' ? 
+                              this.myIME.isHalfPunctMode() : this.mySettingTabs[tabIndex].punctmode; 
+
+         halfpunctmode ? this.myIME.setHalfPunctMode() : this.myIME.setFullPunctMode(); 
+         this.setPunctMode(); 
+
+      }
 
    },
 

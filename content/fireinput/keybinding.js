@@ -162,7 +162,7 @@ Fireinput.keyBinding.keyActions = [
     {name: "toggleIMEKey", value: "", command: "Fireinput.main.toggleIMEMode"},
     {name: "quickToggleIMEKey", value: "", command: ""},
     {name: "switchInputMethodKey", value: "", command: "Fireinput.main.switchInputMethod"},
-    {name: "toggleHalfKey", value: "", command: "Fireinput.main.toggleHalfMode"},
+    {name: "toggleLetterKey", value: "", command: "Fireinput.main.toggleLetterMode"},
     {name: "togglePuncKey", value: "", command: "Fireinput.main.togglePunctMode"},
     {name: "toggleEncodingKey", value: "", command: "Fireinput.main.toggleEncodingMode"},
     {name: "pageUpKey", value: "", command: null},

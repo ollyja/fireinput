@@ -127,6 +127,8 @@
                             oncommand="Fireinput.pref.save(this)" option="IMEBarPosition"/>
                         <menuitem id="fireinputIMEBarPosBottom" type="radio" label="" value="bottom"
                             oncommand="Fireinput.pref.save(this)" option="IMEBarPosition"/>
+                        <menuitem id="fireinputIMEBarPosFloating" type="radio" label="" value="floating"
+                            oncommand="Fireinput.pref.save(this)" option="IMEBarPosition"/>
                       </menupopup>
                    </menu>
                    <menuseparator/>
@@ -237,7 +239,7 @@
           </menupopup>
         </toolbarbutton>
         <toolbarbutton id="fireinputToggleIMEButton" label="" tooltiptext="" oncommand="Fireinput.main.toggleInputMode();"/>
-        <toolbarbutton id="fireinputToggleHalfButton" tooltiptext="" oncommand="Fireinput.main.toggleHalfMode();"/>
+        <toolbarbutton id="fireinputToggleHalfButton" tooltiptext="" oncommand="Fireinput.main.toggleLetterMode();"/>
         <toolbarbutton id="fireinputTogglePunctButton" tooltiptext="" oncommand="Fireinput.main.togglePunctMode();"/>
 
         <toolbarbutton id="fireinputSpecialCharMenu" label="" class="toolbarbuttonStyle">
@@ -255,7 +257,7 @@
         <textbox id="fireinputSearchbox" class="fireinputSearchbox"
                      onkeypress="Fireinput.webSearch.goSearchbox(event)"/>
         <toolbarseparator collapsed="false" style="margin-left:5px"/> 
-        <toolbarbutton id="fireinputIMEBarCloseButton" class="toolbarbutton-icon" tooltiptext="" oncommand="Fireinput.main.toggleFireinput();"/>
+        <toolbarbutton id="fireinputIMEBarCloseButton" class="toolbarbutton-icon" tooltiptext="" oncommand="Fireinput.main.toggleFireinput(false,false,true);"/>
         <hbox id="fireinputNewVersionPanel" style="margin-left:5px; display: none">
           <toolbarseparator collapsed="false"/> 
           <toolbarbutton id="fireinputNewVersion" label="sss" oncommand="Fireinput.help.showRelease()"/>
@@ -287,6 +289,8 @@
                         <menuitem id="fireinputIMEBarPosTop" type="radio" label="" value="top"
                             oncommand="Fireinput.pref.save(this)" option="IMEBarPosition"/>
                         <menuitem id="fireinputIMEBarPosBottom" type="radio" label="" value="bottom"
+                            oncommand="Fireinput.pref.save(this)" option="IMEBarPosition"/>
+                        <menuitem id="fireinputIMEBarPosFloating" type="radio" label="" value="floating"
                             oncommand="Fireinput.pref.save(this)" option="IMEBarPosition"/>
                       </menupopup>
                    </menu>
@@ -398,7 +402,7 @@
           </menupopup>
         </toolbarbutton>
         <toolbarbutton id="fireinputToggleIMEButton" label="" tooltiptext="" oncommand="Fireinput.main.toggleInputMode();"/>
-        <toolbarbutton id="fireinputToggleHalfButton" tooltiptext="" oncommand="Fireinput.main.toggleHalfMode();"/>
+        <toolbarbutton id="fireinputToggleHalfButton" tooltiptext="" oncommand="Fireinput.main.toggleLetterMode();"/>
         <toolbarbutton id="fireinputTogglePunctButton" tooltiptext="" oncommand="Fireinput.main.togglePunctMode();"/>
 
         <toolbarbutton id="fireinputSpecialCharMenu" label="" class="toolbarbuttonStyle">

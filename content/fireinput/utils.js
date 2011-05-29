@@ -655,7 +655,60 @@ Fireinput.util = Fireinput.extend(Fireinput.util, {
           var gs =  Fireinput.util.xpc.getService("@fireinput.com/fireinput;1", "nsIFireinput");
           return gs.getChromeWindow().getFireinput().getCurrentIME();
        }
+    },
+    getDocument: function()
+    {
+       var pos = Fireinput.pref.getDefault("IMEBarPosition");
+       if(pos == Fireinput.IME_BAR_FLOATING) {
+          var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
+          var imePanel = document.getElementById("fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabIndex);
+          if(imePanel)
+            return imePanel; 
+          else 
+            return null;     
+       }
+       else 
+          return document; 
+    },
+
+    getElementsBy: function(method, tag, root, firstOnly) {
+       tag = tag || '*';
+       root = (root) ? root : document;
+       if (!root) {
+         return [];
+       }
+
+       var nodes = [],
+           elements = root.getElementsByTagName(tag);
+
+       for (var i = 0, len = elements.length; i < len; ++i) {
+           if ( method(elements[i]) ) {
+               if (firstOnly) {
+                   nodes = elements[i];
+                   break;
+               } else {
+                   nodes[nodes.length] = elements[i];
+               }
+           }
+       }
+
+      return nodes;
+    },
+
+    getElementBy: function(method, tag, root) {
+      return Fireinput.util.getElementsBy(method, tag, root, true);
+    },
+
+    getElementById: function(root, tag, id) {
+      var pos = Fireinput.pref.getDefault("IMEBarPosition");
+      if(pos == Fireinput.IME_BAR_FLOATING) {
+         var node = Fireinput.util.getElementBy(function(el) { return el.id == id}, tag, root); 
+         return Array.isArray(node) ? null : node; 
+      }
+      else
+         return document.getElementById(id); 
     }
+
 }); 
 
 Fireinput.util.hash = function() 

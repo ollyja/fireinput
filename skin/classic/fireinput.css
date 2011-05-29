@@ -377,3 +377,66 @@ textbox.keyinputbox {
     background-color: transparent !important;
 }
 
+/* floating panel */
+.fireinputIMEBar_floating
+{
+   position: fixed;
+   top: 100px;
+   width: auto;
+   background-color: -moz-dialog !important;
+   border:1px solid rgba(0,0,0,0.5) !important;
+}
+
+.fireinputIMEBar_floating[fireinputtheme] {
+    -moz-appearance: none !important;
+    border-bottom: 0 !important;
+    background-repeat: no-repeat !important;
+    background-position: top right !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+.fireinputIMEBar_floating[fireinputtheme] menulist, .fireinputIMEBar_floating[fireinputtheme] toolbarseparator {
+    -moz-appearance: none !important;
+    border-bottom: 0 !important;
+    background-color: transparent !important;
+}
+
+.fireinputIMEBar_floating.right
+{
+   right: 1px;
+   border-top-left-radius: 4px;
+   border-top-right-radius: 4px;
+}
+
+.fireinputIMEBar_floating.right.vscroll
+{
+   right: 17px;
+}
+
+.fireinputIMEBar_floating.left
+{
+   left: 2px;
+   border-bottom-right-radius: 4px;
+   border-bottom-left-radius: 4px;
+}
+
+.fireinputIMEBar_floating #fireinputSpecialCharMenu
+{
+   display:none;
+}
+
+.fireinputIMEBar_floating #fireinputEmotionMenu
+{
+   display:none;
+}
+
+.fireinputIMEBar_floating #fireinputSearchButton, .fireinputIMEBar_floating #fireinputSearchbox, .fireinputIMEBar_floating #fireinputMessagePanel {
+   display:none;
+}
+
+.fireinputIMEBar_floating hbox > toolbarseparator {
+   display:none;
+}
+
+

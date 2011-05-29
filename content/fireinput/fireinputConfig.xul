@@ -227,7 +227,7 @@
             </row>
             <row align="center">
                <label value="切换全/半角："/>
-               <keyinputbox id="shortcut.toggleHalfKey" option="toggleHalfKey" maxlength="1" size="20" allowmodifiers="true"/>
+               <keyinputbox id="shortcut.toggleLetterKey" option="toggleLetterKey" maxlength="1" size="20" allowmodifiers="true"/>
             </row>
             <row align="center">
                <label value="切换标点符号："/>

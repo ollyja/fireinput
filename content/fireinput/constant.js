@@ -100,6 +100,7 @@ Fireinput.DATA_TEXT		= 2;
 // IME bar position 
 Fireinput.IME_BAR_BOTTOM   = "bottom";
 Fireinput.IME_BAR_TOP   = "top";
+Fireinput.IME_BAR_FLOATING   = "floating";
 
 // pinyin input table type 
 Fireinput.PINYIN_WORD_LOOKUP = 1;

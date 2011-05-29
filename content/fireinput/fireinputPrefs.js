@@ -53,6 +53,7 @@ Fireinput.pref.prefNames =
     {name: "inputKeyExactMatch", type: "BOOL", value: false},
     {name: "enableUrlbarInput", type: "BOOL", value: false},
     {name: "enableWordSharing", type: "BOOL", value: true},
+    {name: "enableIMEPanelTab", type: "BOOL", value: true},
 
     /* guest email/name for accessing server resouces */
     {name: "serverGuestName", type: "STRING", value: ''}, 
@@ -72,7 +73,7 @@ Fireinput.pref.prefNames =
     {name: "toggleIMEKey", type: "STRING", value: "514"},
     {name: "quickToggleIMEKey", type: "STRING", value: "256"},
     {name: "switchInputMethodKey", type: "STRING", value: "1155"},
-    {name: "toggleHalfKey", type: "STRING", value: "1235"},
+    {name: "toggleLetterKey", type: "STRING", value: "1235"},
     {name: "togglePuncKey", type: "STRING", value: "1283"},
     {name: "toggleEncodingKey", type: "STRING", value: "1251"},
     {name: "pageUpKey", type: "STRING", value: "3008"},
@@ -91,6 +92,7 @@ Fireinput.pref.prefInterfaceUI = [
             {id: "fireinputDefaultIMEBarPos", strKey: "fireinput.pref.imebar.position", attribute: "label"},           
             {id: "fireinputIMEBarPosTop", strKey: "fireinput.pref.imebar.position.top", attribute: "label"},           
             {id: "fireinputIMEBarPosBottom", strKey: "fireinput.pref.imebar.position.bottom", attribute: "label"},           
+            {id: "fireinputIMEBarPosFloating", strKey: "fireinput.pref.imebar.position.floating", attribute: "label"},           
             {id: "fireinputAutoInsert", strKey: "fireinput.pref.auto.insert", attribute: "label"},           
             {id: "fireinputAutoInsert", strKey: "fireinput.pref.auto.insert.tooltip", attribute: "tooltiptext"},           
             {id: "fireinputConfigInputWindow", strKey: "fireinput.pref.inputwindow.setting", attribute: "label"},           
@@ -121,6 +123,10 @@ Fireinput.pref.init = function () {
     // get default language first 
     var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage"); 
 
+    var doc = Fireinput.util.getDocument();
+    if(!doc)
+       return;
+
     // update UI 
     for(var i =Fireinput.pref.prefInterfaceUI.length-1; i>=0; i--)
     {
@@ -129,7 +135,9 @@ Fireinput.pref.init = function () {
        var attr = Fireinput.pref.prefInterfaceUI[i].attribute; 
  
        var value = Fireinput.util.getLocaleString(strKey + defaultLanguage); 
-       var handle = document.getElementById(id); 
+       var handle = Fireinput.util.getElementById(doc, "*", id); 
+       if(!handle)
+          handle = document.getElementById(id); 
        if(!handle)
           handle = document.documentElement.getButton(id); 
        if(!handle) 

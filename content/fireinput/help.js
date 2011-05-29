@@ -68,12 +68,16 @@ Fireinput.help = Fireinput.extend(Fireinput.help, {
 
        this.refreshMenu(); 
 
+       this.initialized = true; 
+      
+       if(forceLoad)
+         return; 
+
        // check new releases
        this.checkNewRelease(); 
        // check if it's running dev version 
        this.checkNewDevRelease(); 
 
-       this.initialized = true; 
     },
 
     refreshMenu: function()
@@ -81,13 +85,16 @@ Fireinput.help = Fireinput.extend(Fireinput.help, {
        // get default language first 
        var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
        // update UI 
+       var doc = Fireinput.util.getDocument(); 
+       if(!doc) 
+         return; 
        for(var i =0; i<this.helpUI.length; i++)
        {
           var id = this.helpUI[i].id;
-          var handle = document.getElementById(id);
+          var handle = Fireinput.util.getElementById(doc, "*", id); 
           if(!handle)
              continue;
-
+           
           var strKey = this.helpUI[i].strKey;
           var attr = this.helpUI[i].attribute;
 
@@ -114,7 +121,10 @@ Fireinput.help = Fireinput.extend(Fireinput.help, {
 
     showRelease: function()
     {
-       var element = document.getElementById("fireinputHelpNewRelease");
+      var doc = Fireinput.util.getDocument(); 
+      if(!doc) 
+         return; 
+       var element = Fireinput.util.getElementById(doc, '*', "fireinputHelpNewRelease");
        this.showSite(element.getAttribute("release")); 
     }, 
 
@@ -203,24 +213,27 @@ Fireinput.help = Fireinput.extend(Fireinput.help, {
    
     showNewRelease: function(version)
     {   
-       var element = document.getElementById("fireinputHelpNewRelease"); 
+      var doc = Fireinput.util.getDocument(); 
+      if(!doc) 
+         return; 
+       var element = Fireinput.util.getElementById(doc, '*', "fireinputHelpNewRelease"); 
        element.style.display = ""; 
        element.style.color = "red"; 
        element.setAttribute("label", element.getAttribute("label") + " " + version);
        element.setAttribute("release", "release");
 
-       element = document.getElementById("fireinputHelp"); 
+       element = Fireinput.util.getElementById(doc, '*', "fireinputHelp"); 
        element.style.color = "red"; 
 
        var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
 
-       element = document.getElementById("fireinputNewVersion");
+       element = Fireinput.util.getElementById(doc, '*', "fireinputNewVersion");
        var msg = Fireinput.util.getLocaleString("fireinput.help.newrelease.text" + defaultLanguage);
        msg = msg.replace(/%VERSION%/, version); 
        element.setAttribute("label", msg); 
 
        
-       element = document.getElementById("fireinputNewVersionPanel");
+       element = Fireinput.util.getElementById(doc, '*', "fireinputNewVersionPanel");
        element.style.display = "";
     }, 
 
@@ -276,24 +289,27 @@ Fireinput.help = Fireinput.extend(Fireinput.help, {
    
     showNewDevRelease: function(version, buildDateArray)
     {   
-       var element = document.getElementById("fireinputHelpNewRelease"); 
+      var doc = Fireinput.util.getDocument(); 
+      if(!doc) 
+         return; 
+       var element = Fireinput.util.getElementById(doc, '*', "fireinputHelpNewRelease"); 
        element.style.display = ""; 
        element.style.color = "red"; 
        element.setAttribute("label", element.getAttribute("label") + " " + version + " " + buildDateArray.join("/"));
        element.setAttribute("release", "devrelease");
 
-       element = document.getElementById("fireinputHelp"); 
+       element = Fireinput.util.getElementById(doc, '*', "fireinputHelp"); 
        element.style.color = "red"; 
 
        var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
 
-       element = document.getElementById("fireinputNewVersion");
+       element = Fireinput.util.getElementById(doc, '*', "fireinputNewVersion");
        var msg = Fireinput.util.getLocaleString("fireinput.help.newdevrelease.text" + defaultLanguage);
        msg = msg.replace(/%VERSION%/, version + " " + buildDateArray.join("/")); 
        element.setAttribute("label", msg); 
 
        
-       element = document.getElementById("fireinputNewVersionPanel");
+       element = Fireinput.util.getElementById(doc, '*', "fireinputNewVersionPanel");
        element.style.display = "";
     }
 }); 

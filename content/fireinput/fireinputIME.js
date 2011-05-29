@@ -188,6 +188,11 @@ Fireinput.imeEngine.prototype =
        return (strArray.slice(0, strArray.length-1));
     },
 
+    getLetterMode: function() 
+    {
+       return this.letterMode; 
+    },
+
     isHalfLetterMode: function()
     {
        return this.letterMode == Fireinput.HALF_LETTER_MODE; 
@@ -201,6 +206,11 @@ Fireinput.imeEngine.prototype =
     setFullLetterMode: function()
     {
        this.letterMode = Fireinput.FULL_LETTER_MODE; 
+    },
+
+    getPunctMode: function() 
+    {
+       return this.punctMode; 
     },
 
     isHalfPunctMode: function()

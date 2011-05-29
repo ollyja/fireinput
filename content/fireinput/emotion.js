@@ -54,13 +54,17 @@ Fireinput.emotions =
 
     load: function(forceLoad)
     {
+       var doc = Fireinput.util.getDocument();
+       if(!doc)
+         return;
+      
        if(!this.initialized || forceLoad) 
        {
           // get default language first 
           var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage"); 
           this.mouseTooltip = Fireinput.util.getLocaleString("fireinput.emotion.mouse.tooltips" + defaultLanguage); 
 
-          var element = document.getElementById("fireinputEmotionMenu"); 
+          var element = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputEmotionMenu"); 
           var label = Fireinput.util.getLocaleString("fireinput.emotion.label" + defaultLanguage);
           element.setAttribute("label", label);
 
@@ -81,13 +85,17 @@ Fireinput.emotions =
 
     addUserEmotionMenu: function()
     {
+       var doc = Fireinput.util.getDocument();
+       if(!doc)
+         return;
+
        var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
-       var menuElement = document.getElementById("fireinputEmotionMenuItems");
+       var menuElement = Fireinput.util.getElementById(doc, "menupopup", "fireinputEmotionMenuItems");
 
        // user action menu 
        var id = "fireinput.emotion.user.action"; 
        var label = Fireinput.util.getLocaleString(id + defaultLanguage); 
-       var menuID = document.getElementById(id); 
+       var menuID = Fireinput.util.getElementById(doc, "menuitem", id); 
        if(!menuID)
        {
           var subMenu = document.createElement("menuitem");
@@ -101,7 +109,7 @@ Fireinput.emotions =
 
        // user img list 
        id = "fireinput.emotion.user.list"; 
-       menuID = document.getElementById(id);
+       menuID = Fireinput.util.getElementById(doc, "menu", id);
        label = Fireinput.util.getLocaleString(id + defaultLanguage); 
        if(!menuID)
        {
@@ -211,23 +219,26 @@ Fireinput.emotions =
        if(!this.initialized)
           return; 
 
+       var doc = Fireinput.util.getDocument();
+       if(!doc)
+         return;
+
        var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
 
        this.mouseTooltip = Fireinput.util.getLocaleString("fireinput.emotion.mouse.tooltips" + defaultLanguage); 
-
-       var myMenuID = document.getElementById("fireinput.emotion.user.list");
+       var myMenuID = Fireinput.util.getElementById(doc, "menu", "fireinput.emotion.user.list");
        var myLabel = Fireinput.util.getLocaleString("fireinput.emotion.user.list" + defaultLanguage);
        myMenuID.setAttribute("label", myLabel);
 
-       var actionMenuID = document.getElementById("fireinput.emotion.user.action");
+       var actionMenuID = Fireinput.util.getElementById(doc, "menuitem", "fireinput.emotion.user.action");
        var aLabel = Fireinput.util.getLocaleString("fireinput.emotion.user.action" + defaultLanguage);
        actionMenuID.setAttribute("label", aLabel);
 
-       var element = document.getElementById("fireinputEmotionMenu"); 
+       var element = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputEmotionMenu"); 
        var label = Fireinput.util.getLocaleString("fireinput.emotion.label" + defaultLanguage);
        element.setAttribute("label", label);
 
-       element = document.getElementById("fireinputEmotionMenuItems");
+       element = Fireinput.util.getElementById(doc, "menupopup", "fireinputEmotionMenuItems");
 
        for (var child = element.firstChild; child; child = child.nextSibling)
        {
@@ -256,7 +267,7 @@ Fireinput.emotions =
     {
        // get default language first 
        var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
-       var menuElement = document.getElementById("fireinputEmotionMenuItems");
+       var menuElement = Fireinput.util.getElementById(doc, "menupopup", "fireinputEmotionMenuItems");
 
        for(var i=0; i < jsonArray.length; i++)
        {
@@ -267,7 +278,7 @@ Fireinput.emotions =
              groupName = data.category; 
 
           var id = "fireinput.emotion." + data.category; 
-          var menuID = document.getElementById(id); 
+          var menuID = Fireinput.util.getElementById(doc, "menu", id); 
           var label = groupName; 
           if(!menuID)
           { 

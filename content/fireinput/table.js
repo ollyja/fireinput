@@ -54,6 +54,10 @@ Fireinput.table = Fireinput.extend(Fireinput.table, {
 
        this.refreshMenu(); 
 
+       /* if forceLoad, don't register observer and check update */
+       if(forceLoad)
+         return; 
+
        // register an observer 
        var os = Fireinput.util.xpc.getService("@mozilla.org/observer-service;1", "nsIObserverService");
        os.addObserver(this, "fireinput-table-update-request", false);
@@ -77,13 +81,17 @@ Fireinput.table = Fireinput.extend(Fireinput.table, {
 
     refreshMenu: function()
     {
+       var doc = Fireinput.util.getDocument();
+       if(!doc)
+         return;
+         
        // get default language first 
        var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
        // update UI 
        for(var i =0; i<this.tableManagmentUI.length; i++)
        {
           var id = this.tableManagmentUI[i].id;
-          var handle = document.getElementById(id);
+          var handle = Fireinput.util.getElementById(doc, "*", id);
           if(!handle)
              continue;
 
@@ -120,7 +128,11 @@ Fireinput.table = Fireinput.extend(Fireinput.table, {
  
     showUpdatingProgress: function(showflag)
     {
-       var handle = document.getElementById('fireinputTableUpdatePanel'); 
+       var doc = Fireinput.util.getDocument();
+       if(!doc)
+         return;
+
+       var handle = Fireinput.util.getElementById(doc, '*', 'fireinputTableUpdatePanel'); 
        if(showflag)
        {
           this.isUpdating = true; 
@@ -129,7 +141,7 @@ Fireinput.table = Fireinput.extend(Fireinput.table, {
 
           var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
           var value = Fireinput.util.getLocaleString('fireinput.table.updating.label' + defaultLanguage);
-          var h = document.getElementById('fireinputTableUpdate'); 
+          var h = Fireinput.util.getElementById(doc, '*', 'fireinputTableUpdate'); 
           if(h)
               h.setAttribute('label', value); 
        }
@@ -138,7 +150,7 @@ Fireinput.table = Fireinput.extend(Fireinput.table, {
           this.isUpdating = false; 
           if(handle) 
             handle.style.display = "none"; 
-          var h = document.getElementById('fireinputTableUpdate'); 
+          var h = Fireinput.util.getElementById(doc, '*', 'fereinputTableUpdate'); 
           if(h)
               h.setAttribute('label', '');
        }

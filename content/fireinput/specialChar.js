@@ -159,10 +159,14 @@ Fireinput.specialChar = Fireinput.extend(Fireinput.specialChar, {
 
     load: function(forceLoad)
     {
+       var doc = Fireinput.util.getDocument();
+       if(!doc)
+         return;
+
        if(!this.initialized || forceLoad)
        {
           var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
-          var element = document.getElementById("fireinputSpecialCharMenu"); 
+          var element = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputSpecialCharMenu"); 
           var label = Fireinput.util.getLocaleString("fireinput.special.char.label" + defaultLanguage);
           element.setAttribute("label", label);
           this.initialized = true;
@@ -173,10 +177,13 @@ Fireinput.specialChar = Fireinput.extend(Fireinput.specialChar, {
 
     refreshMenu: function()
     {
+       var doc = Fireinput.util.getDocument();
+       if(!doc)
+         return;
        // get default language first 
        var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
 
-       var element = document.getElementById("fireinputSpecialCharMenu");
+       var element = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputSpecialCharMenu");
        var label = Fireinput.util.getLocaleString("fireinput.special.char.label" + defaultLanguage);
        element.setAttribute("label", label);
 
@@ -184,7 +191,7 @@ Fireinput.specialChar = Fireinput.extend(Fireinput.specialChar, {
        {
           var groupName = this.allSymbols[i].group;
 
-          var menuID = document.getElementById(this.allSymbols[i].group + "_menu");
+          var menuID = Fireinput.util.getElementById(doc, "menu", this.allSymbols[i].group + "_menu");
           if(!menuID)
           {
              continue; 
@@ -194,7 +201,7 @@ Fireinput.specialChar = Fireinput.extend(Fireinput.specialChar, {
        }
 
        // refresh for date/time 
-       var menuID = document.getElementById("fireinput.datetime.label" +"_menu");
+       var menuID = Fireinput.util.getElementById(doc, "menu", "fireinput.datetime.label" +"_menu");
        if(menuID)
        {
           var label = Fireinput.util.getLocaleString("fireinput.datetime.label" + defaultLanguage);
@@ -205,7 +212,11 @@ Fireinput.specialChar = Fireinput.extend(Fireinput.specialChar, {
 
     addGroup: function()
     {
-       var menuElement = document.getElementById("fireinputSpecialCharMenuItems");
+       var doc = Fireinput.util.getDocument();
+       if(!doc)
+         return;
+
+       var menuElement = Fireinput.util.getElementById(doc, "menupopup", "fireinputSpecialCharMenuItems");
 
        // get default language first 
        var defaultLanguage = Fireinput.pref.getDefault("interfaceLanguage");
@@ -229,7 +240,7 @@ Fireinput.specialChar = Fireinput.extend(Fireinput.specialChar, {
        {
           var groupName = this.allSymbols[i].group;
 
-          var menuID = document.getElementById(this.allSymbols[i].group); 
+          var menuID = Fireinput.util.getElementById(doc, "menupopup",  this.allSymbols[i].group); 
           if(!menuID)
           { 
              var label = Fireinput.util.getLocaleString(groupName + defaultLanguage);
@@ -283,7 +294,10 @@ Fireinput.specialChar = Fireinput.extend(Fireinput.specialChar, {
 
     updateDateTime: function(event)
     {
-       var subMenupopup = document.getElementById("fireinput.datetime.label"); 
+       var doc = Fireinput.util.getDocument();
+       if(!doc)
+         return;
+       var subMenupopup = Fireinput.util.getElementById(doc, "menupopup", "fireinput.datetime.label"); 
        while(subMenupopup.hasChildNodes())
        {
           subMenupopup.removeChild(subMenupopup.lastChild);
