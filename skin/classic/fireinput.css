@@ -76,7 +76,7 @@ textbox.keyinputbox {
 #fireinputTogglePunctButton {
     margin: 0 0 0 0;
     -moz-image-region: rect(auto, auto, auto, auto);
-    list-style-image: url("chrome://fireinput/skin/half-punct.png");
+    list-style-image: url("chrome://fireinput/skin/full-punct.png");
 }
 
 #fireinputTogglePunctButton:hover {

@@ -1207,7 +1207,7 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
    {
        var gs =  Fireinput.util.xpc.getService("@fireinput.com/fireinput;1", "nsIFireinput");
        var fi = gs.getChromeWindow().getFireinput(); 
-       fi.showInputMethodSetting();
+       fi.main.showInputMethodSetting();
    }, 
 
    initNetTableInstall: function()
@@ -1314,7 +1314,6 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
      ptarget.html("<img  src='chrome://fireinput/skin/loading.gif'/>");
 
      var item = jsonArray.shift(); 
-
      this.saveNetTableFileStep(item, jsonArray, function(s) {
         if(s) {
           ptarget.html(ohtml);
@@ -1323,7 +1322,7 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
           // reload IME 
           var gs =  Fireinput.util.xpc.getService("@fireinput.com/fireinput;1", "nsIFireinput");
           var fi = gs.getChromeWindow().getFireinput(); 
-          fi.reloadIME();
+          fi.main.reloadIME();
 
         } 
         else {
@@ -1346,7 +1345,7 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
              method: 'get',
              onSuccess: function(p) {   
                   data = Fireinput.util.unicode.getUnicodeString(p.responseText);
-                  if(Fireinput.md5.hex_md5(data) != item[2]) {
+                  if(item[2].indexOf(Fireinput.md5.hex_md5(data)) == -1) {
                      cb.call(this, false);
                   }
 
@@ -1369,9 +1368,8 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
                   }          
                   
               },
-             onFailure: function() {  cb.call(this, false); }
+             onFailure: function(p) {  alert(p.responseText); cb.call(this, false); }
           });
-
      ajax.request(Fireinput.SERVER_URL + item[1] + "/" + item[0]); 
    }, 
 

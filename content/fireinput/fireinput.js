@@ -266,6 +266,8 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
 
       this.toggleIMEMenu();
 
+      this.addToolbarButton(); 
+
       // initial default IME 
       this.myIME = this.getIME();
 
@@ -293,6 +295,25 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       os.addObserver(this, "quit-application-requested", false);
    },
 
+   addToolbarButton: function() {
+      /* only add it by first run */
+      var firstrun =  Fireinput.pref.getDefault("firstRun");
+      if(firstrun == Fireinput.FIREINPUT_VERSION)
+         return; 
+
+      let buttonId = "fireinput-toolbarbutton";
+
+      if (document.getElementById(buttonId))
+         return;
+
+      let toolbar = document.getElementById("TabsToolbar");
+      let currentSet = toolbar.currentSet;
+      currentSet += "," + buttonId; 
+      toolbar.currentSet = currentSet;
+      toolbar.setAttribute("currentset", currentSet);
+      document.persist(toolbar.id, "currentset");
+   },
+   
    // Patch from christop...: In order to save memory we check if myIME was created in another window
    // already. Only if not, we create myIME in current window using getDefaultIME()
    getIME: function () {
@@ -775,7 +796,8 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    },
 
    reloadIME: function () {
-      if (!this.myRunStatus) return;
+      var pos = Fireinput.pref.getDefault("IMEBarPosition");
+      if(pos != Fireinput.IME_BAR_FLOATING && !this.myRunStatus) return;
 
       this.myIMESchema = -1;
 
@@ -821,7 +843,16 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
 
    isIMESchemaEnabled: function () {
       if (!this.myIME) return;
+      var pos = Fireinput.pref.getDefault("IMEBarPosition");
+      if(pos == Fireinput.IME_BAR_FLOATING) {
+         if (!this.myIME.isSchemaEnabled()) {
+            window.openUILinkIn("chrome://fireinput/content/tablemgr/installtable.html", "tab");
+         }
+      }
+      else 
       if (!this.myIME.isSchemaEnabled()) {
+
+
          var h = document.getElementById('fireinputMessagePanel');
          h.style.display = "";
 
@@ -846,11 +877,15 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       }
       this.myIMEInputBarStatus = false;
 
+      var method = Fireinput.pref.getDefault("defaultInputMethod");
       var doc = Fireinput.util.getDocument(); 
-      if(!doc) 
-         return; 
+      if(doc) {
+         var inputMethodButton = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputInputMethod"); 
+         if(inputMethodButton)
+           method = inputMethodButton.getAttribute("value")  ; 
+      }
 
-      var method = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputInputMethod").getAttribute("value");
+
       if (this.myIMESchema == method) return;
 
       if (method == Fireinput.WUBI_86 || method == Fireinput.WUBI_98) {
@@ -1249,8 +1284,8 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       var lastPos = Fireinput.pref.getDefault("floatingIMEPanelPos"); 
       if(lastPos) {
          lastPos = JSON.parse(lastPos); 
-         el.style.top = lastPos.y + "px";
-         el.style.left = lastPos.x + "px";
+         el.style.top =  (lastPos.y > window.innerHeight ? (window.innerHeight - 50) : lastPos.y) + "px";
+         el.style.left = (lastPos.x > window.innerWidth ? (window.innerWidth -10): lastPos.x) + "px";
       }
       else 
          el.style.top = Fireinput.util.getBrowserBoxesHeight() + "px";
@@ -1261,24 +1296,28 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    
    closeAllFloatingBars: function() {
 
-      var floatingPanels = gBrowser.selectedBrowser.parentNode.parentNode.getElementsByClassName("fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING); 
-      if(floatingPanels && floatingPanels.length > 0) {
-         for(var i=0; i<floatingPanels.length; i++) {
-            floatingPanels[i].parentNode.removeChild(floatingPanels[i]); 
+      for (var i = 0; i < gBrowser.browsers.length; ++i) {
+         var browser = gBrowser.getBrowserAtIndex(i);
+         var floatingPanels = browser.parentNode.parentNode.getElementsByClassName("fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING); 
+
+         if(floatingPanels && floatingPanels.length > 0) {
+            for(var j=0; j<floatingPanels.length; j++) {
+               floatingPanels[j].parentNode.removeChild(floatingPanels[j]); 
+            }
          }
-         // also disable all listening events 
-         window.removeEventListener('keypress', Fireinput.main.keyPressListenerBinding, true);
-         window.removeEventListener('keyup', Fireinput.main.keyUpListenerBinding, true);
-         gBrowser.tabContainer.removeEventListener("TabSelect", Fireinput.main.tabSelectListenerBinding, false);
 
-         window.removeEventListener("mousedown", Fireinput.main.floatingMouseDownListenerBinding, false);
-         window.removeEventListener("mousemove", Fireinput.main.floatingMouseMoveListenerBinding, false);
-         window.removeEventListener("mouseup", Fireinput.main.floatingMouseUpListenerBinding, false);
-
-         this.myTabIMEPanelEventStatus = false; 
       }
-   
-      return floatingPanels && floatingPanels.length > 0; 
+
+      // also disable all listening events 
+      window.removeEventListener('keypress', Fireinput.main.keyPressListenerBinding, true);
+      window.removeEventListener('keyup', Fireinput.main.keyUpListenerBinding, true);
+      gBrowser.tabContainer.removeEventListener("TabSelect", Fireinput.main.tabSelectListenerBinding, false);
+
+      window.removeEventListener("mousedown", Fireinput.main.floatingMouseDownListenerBinding, false);
+      window.removeEventListener("mousemove", Fireinput.main.floatingMouseMoveListenerBinding, false);
+      window.removeEventListener("mouseup", Fireinput.main.floatingMouseUpListenerBinding, false);
+
+      this.myTabIMEPanelEventStatus = false; 
    },
 
    updateIMETabSetting: function(key, value) {

@@ -8,7 +8,7 @@ Fireinput.imeEngine.prototype =
     phraseCodeHash: null, 
     name: null, 
     letterMode: Fireinput.HALF_LETTER_MODE, 
-    punctMode: Fireinput.HALF_PUNCT_MODE, 
+    punctMode: Fireinput.FULL_PUNCT_MODE, 
     tabIndex: -1, 
 
     getName: function ()

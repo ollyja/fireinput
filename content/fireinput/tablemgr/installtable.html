@@ -11,6 +11,7 @@
 <link href="chrome://fireinput/skin/jquery.tabs.css" rel="stylesheet" type="text/css">
 <link href="chrome://fireinput/skin/emotionmgr.css" rel="stylesheet" type="text/css">
 <link href="chrome://fireinput/skin/common.css" rel="stylesheet" type="text/css">
+<script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/ns.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/lib.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/utils.js"></script>
 <script language="JavaScript" type="text/javascript" src="chrome://fireinput/content/md5.js"></script>
@@ -39,11 +40,11 @@
 <script type="text/javascript">
 $(function() {
    Fireinput.serverLogin.checkUserLogon();
-   FireinputTableMgr.initNetTableInstall();
+   Fireinput.tableMgr.initNetTableInstall();
    $('#topTabMenu').tabs({
 	fxSpeed: 'fast',
         onShow: function (){
-          FireinputTableMgr.initTab($(this).activeTab()); 
+          Fireinput.tableMgr.initTab($(this).activeTab()); 
         }
    });
 });
@@ -74,7 +75,7 @@ $(function() {
        <p/>
        如想使用自己的词库, 请点击 <a href="chrome://fireinput/content/tablemgr/tablemgr.html#importWord">词库导入</a>
        <p/>
-       如想取消不用的输入法, 请点击 <a href="#" onclick="FireinputTableMgr.showInputMethodSetting(); return false">输入法高级</a>
+       如想取消不用的输入法, 请点击 <a href="#" onclick="Fireinput.tableMgr.showInputMethodSetting(); return false">输入法高级</a>
      </div>
      <div style="margin-top: 20px">
            <table cellspacing=5 cellpadding=7 border=0 valign="middle">
