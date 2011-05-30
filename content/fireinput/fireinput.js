@@ -1257,15 +1257,21 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
          var id = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabIndex;
          var el = document.getElementById(id); 
+
          if(el) {
-            var objectWidth = el.boxObject.width < 210 ? 210 : el.boxObject.width; 
-            var objectHeight = el.boxObject.height < 32 ? 32 : el.boxObject.height; 
-            if(lastPos.dx < (objectWidth + 50) || lastPos.x > window.innerWidth) 
+            var objectWidth = el.boxObject.width < 250 ? 250 : el.boxObject.width; 
+            var objectHeight = el.boxObject.height < 80 ? 80 : el.boxObject.height; 
+
+            if(lastPos.dx < objectWidth)
+               el.style.left = (window.innerWidth - objectWidth) + "px"; 
+            else if(lastPos.x >= window.innerWidth) 
                el.style.left = (window.innerWidth - lastPos.dx) + "px"; 
             else
-               el.style.left = lastPos.x + "px"; 
+               el.style.left = (lastPos.x > 3 ? lastPos.x : 3) + "px"; 
 
-            if(lastPos.dy < (objectHeight + 50) || lastPos.y > window.innerHeight)
+            if(lastPos.dy < objectHeight)
+               el.style.top = (window.innerHeight - objectHeight) + "px"; 
+            else if(lastPos.y >= window.innerHeight)
                el.style.top = (window.innerHeight - lastPos.dy) + "px"; 
             else 
                el.style.top = lastPos.y + "px";
@@ -2012,7 +2018,16 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
             }
             else {
                // rich editor 
-               var p = target.frameElement;
+               var p = target.frameElement; 
+               if(!p) {
+                  target = XPCNativeWrapper.unwrap(target); 
+                  p = target.frameElement;
+
+                  if(!p)
+                     p = target.parent.frameElement; 
+               }
+
+
 
                xpos = Fireinput.util.findPosX(p);
                ypos = Fireinput.util.findPosY(p);
@@ -2045,7 +2060,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
                   xpos -= (Fireinput.util.getDocumentScrollLeft(p.ownerDocument) + Fireinput.util.getDocumentScrollLeft(p.contentDocument));
                   ypos -= (Fireinput.util.getDocumentScrollTop(p.ownerDocument) + Fireinput.util.getDocumentScrollTop(p.contentDocument));
                }
-               else {
+               else if(p) {
                   xpos -= Fireinput.util.getDocumentScrollLeft(p.ownerDocument);
                   ypos -= Fireinput.util.getDocumentScrollTop(p.ownerDocument);
                }

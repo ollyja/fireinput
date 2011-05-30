@@ -442,16 +442,16 @@ Fireinput.specialChar = Fireinput.extend(Fireinput.specialChar, {
 
        if(!key || key.length <= 0)
           return ivalue; 
-       for(var i = iMode.length-1; i>=0; i--)
+       for(var i = this.iMode.length-1; i>=0; i--)
        {
-          var ikey = 'i' + iMode[i].key; 
+          var ikey = 'i' + this.iMode[i].key; 
           if(ikey.indexOf(key) == 0)
           {
               var list = []; 
-              if((iMode[i].word).fn)
-                 list = (iMode[i].word).fn(); 
+              if((this.iMode[i].word).fn)
+                 list = (this.iMode[i].word).fn.call(this); 
               else 
-                 list = iMode[i].word; 
+                 list = this.iMode[i].word; 
 
               for(var j = 0; list && j<list.length; j++)
               {
@@ -471,16 +471,16 @@ Fireinput.specialChar = Fireinput.extend(Fireinput.specialChar, {
        if(!key || key.length <= 0)
           return ivalue; 
 
-       for(var i = zMode.length-1; i>=0; i--)
+       for(var i = this.zMode.length-1; i>=0; i--)
        {
-          var ikey = 'z' + zMode[i].key; 
+          var ikey = 'z' + this.zMode[i].key; 
           if(ikey.indexOf(key) == 0)
           {
               var list = []; 
-              if((zMode[i].word).fn)
-                 list = (zMode[i].word).fn(); 
+              if((this.zMode[i].word).fn)
+                 list = (this.zMode[i].word).fn.call(this); 
               else 
-                 list = zMode[i].word; 
+                 list = this.zMode[i].word; 
 
               for(var j = 0; list && j<list.length; j++)
               {
@@ -496,21 +496,21 @@ Fireinput.specialChar = Fireinput.extend(Fireinput.specialChar, {
 
 // short key for date, week, time 
 Fireinput.specialChar.iMode = [
-                {key: 'rq', word: { fn: this.getMonth} },
-                {key: 'month', word: { fn: this.getMonth} },
-                {key: 'sj', word: { fn: this.getTime} },
-                {key: 'time', word: { fn: this.getTime} },
-                {key: 'now', word: { fn: this.getTime} },
-                {key: 'xq', word: { fn: this.getWeek} },
-                {key: 'week', word: { fn: this.getWeek} }
+                {key: 'rq', word: { fn: Fireinput.specialChar.getMonth} },
+                {key: 'month', word: { fn: Fireinput.specialChar.getMonth} },
+                {key: 'sj', word: { fn: Fireinput.specialChar.getTime} },
+                {key: 'time', word: { fn: Fireinput.specialChar.getTime} },
+                {key: 'now', word: { fn: Fireinput.specialChar.getTime} },
+                {key: 'xq', word: { fn: Fireinput.specialChar.getWeek} },
+                {key: 'week', word: { fn: Fireinput.specialChar.getWeek} }
 ]; 
 
 Fireinput.specialChar.zMode = [
-                {key: 'rq', word: { fn: this.getMonth} },
-                {key: 'month', word: { fn: this.getMonth} },
-                {key: 'sj', word: { fn: this.getTime} },
-                {key: 'time', word: { fn: this.getTime} },
-                {key: 'now', word: { fn: this.getTime} },
-                {key: 'xq', word: { fn: this.getWeek} }, 
-                {key: 'week', word: { fn: this.getWeek} }
+                {key: 'rq', word: { fn: Fireinput.specialChar.getMonth} },
+                {key: 'month', word: { fn: Fireinput.specialChar.getMonth} },
+                {key: 'sj', word: { fn: Fireinput.specialChar.getTime} },
+                {key: 'time', word: { fn: Fireinput.specialChar.getTime} },
+                {key: 'now', word: { fn: Fireinput.specialChar.getTime} },
+                {key: 'xq', word: { fn: Fireinput.specialChar.getWeek} }, 
+                {key: 'week', word: { fn: Fireinput.specialChar.getWeek} }
 ]; 

@@ -385,7 +385,7 @@ textbox.keyinputbox {
    width: auto;
    margin: 0px !important; 
    padding: 0px 3px 0 0!important; 
-   background-image: -moz-radial-gradient(left top, ellipse farthest-side, rgba(180,218,244,.5), rgba(180,218,244,0));
+   background-image: -moz-radial-gradient(left top, ellipse farthest-side, rgba(180,218,244,1), rgba(180,218,244,.1));
    background-size: 100% 50px;
    background-repeat: no-repeat;
    border:1px solid rgba(0,0,0,0.5) !important;

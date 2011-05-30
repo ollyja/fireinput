@@ -436,6 +436,9 @@ Fireinput.util = Fireinput.extend(Fireinput.util, {
 
     findPosX: function(obj)
     {
+       if(!obj)
+         return 0; 
+
        var curleft = obj.offsetLeft;
        if(obj.offsetParent)
        { 
@@ -453,6 +456,8 @@ Fireinput.util = Fireinput.extend(Fireinput.util, {
 
     findPosY: function(obj)
     {
+       if(!obj)
+         return 0; 
        var curtop = obj.offsetTop;
        if(obj.offsetParent)
        {
