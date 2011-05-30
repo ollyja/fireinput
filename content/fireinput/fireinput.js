@@ -82,31 +82,6 @@ Fireinput.main.imeInterfaceUI = [ /* all button tooltips */ {
 },
 
 {
-   id: "fireinputContextEnhanceWordTable",
-   strKey: "fireinput.wordtable.enhance",
-   attribute: "label"
-},
-{
-   id: "fireinputContextEnableIME",
-   strKey: "fireinput.show.IME",
-   attribute: "label"
-},
-{
-   id: "fireinputContextSwitchEncoding",
-   strKey: "fireinput.encoding.switch",
-   attribute: "label"
-},
-{
-   id: "fireinputContextSwitchZHToBG",
-   strKey: "fireinput.encoding.zhtobg",
-   attribute: "label"
-},
-{
-   id: "fireinputContextSwitchBGToZH",
-   strKey: "fireinput.encoding.bgtozh",
-   attribute: "label"
-},
-{
    id: "menuPinyinQuan",
    strKey: "fireinput.pinyin.quan.label",
    attribute: "label"
@@ -165,11 +140,6 @@ Fireinput.main.imeInterfaceUI = [ /* all button tooltips */ {
    id: "fireinputSearchButton",
    strKey: "fireinput.search.label",
    attribute: "value"
-},
-{
-   id: "fireinputContextSelectImage",
-   strKey: "fireinput.context.select.image",
-   attribute: "label"
 }
 
 ];
@@ -703,6 +673,9 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
             this.updateIMETabSetting("inputstatus", this.myInputStatus); 
             this.updateIMETabSetting("runstatus", true); 
             this.myRunStatus = true; 
+
+            /* adjust position accordingly */
+            this.floatingIMEBarWindowResizeListener(); 
          }
 
       }
@@ -734,10 +707,12 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
             Fireinput.main.floatingMouseMoveListenerBinding = Fireinput.main.floatingIMEBarMouseMoveListener.bind(Fireinput.main);
             Fireinput.main.floatingMouseDownListenerBinding = Fireinput.main.floatingIMEBarMouseDownListener.bind(Fireinput.main);
             Fireinput.main.floatingMouseUpListenerBinding = Fireinput.main.floatingIMEBarMouseUpListener.bind(Fireinput.main);
+            Fireinput.main.floatingWindowResizeListernerBinding = Fireinput.main.floatingIMEBarWindowResizeListener.bind(Fireinput.main);
 
             window.addEventListener("mousedown", Fireinput.main.floatingMouseDownListenerBinding, false);
             window.addEventListener("mousemove", Fireinput.main.floatingMouseMoveListenerBinding, false);
             window.addEventListener("mouseup", Fireinput.main.floatingMouseUpListenerBinding, false);
+            window.addEventListener("resize", Fireinput.main.floatingWindowResizeListernerBinding, false);
 
             // set it to true to only enter here once 
             this.myTabIMEPanelEventStatus = true; 
@@ -1160,6 +1135,13 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    },
 
    fireinputContext: function () {
+      this.loadIMEPrefByID("fireinputContextSwitchBGToZH", "fireinput.encoding.bgtozh", "label");  
+      this.loadIMEPrefByID("fireinputContextSwitchZHToBG", "fireinput.encoding.zhtobg", "label");  
+      this.loadIMEPrefByID("fireinputContextEnableIME", "fireinput.show.IME", "label");  
+      this.loadIMEPrefByID("fireinputContextEnhanceWordTable", "fireinput.wordtable.enhance", "label");  
+      this.loadIMEPrefByID("fireinputContextSwitchEncoding", "fireinput.encoding.switch", "label");  
+      this.loadIMEPrefByID("fireinputContextSelectImage", "fireinput.context.select.image", "label");  
+
       document.getElementById('fireinputContextEnableIME').hidden = (!(gContextMenu.onTextInput) || Fireinput.myRunStatus);
       document.getElementById('fireinputContextSelectImage').hidden = !(gContextMenu.onImage);
       // init add table menu 
@@ -1255,13 +1237,43 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       var target = event.target;
       if(this.floatingIMEBarMoving) {
          if(typeof(this.floatingIMEBarMoving.nx) != 'undefined') {
-            var lastPos = {x: this.floatingIMEBarMoving.nx, y: this.floatingIMEBarMoving.ny};
+            var dx = window.innerWidth - this.floatingIMEBarMoving.nx; 
+            var dy = window.innerHeight - this.floatingIMEBarMoving.ny; 
+            var lastPos = {x: this.floatingIMEBarMoving.nx, y: this.floatingIMEBarMoving.ny, dx: dx, dy: dy};
             Fireinput.pref.save("floatingIMEPanelPos", JSON.stringify(lastPos));
          }
 
          this.floatingIMEBarMoving = false;  
       }
    },
+
+   floatingIMEBarWindowResizeListener: function(event) {
+      if(!this.myRunStatus) return; 
+
+      var lastPos = Fireinput.pref.getDefault("floatingIMEPanelPos"); 
+      if(lastPos) {
+         lastPos = JSON.parse(lastPos); 
+
+         var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
+         var id = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabIndex;
+         var el = document.getElementById(id); 
+         if(el) {
+            var objectWidth = el.boxObject.width < 210 ? 210 : el.boxObject.width; 
+            var objectHeight = el.boxObject.height < 32 ? 32 : el.boxObject.height; 
+            if(lastPos.dx < (objectWidth + 50) || lastPos.x > window.innerWidth) 
+               el.style.left = (window.innerWidth - lastPos.dx) + "px"; 
+            else
+               el.style.left = lastPos.x + "px"; 
+
+            if(lastPos.dy < (objectHeight + 50) || lastPos.y > window.innerHeight)
+               el.style.top = (window.innerHeight - lastPos.dy) + "px"; 
+            else 
+               el.style.top = lastPos.y + "px";
+         }
+      }
+
+
+   }, 
 
    showFloatingIMEBar: function() {
       /* create floating panel */
@@ -1280,15 +1292,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       el.appendChild(this.myRemovedFireinputPanel[Fireinput.IME_BAR_TOP].cloneNode(true)); 
       var e = browserEl.insertBefore(el, gBrowser.selectedBrowser.parentNode);   
       e.className = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + " left";
-
-      var lastPos = Fireinput.pref.getDefault("floatingIMEPanelPos"); 
-      if(lastPos) {
-         lastPos = JSON.parse(lastPos); 
-         el.style.top =  (lastPos.y > window.innerHeight ? (window.innerHeight - 50) : lastPos.y) + "px";
-         el.style.left = (lastPos.x > window.innerWidth ? (window.innerWidth -10): lastPos.x) + "px";
-      }
-      else 
-         el.style.top = Fireinput.util.getBrowserBoxesHeight() + "px";
+      e.style.top = Fireinput.util.getBrowserBoxesHeight() + "px";
 
 
       return true; 
@@ -1316,6 +1320,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       window.removeEventListener("mousedown", Fireinput.main.floatingMouseDownListenerBinding, false);
       window.removeEventListener("mousemove", Fireinput.main.floatingMouseMoveListenerBinding, false);
       window.removeEventListener("mouseup", Fireinput.main.floatingMouseUpListenerBinding, false);
+      window.removeEventListener("resize", Fireinput.main.floatingWindowResizeListernerBinding, false); 
 
       this.myTabIMEPanelEventStatus = false; 
    },
