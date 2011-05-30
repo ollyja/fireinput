@@ -53,7 +53,7 @@ Fireinput.pref.prefNames =
     {name: "inputKeyExactMatch", type: "BOOL", value: false},
     {name: "enableUrlbarInput", type: "BOOL", value: false},
     {name: "enableWordSharing", type: "BOOL", value: true},
-    {name: "enableIMEPanelTab", type: "BOOL", value: true},
+    {name: "floatingIMEPanelPos", type: "STRING", value: null},
 
     /* guest email/name for accessing server resouces */
     {name: "serverGuestName", type: "STRING", value: ''}, 

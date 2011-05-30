@@ -115,6 +115,7 @@
 <toolbox id="navigator-toolbox">
    <toolbar id="fireinputIMEBar_top" toolbarname="Fireinput Chinese IME" hidden="true" checked="true" align="center" fullscreentoolbar="true">
       <hbox id="fireinputOptionBox">
+        <vbox id="fireinputMoveButton" hidden="true"></vbox>
         <toolbarbutton id="fireinputMenu" tooltiptext="Fireinput menu">
             <menupopup id="fireinputMenuItems" position="after_pointer">
               <menuitem id="fireinputHelpMenuEditor" label="" oncommand="Fireinput.help.openEditor()"/>

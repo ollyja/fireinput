@@ -708,6 +708,17 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
 
             // monitor tab select 
             gBrowser.tabContainer.addEventListener("TabSelect", Fireinput.main.tabSelectListenerBinding, true);
+
+            // add drag and move capability for floating ime bar 
+            Fireinput.main.floatingMouseMoveListenerBinding = Fireinput.main.floatingIMEBarMouseMoveListener.bind(Fireinput.main);
+            Fireinput.main.floatingMouseDownListenerBinding = Fireinput.main.floatingIMEBarMouseDownListener.bind(Fireinput.main);
+            Fireinput.main.floatingMouseUpListenerBinding = Fireinput.main.floatingIMEBarMouseUpListener.bind(Fireinput.main);
+
+            window.addEventListener("mousedown", Fireinput.main.floatingMouseDownListenerBinding, false);
+            window.addEventListener("mousemove", Fireinput.main.floatingMouseMoveListenerBinding, false);
+            window.addEventListener("mouseup", Fireinput.main.floatingMouseUpListenerBinding, false);
+
+            // set it to true to only enter here once 
             this.myTabIMEPanelEventStatus = true; 
          }
 
@@ -1175,6 +1186,48 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       return true;
    },
 
+   floatingIMEBarMouseDownListener: function(event) {
+      if(!this.myRunStatus) return; 
+
+            var boxHeight = Fireinput.util.getBrowserBoxesHeight();
+      var target = event.originalTarget; 
+      if(target.id == "fireinputMoveButton") {
+         target = target.parentNode.parentNode;
+         this.floatingIMEBarMoving = {x:target.boxObject.x,y:target.boxObject.y,ex:event.screenX,ey:event.screenY};
+      }
+   },
+
+   floatingIMEBarMouseMoveListener: function(event) {
+      if(!this.myRunStatus) return; 
+
+      if(this.floatingIMEBarMoving) {
+         var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
+         var id = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabIndex;
+         var imeBar = document.getElementById(id); 
+         if(imeBar) {
+            var x = this.floatingIMEBarMoving.x + event.screenX - this.floatingIMEBarMoving.ex; 
+            var y = this.floatingIMEBarMoving.y + event.screenY - this.floatingIMEBarMoving.ey; 
+            imeBar.style.top =  y + "px";
+            imeBar.style.left = x + "px";
+            this.floatingIMEBarMoving.nx = x; 
+            this.floatingIMEBarMoving.ny = y; 
+         }
+      }
+   },
+
+   floatingIMEBarMouseUpListener: function(event) {
+      if(!this.myRunStatus) return; 
+      var target = event.target;
+      if(this.floatingIMEBarMoving) {
+         if(typeof(this.floatingIMEBarMoving.nx) != 'undefined') {
+            var lastPos = {x: this.floatingIMEBarMoving.nx, y: this.floatingIMEBarMoving.ny};
+            Fireinput.pref.save("floatingIMEPanelPos", JSON.stringify(lastPos));
+         }
+
+         this.floatingIMEBarMoving = false;  
+      }
+   },
+
    showFloatingIMEBar: function() {
       /* create floating panel */
       var browserEl = gBrowser.selectedBrowser.parentNode.parentNode;
@@ -1192,39 +1245,36 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       el.appendChild(this.myRemovedFireinputPanel[Fireinput.IME_BAR_TOP].cloneNode(true)); 
       var e = browserEl.insertBefore(el, gBrowser.selectedBrowser.parentNode);   
       e.className = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + " left";
-      el.style.top = this.getBrowserBoxesHeight() + "px";
+
+      var lastPos = Fireinput.pref.getDefault("floatingIMEPanelPos"); 
+      if(lastPos) {
+         lastPos = JSON.parse(lastPos); 
+         el.style.top = lastPos.y + "px";
+         el.style.left = lastPos.x + "px";
+      }
+      else 
+         el.style.top = Fireinput.util.getBrowserBoxesHeight() + "px";
+
+
       return true; 
    },
    
-   getBrowserBoxesHeight: function() {
-      var topPos = 1; 
-      var h = document.getElementById("navigator-toolbox");
-      if(h)
-         topPos += h.boxObject.height;
-
-      if(gBrowser.getNotificationBox()) {
-         var aNotification = gBrowser.getNotificationBox();
-         var notifications = aNotification.allNotifications;
-         for (var n = notifications.length - 1; n >= 0; n--) {
-              if(typeof(notifications[n].boxObject) != 'undefined')
-                topPos += notifications[n].boxObject.height;
-         }
-      }
-      return topPos; 
-   }, 
-
    closeAllFloatingBars: function() {
 
       var floatingPanels = gBrowser.selectedBrowser.parentNode.parentNode.getElementsByClassName("fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING); 
       if(floatingPanels && floatingPanels.length > 0) {
-         for(var i=0; i<floatingPanels.length; i++)
-           /* completely remove it */
+         for(var i=0; i<floatingPanels.length; i++) {
             floatingPanels[i].parentNode.removeChild(floatingPanels[i]); 
-   
+         }
          // also disable all listening events 
          window.removeEventListener('keypress', Fireinput.main.keyPressListenerBinding, true);
          window.removeEventListener('keyup', Fireinput.main.keyUpListenerBinding, true);
          gBrowser.tabContainer.removeEventListener("TabSelect", Fireinput.main.tabSelectListenerBinding, false);
+
+         window.removeEventListener("mousedown", Fireinput.main.floatingMouseDownListenerBinding, false);
+         window.removeEventListener("mousemove", Fireinput.main.floatingMouseMoveListenerBinding, false);
+         window.removeEventListener("mouseup", Fireinput.main.floatingMouseUpListenerBinding, false);
+
          this.myTabIMEPanelEventStatus = false; 
       }
    

@@ -383,30 +383,42 @@ textbox.keyinputbox {
    position: fixed;
    top: 100px;
    width: auto;
-   background-color: -moz-dialog !important;
+   margin: 0px !important; 
+   padding: 0px 3px 0 0!important; 
+   background-image: -moz-radial-gradient(left top, ellipse farthest-side, rgba(180,218,244,.5), rgba(180,218,244,0));
+   background-size: 100% 50px;
+   background-repeat: no-repeat;
    border:1px solid rgba(0,0,0,0.5) !important;
 }
 
+.fireinputIMEBar_floating hbox > toolbarbutton {
+   max-height: 30px !important; 
+}
+
+.fireinputIMEBar_floating #fireinputMoveButton {
+   display: block !important; 
+   width: 1px; 
+   border:1px outset rgba(0,0,0,0.5) !important;
+   cursor:move; 
+   margin-right:5px;
+}
 .fireinputIMEBar_floating[fireinputtheme] {
     -moz-appearance: none !important;
-    border-bottom: 0 !important;
     background-repeat: no-repeat !important;
     background-position: top right !important;
     background-color: transparent !important;
     background-image: none !important;
+    background-size: auto auto !important; 
 }
 
 .fireinputIMEBar_floating[fireinputtheme] menulist, .fireinputIMEBar_floating[fireinputtheme] toolbarseparator {
     -moz-appearance: none !important;
-    border-bottom: 0 !important;
     background-color: transparent !important;
 }
 
 .fireinputIMEBar_floating.right
 {
-   right: 1px;
-   border-top-left-radius: 4px;
-   border-top-right-radius: 4px;
+   right: 3px;
 }
 
 .fireinputIMEBar_floating.right.vscroll
@@ -416,9 +428,7 @@ textbox.keyinputbox {
 
 .fireinputIMEBar_floating.left
 {
-   left: 2px;
-   border-bottom-right-radius: 4px;
-   border-bottom-left-radius: 4px;
+   left: 5px;
 }
 
 .fireinputIMEBar_floating #fireinputSpecialCharMenu

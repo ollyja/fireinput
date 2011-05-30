@@ -656,6 +656,24 @@ Fireinput.util = Fireinput.extend(Fireinput.util, {
           return gs.getChromeWindow().getFireinput().getCurrentIME();
        }
     },
+
+    getBrowserBoxesHeight: function() {
+       var topPos = 1;
+       var h = document.getElementById("navigator-toolbox");
+       if(h)
+         topPos += h.boxObject.height;
+
+       if(gBrowser.getNotificationBox()) {
+         var aNotification = gBrowser.getNotificationBox();
+         var notifications = aNotification.allNotifications;
+         for (var n = notifications.length - 1; n >= 0; n--) {
+              if(typeof(notifications[n].boxObject) != 'undefined')
+                topPos += notifications[n].boxObject.height;
+         }
+       }
+       return topPos;
+    },
+
     getDocument: function()
     {
        var pos = Fireinput.pref.getDefault("IMEBarPosition");

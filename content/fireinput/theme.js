@@ -252,7 +252,6 @@ Fireinput.themes = Fireinput.extend(Fireinput.themes, {
        containerBox.style.color = fontcolor; 
 */
        var pos = Fireinput.pref.getDefault("IMEBarPosition");
-       var pos = Fireinput.pref.getDefault("IMEBarPosition");
        if(pos == Fireinput.IME_BAR_FLOATING) {
          var floatingPanels = gBrowser.selectedBrowser.parentNode.parentNode.getElementsByClassName("fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING);
          if(floatingPanels && floatingPanels.length > 0) {
