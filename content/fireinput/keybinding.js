@@ -203,7 +203,30 @@ Fireinput.keyBinding = Fireinput.extend(Fireinput.keyBinding,
     {
        this.init(); 
     }, 
-    
+
+    modifyToggleIMEKeyCommand: function(reset) {
+       /* update toggleIMEKey action to be close/open ime bar when pos is at floating */
+       for (var i=0; i<this.keyActions.length; i++)
+       {
+          if(this.keyActions[i].name == "toggleIMEKey") {
+            if(!this.keyActions[i]._command) {
+               if(reset)
+                  return; 
+               else {
+                  this.keyActions[i]._command = this.keyActions[i].command
+                  this.keyActions[i].command = "Fireinput.main.toggleFireinput"; 
+               }
+            }
+            else if(reset) {
+               this.keyActions[i].command = this.keyActions[i]._command; 
+            }
+   
+            break; 
+          }
+       }
+       
+    }, 
+
     getKeyCodeByString: function(keyString)
     {
        return this.keyCodeHash.getItem(keyString.toUpperCase());

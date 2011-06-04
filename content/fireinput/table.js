@@ -297,8 +297,8 @@ Fireinput.table = Fireinput.extend(Fireinput.table, {
           method: 'post',
           postBody: params,
           contentType: 'application/x-www-form-urlencoded',
-          onSuccess: function(p) { alert('okay:' + p.responseText);},
-          onFailure: function(p) {alert('fail:' + p.responseText); },
+          onSuccess: function(p) { },
+          onFailure: function(p) { },
         });
 
        ajax.request(Fireinput.SERVER_URL + url);

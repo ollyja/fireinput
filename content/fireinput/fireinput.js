@@ -714,6 +714,9 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
             window.addEventListener("mouseup", Fireinput.main.floatingMouseUpListenerBinding, false);
             window.addEventListener("resize", Fireinput.main.floatingWindowResizeListernerBinding, false);
 
+            // reset key binding 
+            Fireinput.keyBinding.modifyToggleIMEKeyCommand(false); 
+
             // set it to true to only enter here once 
             this.myTabIMEPanelEventStatus = true; 
          }
@@ -1328,6 +1331,9 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       window.removeEventListener("mouseup", Fireinput.main.floatingMouseUpListenerBinding, false);
       window.removeEventListener("resize", Fireinput.main.floatingWindowResizeListernerBinding, false); 
 
+      // reset key binding 
+      Fireinput.keyBinding.modifyToggleIMEKeyCommand(true); 
+
       this.myTabIMEPanelEventStatus = false; 
    },
 
@@ -1584,6 +1590,13 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          halfpunctmode ? this.myIME.setHalfPunctMode() : this.myIME.setFullPunctMode(); 
          this.setPunctMode(); 
 
+      }
+      else {
+         var pos = Fireinput.pref.getDefault("IMEBarPosition");
+         if(pos == Fireinput.IME_BAR_FLOATING) {
+            /* not enabled, just set off */
+            this.myRunStatus = false; 
+         }
       }
 
    },
