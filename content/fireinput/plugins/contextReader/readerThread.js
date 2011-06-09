@@ -92,7 +92,7 @@ Fireinput.contextReader = {
         */
        if(Fireinput.contextReader.validContext(tab)) 
           Fireinput.contextReader.readerMainThread.dispatch(new Fireinput.contextReader.workingThread(
-                  1,gBrowser.getBrowserIndexForDocument(tab.defaultView.content.document), tab.defaultView.document.documentElement.innerHTML),
+                  1,Fireinput.util.getBrowserUniqueId(), tab.defaultView.document.documentElement.innerHTML),
           Fireinput.contextReader.readerMainThread.DISPATCH_NORMAL);
     }, 
        
@@ -200,9 +200,9 @@ Fireinput.contextReader = {
 
 Fireinput.contextReader.readerMainThread = Fireinput.util.xpc.getService("@mozilla.org/thread-manager;1").currentThread; 
 
-Fireinput.contextReader.workingThread = function(threadID, tabindex, context) {
+Fireinput.contextReader.workingThread = function(threadID, tabId, context) {
     this.threadID = threadID;
-    this.tabindex = tabindex; 
+    this.tabId = tabId; 
     this.context = context; 
     this.result = "";
 };
@@ -216,7 +216,7 @@ Fireinput.contextReader.workingThread.prototype = {
 
           // When it's done, call back to the main thread to let it know
           // we're finished.
-          Fireinput.contextReader.readerMainThread.dispatch(new Fireinput.contextReader.mainThread(this.threadID, this.result, this.tabindex), Fireinput.contextReader.readerMainThread.DISPATCH_NORMAL);
+          Fireinput.contextReader.readerMainThread.dispatch(new Fireinput.contextReader.mainThread(this.threadID, this.result, this.tabId), Fireinput.contextReader.readerMainThread.DISPATCH_NORMAL);
 
           // okay, we are almost done, check to see if there are pending events
           try { 
@@ -239,10 +239,10 @@ Fireinput.contextReader.workingThread.prototype = {
 };
 
 
-Fireinput.contextReader.mainThread = function(threadID, result, tabindex) {
+Fireinput.contextReader.mainThread = function(threadID, result, tabId) {
     this.threadID = threadID;
     this.result = result;
-    this.tabindex = tabindex; 
+    this.tabId = tabId; 
 };
 
 Fireinput.contextReader.mainThread.prototype = {
@@ -253,7 +253,7 @@ Fireinput.contextReader.mainThread.prototype = {
             return; 
 
          // it's up to importer to handle it now 
-         Fireinput.importer.processPhraseFromRemoteOnDemand(this.tabindex, this.result, this.result.length);
+         Fireinput.importer.processPhraseFromRemoteOnDemand(this.tabId, this.result, this.result.length);
 
       } catch(err) {
          Components.utils.reportError(err);

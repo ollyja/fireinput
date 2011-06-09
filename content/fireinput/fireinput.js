@@ -639,8 +639,8 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
 
       var toggleOff =  false; 
       if(pos == Fireinput.IME_BAR_FLOATING) {
-         var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
-         var imePanel = document.getElementById("fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabIndex); 
+         var tabId = Fireinput.util.getBrowserUniqueId(); 
+         var imePanel = document.getElementById("fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabId); 
 
          if(imePanel && !imePanel.hidden) {
             imePanel.hidden = true; 
@@ -655,7 +655,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
             var newBar = this.showFloatingIMEBar(); 
             if(newBar) {
                /* reset old setting */
-               this.mySettingTabs[tabIndex] = [];
+               this.mySettingTabs[tabId] = [];
 
                /* reload all other modules */
                this.toggleIMEMenu();
@@ -1209,7 +1209,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    floatingIMEBarMouseDownListener: function(event) {
       if(!this.myRunStatus) return; 
 
-            var boxHeight = Fireinput.util.getBrowserBoxesHeight();
+      var boxHeight = Fireinput.util.getBrowserBoxesHeight();
       var target = event.originalTarget; 
       if(target.id == "fireinputMoveButton") {
          target = target.parentNode.parentNode;
@@ -1221,8 +1221,8 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       if(!this.myRunStatus) return; 
 
       if(this.floatingIMEBarMoving) {
-         var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
-         var id = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabIndex;
+         var tabId = Fireinput.util.getBrowserUniqueId(); 
+         var id = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabId;
          var imeBar = document.getElementById(id); 
          if(imeBar) {
             var x = this.floatingIMEBarMoving.x + event.screenX - this.floatingIMEBarMoving.ex; 
@@ -1257,8 +1257,8 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       if(lastPos) {
          lastPos = JSON.parse(lastPos); 
 
-         var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
-         var id = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabIndex;
+         var tabId = Fireinput.util.getBrowserUniqueId(); 
+         var id = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabId;
          var el = document.getElementById(id); 
 
          if(el) {
@@ -1287,8 +1287,8 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    showFloatingIMEBar: function() {
       /* create floating panel */
       var browserEl = gBrowser.selectedBrowser.parentNode.parentNode;
-      var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
-      var id = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabIndex;
+      var tabId = Fireinput.util.getBrowserUniqueId(); 
+      var id = "fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabId;
       var el = document.getElementById(id); 
       if(el) {
          el.hidden = false; 
@@ -1338,11 +1338,11 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    },
 
    updateIMETabSetting: function(key, value) {
-      var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
-      if(typeof(this.mySettingTabs[tabIndex]) == 'undefined')
-         this.mySettingTabs[tabIndex] = []; 
+      var tabId = Fireinput.util.getBrowserUniqueId(); 
+      if(typeof(this.mySettingTabs[tabId]) == 'undefined')
+         this.mySettingTabs[tabId] = []; 
 
-      this.mySettingTabs[tabIndex][key] = value;
+      this.mySettingTabs[tabId][key] = value;
    },
 
    initIMEBarPosition: function () {
@@ -1541,8 +1541,35 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    },
 
    tabSelectListener: function(event) {
-      var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
-      if(typeof(this.mySettingTabs[tabIndex]) != 'undefined') {
+
+      var pos = Fireinput.pref.getDefault("IMEBarPosition");
+      var tabId = Fireinput.util.getBrowserUniqueId(); 
+
+
+      /* check status */
+      if(pos == Fireinput.IME_BAR_FLOATING) {
+         var imePanel = document.getElementById("fireinputIMEBar_" + pos + "_" + tabId); 
+
+         if(!imePanel) {
+            /* we might be out of sync because of tab drag/drop, reset everything */
+            this.myInputStatus = false;
+            this.myRunStatus = false;
+
+            /* clear history */
+            if(typeof(this.mySettingTabs[tabId]) != 'undefined') 
+               delete(this.mySettingTabs[tabId]);                
+
+            return; 
+         }
+   
+         if(imePanel && typeof(this.mySettingTabs[tabId]) == 'undefined') {
+            this.mySettingTabs[tabId] = []; 
+            
+         }
+      }
+
+
+      if(typeof(this.mySettingTabs[tabId]) != 'undefined') {
          var doc = Fireinput.util.getDocument();
          if(!doc)
             return;
@@ -1556,8 +1583,8 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          }
 
          // zh/big5/en encoding can be anything 
-         this.myInputMode = typeof(this.mySettingTabs[tabIndex].inputmode) == 'undefined' ? 
-                            Fireinput.pref.getDefault("defaultInputEncoding") : this.mySettingTabs[tabIndex].inputmode; 
+         this.myInputMode = typeof(this.mySettingTabs[tabId].inputmode) == 'undefined' ? 
+                            Fireinput.pref.getDefault("defaultInputEncoding") : this.mySettingTabs[tabId].inputmode; 
 
          var modeString = this.getModeString(this.myInputMode);
          this.loadIMEPanelPrefByID("fireinputToggleIMEButton", modeString, "label");
@@ -1567,36 +1594,29 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
             this.myIME.setEncoding(this.myInputMode);
 
          /* zh or en */
-         this.myIMEMode   = typeof(this.mySettingTabs[tabIndex].imemode) == 'undefined' ? 
-                            this.myInputMode : this.mySettingTabs[tabIndex].imemode;
+         this.myIMEMode   = typeof(this.mySettingTabs[tabId].imemode) == 'undefined' ? 
+                            this.myInputMode : this.mySettingTabs[tabId].imemode;
          this.myIMEMode = this.myInputMode== Fireinput.ENCODING_EN ? Fireinput.IME_MODE_EN : Fireinput.IME_MODE_ZH;
 
          /* input status */
-         this.myInputStatus = typeof(this.mySettingTabs[tabIndex].inputstatus) == 'undefined' ?
-                              this.myInputMode != Fireinput.ENCODING_EN : this.mySettingTabs[tabIndex].inputstatus; 
+         this.myInputStatus = typeof(this.mySettingTabs[tabId].inputstatus) == 'undefined' ?
+                              this.myInputMode != Fireinput.ENCODING_EN : this.mySettingTabs[tabId].inputstatus; 
 
-         this.myRunStatus   = typeof(this.mySettingTabs[tabIndex].runstatus) == 'undefined' ?
-                              true : this.mySettingTabs[tabIndex].runstatus; 
+         this.myRunStatus   = typeof(this.mySettingTabs[tabId].runstatus) == 'undefined' ?
+                              !imePanel.hidden : this.mySettingTabs[tabId].runstatus; 
 
-         var halflettermode   = typeof(this.mySettingTabs[tabIndex].lettermode) == 'undefined' ? 
-                              this.myIME.isHalfLetterMode() : this.mySettingTabs[tabIndex].lettermode; 
+         var halflettermode   = typeof(this.mySettingTabs[tabId].lettermode) == 'undefined' ? 
+                              this.myIME.isHalfLetterMode() : this.mySettingTabs[tabId].lettermode; 
 
          halflettermode ? this.myIME.setHalfLetterMode() : this.myIME.setFullLetterMode(); 
          this.setLetterMode(); 
 
-         var halfpunctmode   = typeof(this.mySettingTabs[tabIndex].punctmode) == 'undefined' ? 
-                              this.myIME.isHalfPunctMode() : this.mySettingTabs[tabIndex].punctmode; 
+         var halfpunctmode   = typeof(this.mySettingTabs[tabId].punctmode) == 'undefined' ? 
+                              this.myIME.isHalfPunctMode() : this.mySettingTabs[tabId].punctmode; 
 
          halfpunctmode ? this.myIME.setHalfPunctMode() : this.myIME.setFullPunctMode(); 
          this.setPunctMode(); 
 
-      }
-      else {
-         var pos = Fireinput.pref.getDefault("IMEBarPosition");
-         if(pos == Fireinput.IME_BAR_FLOATING) {
-            /* not enabled, just set off */
-            this.myRunStatus = false; 
-         }
       }
 
    },
@@ -2021,9 +2041,11 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
                   }
                }
 
-               //	        if(ypos > (window.innerHeight - 20))
-               //                   ypos = window.innerHeight - 20; 
-               if (ypos <= 20) ypos = 20;
+               // make sure the ypos is not out of content window 
+               if(ypos > gBrowser.contentWindow.innerHeight - 50)
+                  ypos = gBrowser.contentWindow.innerHeight - 50; 
+
+               if (ypos <= 50) ypos = 50;
                //Fireinput.log.debug(this,"xpos:" + xpos); 
                //Fireinput.log.debug(this,"ypos:" + ypos); 
                var id = document.getElementById("fireinputIMEContainer");
@@ -2100,10 +2122,14 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
                   }
                }
 
+               // make sure the ypos is not out of content window 
+               if(ypos > gBrowser.contentWindow.innerHeight - 50)
+                  ypos = gBrowser.contentWindow.innerHeight - 50; 
+
                // most of rich editors have toolbar on top, put popup on top of toolbar 
                // ypos -= 30;
 
-               if (ypos <= 20) ypos = 20;
+               if (ypos <= 50) ypos = 50;
 
                var id = document.getElementById("fireinputIMEContainer");
                if(!this.myTarget.screenX)
@@ -2148,8 +2174,8 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          //The findchar has to invoked here to resolve the performance issue 
          
          //set tab index, so it has chance to take this browser's on-demand data as high priority 
-         var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
-         this.myIME.setBrowserIndex(tabIndex);
+         var tabId = Fireinput.util.getBrowserUniqueId(); 
+         this.myIME.setBrowserId(tabId);
 
          Fireinput.imePanel.findChar(true);
          return;

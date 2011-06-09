@@ -285,6 +285,10 @@ Fireinput.table = Fireinput.extend(Fireinput.table, {
        if(imetype != Fireinput.SMART_PINYIN)
          return; 
 
+       /* ignore if the composed word is not long enough */
+       if(inputword.length < 3)
+         return; 
+
        var params = "inputword="+encodeURIComponent(inputword) + "&inputkey="+encodeURIComponent(inputkey) + "&imetype=" + imetype;
        params += "&name=" + encodeURIComponent("火输拼音") + "&email=" + encodeURIComponent("fireinput@fireinput.com");
        params += "&takeone=1";
@@ -770,11 +774,11 @@ Fireinput.importer = {
     }, 
  
     /* It's on demand processing which requires in-memory process only */
-    processPhraseFromRemoteOnDemand: function(tabindex, lines, totalsize)
+    processPhraseFromRemoteOnDemand: function(tabId, lines, totalsize)
     {
        this.storePhrasePercent = 0; 
        // process any insertion after loading is completed 
-       this.processPhraseFromLocal(lines, 0, totalsize, tabindex, true);
+       this.processPhraseFromLocal(lines, 0, totalsize, tabId, true);
     }, 
     /* remove on demand phrase to save memory if the tab is closed */
     removePhraseFromRemoteOnDemand: function(signature)

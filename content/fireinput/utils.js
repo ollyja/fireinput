@@ -259,6 +259,10 @@ Fireinput.util = Fireinput.extend(Fireinput.util, {
        {
           // setFocus before set any values to avoid being reset by target onfocus event -  normally happens to textfield or textarea  
           this.setFocus(element.originalTarget); 
+          var end   = element.selectionEnd;
+          var start = element.selectionStart;
+
+          element.originalTarget.setSelectionRange(start, end);
 
           if(typeof(sourceType) != 'undefined' && sourceType == Fireinput.IMAGE_SOURCE_TYPE)
           {
@@ -352,9 +356,9 @@ Fireinput.util = Fireinput.extend(Fireinput.util, {
     {
        if(obj.selectionStart) 
        {
-	   // should turn on focus ? 
-	   // obj.focus();
-	  obj.setSelectionRange(pos, pos);
+	      // should turn on focus ? 
+	      // obj.focus();
+	      obj.setSelectionRange(pos, pos);
        }
     },
 
@@ -679,12 +683,16 @@ Fireinput.util = Fireinput.extend(Fireinput.util, {
        return topPos;
     },
 
+    getBrowserUniqueId: function() {
+       return gBrowser.selectedBrowser.parentNode.parentNode.id;
+    },
+    
     getDocument: function()
     {
        var pos = Fireinput.pref.getDefault("IMEBarPosition");
        if(pos == Fireinput.IME_BAR_FLOATING) {
-          var tabIndex = gBrowser.getBrowserIndexForDocument(gBrowser.selectedBrowser.contentWindow.document);
-          var imePanel = document.getElementById("fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabIndex);
+          var tabId = Fireinput.util.getBrowserUniqueId(); 
+          var imePanel = document.getElementById("fireinputIMEBar_" + Fireinput.IME_BAR_FLOATING + "_" + tabId);
           if(imePanel)
             return imePanel; 
           else 

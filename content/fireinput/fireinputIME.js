@@ -9,7 +9,7 @@ Fireinput.imeEngine.prototype =
     name: null, 
     letterMode: Fireinput.HALF_LETTER_MODE, 
     punctMode: Fireinput.FULL_PUNCT_MODE, 
-    tabIndex: -1, 
+    tabId: -1, 
 
     getName: function ()
     {
@@ -234,9 +234,9 @@ Fireinput.imeEngine.prototype =
        return 0; 
     }, 
 
-    setBrowserIndex: function(i)
+    setBrowserId: function(i)
     {
-       this.tabIndex = i; 
+       this.tabId = i; 
     }
     
 };

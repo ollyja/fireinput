@@ -1702,8 +1702,8 @@ Fireinput.smartPinyinEngine.prototype =  Fireinput.extend(new Fireinput.imeEngin
 
     searchOnDemandPhrase: function(initialKeys) 
     {
-      if(this.onDemandPhraseCodeHash && this.onDemandPhraseCodeHash.hasItem(this.tabIndex)) {
-          var phraseHash = this.onDemandPhraseCodeHash.getItem(this.tabIndex);
+      if(this.onDemandPhraseCodeHash && this.onDemandPhraseCodeHash.hasItem(this.tabId)) {
+          var phraseHash = this.onDemandPhraseCodeHash.getItem(this.tabId);
           var nowPhrase = phraseHash.getItem(initialKeys);
           return nowPhrase;
       }
