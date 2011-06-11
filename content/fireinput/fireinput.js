@@ -145,7 +145,7 @@ Fireinput.main.imeInterfaceUI = [ /* all button tooltips */ {
 ];
 
 
-Fireinput.main.imeInputModeValues = [{
+Fireinput.main.imeEncodingModeValues = [{
    name: Fireinput.ENCODING_ZH,
    label: "fireinput.method.chinese.value"
 },
@@ -176,7 +176,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    myIMEMode: Fireinput.IME_MODE_ZH,
 
    // Input mode. It will decide which encoding will be used(Simplified Chinese or Big5)
-   myInputMode: Fireinput.ENCODING_ZH,
+   myEncodingMode: Fireinput.ENCODING_ZH,
 
    // caret focus event 
    myEvent: null,
@@ -668,7 +668,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
                this.displayAjaxService(true);
             }
 
-            this.setInputMode(Fireinput.pref.getDefault("defaultInputEncoding"));
+            this.setEncodingMode(Fireinput.pref.getDefault("defaultInputEncoding"));
             this.myInputStatus = this.myIMEMode != Fireinput.IME_MODE_EN; 
             this.updateIMETabSetting("inputstatus", this.myInputStatus); 
             this.updateIMETabSetting("runstatus", true); 
@@ -731,7 +731,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          window.addEventListener('keyup', Fireinput.main.keyUpListenerBinding, true);
          gBrowser.tabContainer.addEventListener("TabSelect", Fireinput.main.tabSelectListenerBinding, true);
          this.myInputStatus = true;
-         this.setInputMode(Fireinput.pref.getDefault("defaultInputEncoding"));
+         this.setEncodingMode(Fireinput.pref.getDefault("defaultInputEncoding"));
          this.displayAjaxService(forceLoad == undefined ? false : forceLoad);
       }
       else {
@@ -785,8 +785,8 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    toggleIME: function () {
       if (!this.myRunStatus) return;
 
-      if (this.myInputStatus) this.setInputMode(Fireinput.ENCODING_EN);
-      else this.setInputMode(this.myInputMode);
+      if (this.myInputStatus) this.setEncodingMode(Fireinput.ENCODING_EN);
+      else this.setEncodingMode(this.myEncodingMode);
    },
 
    resetIME: function () {
@@ -900,7 +900,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       this.myIMESchema = method;
 
       // enable zh input 
-      this.setInputMode(Fireinput.pref.getDefault("defaultInputEncoding"));
+      this.setEncodingMode(Fireinput.pref.getDefault("defaultInputEncoding"));
 
       // set num of word choice 
       this.myIME.setNumWordSelection(Fireinput.pref.getDefault("wordselectionNum"));
@@ -930,12 +930,12 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    },
 
    getModeString: function (mode) {
-      for (var i = this.imeInputModeValues.length - 1; i >= 0; i--) {
-         if (mode == this.imeInputModeValues[i].name) return this.imeInputModeValues[i].label;
+      for (var i = this.imeEncodingModeValues.length - 1; i >= 0; i--) {
+         if (mode == this.imeEncodingModeValues[i].name) return this.imeEncodingModeValues[i].label;
       }
 
       // otherwise return first one 
-      return this.imeInputModeValues[0].label;
+      return this.imeEncodingModeValues[0].label;
 
    },
 
@@ -947,7 +947,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
 
       switch (mode) {
       case Fireinput.IME_MODE_ZH:
-         var modeString = this.getModeString(this.myInputMode);
+         var modeString = this.getModeString(this.myEncodingMode);
          this.loadIMEPanelPrefByID("fireinputToggleIMEButton", modeString, "label");
          // we need to check whether the schema has been enabled or not 
          this.isIMESchemaEnabled();
@@ -981,13 +981,13 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       }
    },
 
-   setInputMode: function (mode) {
+   setEncodingMode: function (mode) {
       var modeString = this.getModeString(mode);
       this.loadIMEPanelPrefByID("fireinputToggleIMEButton", modeString, "label");
       switch (mode) {
       case Fireinput.ENCODING_ZH:
       case Fireinput.ENCODING_BIG5:
-         this.myInputMode = mode;
+         this.myEncodingMode = mode;
          this.myIMEMode = Fireinput.IME_MODE_ZH;
          this.myIME.setEncoding(mode);
          // this.enableIME(); 
@@ -1002,45 +1002,45 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       }
 
       /* update per tab setting if necessary */
-      this.updateIMETabSetting("inputmode", this.myInputMode); 
+      this.updateIMETabSetting("encodingmode", this.myEncodingMode); 
       this.updateIMETabSetting("imemode", this.myIMEMode); 
    },
 
-   toggleInputMode: function () {
+   toggleEncodingMode: function () {
       if (this.myIMEMode == Fireinput.IME_MODE_EN) {
-         this.setInputMode(Fireinput.ENCODING_ZH);
+         this.setEncodingMode(Fireinput.ENCODING_ZH);
          Fireinput.pref.save("defaultInputEncoding", Fireinput.ENCODING_ZH);
 
          return;
       }
 
-      switch (this.myInputMode) {
+      switch (this.myEncodingMode) {
       case Fireinput.ENCODING_ZH:
-         this.setInputMode(Fireinput.ENCODING_BIG5);
+         this.setEncodingMode(Fireinput.ENCODING_BIG5);
          // remember encoding 
          Fireinput.pref.save("defaultInputEncoding", Fireinput.ENCODING_BIG5);
          break;
 
       case Fireinput.ENCODING_BIG5:
-         this.setInputMode(Fireinput.ENCODING_EN);
+         this.setEncodingMode(Fireinput.ENCODING_EN);
          break;
       default:
-         this.setInputMode(Fireinput.ENCODING_ZH);
+         this.setEncodingMode(Fireinput.ENCODING_ZH);
       }
    },
 
    toggleEncodingMode: function () {
       if (this.myIMEMode == Fireinput.IME_MODE_EN) return;
 
-      switch (this.myInputMode) {
+      switch (this.myEncodingMode) {
       case Fireinput.ENCODING_ZH:
-         this.setInputMode(Fireinput.ENCODING_BIG5);
+         this.setEncodingMode(Fireinput.ENCODING_BIG5);
          // remember encoding 
          Fireinput.pref.save("defaultInputEncoding", Fireinput.ENCODING_BIG5);
          break;
 
       case Fireinput.ENCODING_BIG5:
-         this.setInputMode(Fireinput.ENCODING_ZH);
+         this.setEncodingMode(Fireinput.ENCODING_ZH);
          Fireinput.pref.save("defaultInputEncoding", Fireinput.ENCODING_ZH);
          break;
       }
@@ -1545,7 +1545,6 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       var pos = Fireinput.pref.getDefault("IMEBarPosition");
       var tabId = Fireinput.util.getBrowserUniqueId(); 
 
-
       /* check status */
       if(pos == Fireinput.IME_BAR_FLOATING) {
          var imePanel = document.getElementById("fireinputIMEBar_" + pos + "_" + tabId); 
@@ -1582,37 +1581,43 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
             element.setAttribute("value", schema);
          }
 
-         // zh/big5/en encoding can be anything 
-         this.myInputMode = typeof(this.mySettingTabs[tabId].inputmode) == 'undefined' ? 
-                            Fireinput.pref.getDefault("defaultInputEncoding") : this.mySettingTabs[tabId].inputmode; 
+         // if it's not floating position, default to en mode for new tab 
+         var imeMode = (pos == Fireinput.IME_BAR_FLOATING) ? Fireinput.IME_MODE_ZH : Fireinput.IME_MODE_EN; 
 
-         var modeString = this.getModeString(this.myInputMode);
+         // check ime mode, either zh or en 
+         this.myIMEMode   = typeof(this.mySettingTabs[tabId]['imemode']) == 'undefined' ? 
+                            Fireinput.IME_MODE_ZH : this.mySettingTabs[tabId]['imemode'];
+
+
+         // zh/big5/en encoding can be anything 
+         this.myEncodingMode = typeof(this.mySettingTabs[tabId]['encodingmode']) == 'undefined' ? 
+                            Fireinput.pref.getDefault("defaultInputEncoding") : this.mySettingTabs[tabId]['encodingmode']; 
+
+         var modeString = this.getModeString(this.myEncodingMode);
+         if(this.myIMEMode != Fireinput.IME_MODE_ZH) 
+            modeString = this.getModeString(this.myIMEMode);
+         else {
+            // update encoding mode 
+            this.myIME.setEncoding(this.myEncodingMode);
+         }
+
          this.loadIMEPanelPrefByID("fireinputToggleIMEButton", modeString, "label");
 
-         /* update encoding */
-         if(this.myInputMode != Fireinput.ENCODING_EN)
-            this.myIME.setEncoding(this.myInputMode);
-
-         /* zh or en */
-         this.myIMEMode   = typeof(this.mySettingTabs[tabId].imemode) == 'undefined' ? 
-                            this.myInputMode : this.mySettingTabs[tabId].imemode;
-         this.myIMEMode = this.myInputMode== Fireinput.ENCODING_EN ? Fireinput.IME_MODE_EN : Fireinput.IME_MODE_ZH;
-
          /* input status */
-         this.myInputStatus = typeof(this.mySettingTabs[tabId].inputstatus) == 'undefined' ?
-                              this.myInputMode != Fireinput.ENCODING_EN : this.mySettingTabs[tabId].inputstatus; 
+         this.myInputStatus = typeof(this.mySettingTabs[tabId]['inputstatus']) == 'undefined' ?
+                              true : this.mySettingTabs[tabId]['inputstatus']; 
 
-         this.myRunStatus   = typeof(this.mySettingTabs[tabId].runstatus) == 'undefined' ?
-                              !imePanel.hidden : this.mySettingTabs[tabId].runstatus; 
+         this.myRunStatus   = typeof(this.mySettingTabs[tabId]['runstatus']) == 'undefined' ?
+                              !imePanel.hidden : this.mySettingTabs[tabId]['runstatus']; 
 
-         var halflettermode   = typeof(this.mySettingTabs[tabId].lettermode) == 'undefined' ? 
-                              this.myIME.isHalfLetterMode() : this.mySettingTabs[tabId].lettermode; 
+         var halflettermode   = typeof(this.mySettingTabs[tabId]['lettermode']) == 'undefined' ? 
+                              this.myIME.isHalfLetterMode() : this.mySettingTabs[tabId]['lettermode']; 
 
          halflettermode ? this.myIME.setHalfLetterMode() : this.myIME.setFullLetterMode(); 
          this.setLetterMode(); 
 
-         var halfpunctmode   = typeof(this.mySettingTabs[tabId].punctmode) == 'undefined' ? 
-                              this.myIME.isHalfPunctMode() : this.mySettingTabs[tabId].punctmode; 
+         var halfpunctmode   = typeof(this.mySettingTabs[tabId]['punctmode']) == 'undefined' ? 
+                              this.myIME.isHalfPunctMode() : this.mySettingTabs[tabId]['punctmode']; 
 
          halfpunctmode ? this.myIME.setHalfPunctMode() : this.myIME.setFullPunctMode(); 
          this.setPunctMode(); 

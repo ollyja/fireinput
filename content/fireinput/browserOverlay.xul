@@ -239,7 +239,7 @@
               <menuitem id="menuZhengma" label="" value="9" oncommand="Fireinput.pref.save('defaultInputMethod', 9)"/>
           </menupopup>
         </toolbarbutton>
-        <toolbarbutton id="fireinputToggleIMEButton" label="" tooltiptext="" oncommand="Fireinput.main.toggleInputMode();"/>
+        <toolbarbutton id="fireinputToggleIMEButton" label="" tooltiptext="" oncommand="Fireinput.main.toggleEncodingMode();"/>
         <toolbarbutton id="fireinputToggleHalfButton" tooltiptext="" oncommand="Fireinput.main.toggleLetterMode();"/>
         <toolbarbutton id="fireinputTogglePunctButton" tooltiptext="" oncommand="Fireinput.main.togglePunctMode();"/>
 
@@ -402,7 +402,7 @@
               <menuitem id="menuZhengma" label="" value="9" oncommand="Fireinput.pref.save('defaultInputMethod', 9)"/>
           </menupopup>
         </toolbarbutton>
-        <toolbarbutton id="fireinputToggleIMEButton" label="" tooltiptext="" oncommand="Fireinput.main.toggleInputMode();"/>
+        <toolbarbutton id="fireinputToggleIMEButton" label="" tooltiptext="" oncommand="Fireinput.main.toggleEncodingMode();"/>
         <toolbarbutton id="fireinputToggleHalfButton" tooltiptext="" oncommand="Fireinput.main.toggleLetterMode();"/>
         <toolbarbutton id="fireinputTogglePunctButton" tooltiptext="" oncommand="Fireinput.main.togglePunctMode();"/>
 
