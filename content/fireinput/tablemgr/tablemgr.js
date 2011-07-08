@@ -733,8 +733,8 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
           method: 'post',
           postBody: params,
           contentType: 'application/x-www-form-urlencoded',
-          onSuccess: function(p) { self.addWordServerSuccess(p); self.disableButton("addNewServer", false);},
-          onFailure: function(p) { self.addWordServerFailure(p); self.disableButton("addNewServer", false);}
+          onSuccess: function(p) { alert(p.responseText); self.addWordServerSuccess(p); self.disableButton("addNewServer", false);},
+          onFailure: function(p) { alert(p.responseText); self.addWordServerFailure(p); self.disableButton("addNewServer", false);}
         });
 
        this.disableButton("addNewServer", true);
@@ -941,6 +941,14 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
           document.newWordForm.inputkey.value = fcharTone; 
           document.newWordForm.hiddennumtoneinputkey.value = fnumTone;
           document.newWordForm.hiddenchartoneinputkey.value = fcharTone;
+
+          document.newWordForm.realname.value = Fireinput.pref.getDefault("serverGuestName"); 
+          document.newWordForm.realname.defvalue = document.newWordForm.realname.value; 
+          document.newWordForm.email.value = Fireinput.pref.getDefault("serverGuestId"); 
+          document.newWordForm.email.defvalue = document.newWordForm.email.value; 
+          $("#userInfoData").show(); 
+          $("#keyConfirm").show();   
+
           if(charToneKeyList.length > 1)
           {
              $("#toggleKeySuggestion").show(); 

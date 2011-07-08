@@ -696,7 +696,14 @@ Fireinput.zhengmaEngine.prototype =  Fireinput.extend(new Fireinput.imeEngine(),
     storeOneUpdatePhraseWithFreq: function(phrase, key, freq) 
     {
        this.updateUserCodeValue(key, phrase, freq); 
-    }   
+    },
+
+    isNewPhrase: function(work, key)
+    {
+       return false;
+    }
+
+
 });
 
 

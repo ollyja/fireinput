@@ -1780,6 +1780,19 @@ Fireinput.smartPinyinEngine.prototype =  Fireinput.extend(new Fireinput.imeEngin
          return null; 
 
        return this.codePinyinHash.getItem(word);
+    },
+
+    isNewPhrase: function(word, key)
+    {
+       var chars = word.match(/[\D\.]+/g)[0];
+       /* check whether the phrase is not from local table file */
+      if(this.userCodeHash && this.userCodeHash.hasItem(chars + ":" + key))
+      {
+         var attr = this.userCodeHash.getItem(chars + ":" + key); 
+         return attr && (typeof(attr.newPhrase) != 'undefined') && attr.newPhrase; 
+      }
+
+      return false; 
     }
 
 });

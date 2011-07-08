@@ -521,13 +521,23 @@ Fireinput.imePanel =
              //This is new word. Update to server 
              if(Fireinput.pref.getDefault("enableWordSharing")) {
                var w = Fireinput.util.unicode.getUnicodeString((composeWord.word + word).replace(/\d+/g, ""));
-               Fireinput.table.addWordToServer(w, composeWord.key + " " + key, 
-                                               Fireinput.pref.getDefault("defaultInputMethod"));
+               // The key might have number from number tone 
+               var k = (composeWord.key + " " + key).replace(/\d+/g, "");
+               Fireinput.table.addWordToServer(w, k, Fireinput.pref.getDefault("defaultInputMethod"));
 
              }
           }
-          else if(this.myUpdateFreq && ufreq)
+          else if(this.myUpdateFreq && ufreq) {
              Fireinput.main.getCurrentIME().updateFrequency(word, key);
+
+             // This is not local phrase. Update to server 
+             if(Fireinput.main.getCurrentIME().isNewPhrase(word, key)) {
+                var w = Fireinput.util.unicode.getUnicodeString(word.replace(/\d+/g, ""));
+                // The key might have number from number tone 
+                var k = (composeWord.key + " " + key).replace(/\d+/g, "");
+                Fireinput.table.addWordToServer(w, k, Fireinput.pref.getDefault("defaultInputMethod"));
+             }
+          }
 
           if(this.mySaveHistory)
              Fireinput.longTable.notify(Fireinput.main.getTarget());
