@@ -262,6 +262,12 @@ Fireinput.util = Fireinput.extend(Fireinput.util, {
           var end   = element.selectionEnd;
           var start = element.selectionStart;
 
+          // set original text value back 
+          if(typeof(element.currentText) != 'undefined')
+             element.originalTarget.value = element.currentText; 
+
+          // preserve the previous selection range 
+          
           element.originalTarget.setSelectionRange(start, end);
 
           if(typeof(sourceType) != 'undefined' && sourceType == Fireinput.IMAGE_SOURCE_TYPE)
@@ -354,7 +360,7 @@ Fireinput.util = Fireinput.extend(Fireinput.util, {
 
     setCaretTo: function (obj, pos) 
     {
-       if(obj.selectionStart) 
+       if(typeof(obj.selectionStart) != 'undefined')
        {
 	      // should turn on focus ? 
 	      // obj.focus();

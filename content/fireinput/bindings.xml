@@ -78,6 +78,7 @@
             var modifiers = this.getAttribute('modifiers');
             var keyCode = this.getAttribute('keycode');
             if (keyCode == '') return '未设';
+
             str += (modifiers & Event.CONTROL_MASK)?'Ctrl+':'';
             str += (modifiers & Event.ALT_MASK)?'Alt+':'';
             str += (modifiers & Event.SHIFT_MASK)?'Shift+':'';
@@ -93,11 +94,6 @@
       <method name="onKeyDown">
         <parameter name="event"/>
         <body>
-          if (event.keyCode == Event.prototype.DOM_VK_META ||
-              event.keyCode == Event.prototype.DOM_VK_SHIFT ||
-              event.keyCode == Event.prototype.DOM_VK_CONTROL ||
-              event.keyCode == Event.prototype.DOM_VK_ALT)
-              return;
           this.setKey(event);
           this.stopEvent(event);
         </body>
@@ -116,14 +112,25 @@
       <method name="setKey">
         <parameter name="event"/>
         <body>
+          <![CDATA[
           if(event.keyCode=="8"){
             this.updateAttr('keycode',"");
             this.updateAttr('modifiers',0);
           }else{
+
             this.updateAttr('keycode',event.keyCode);
-            this.updateAttr('modifiers',this.getModifiers(event));
+
+            if (event.keyCode == KeyEvent.DOM_VK_META ||
+                event.keyCode == KeyEvent.DOM_VK_SHIFT ||
+                event.keyCode == KeyEvent.DOM_VK_CONTROL ||
+                event.keyCode == KeyEvent.DOM_VK_ALT) {
+               // don't set modifiers 
+               this.updateAttr('modifiers', 0);
+            } else
+               this.updateAttr('modifiers',this.getModifiers(event));
           }
           this.updateDisplay();
+          ]]>
         </body>
       </method>
 

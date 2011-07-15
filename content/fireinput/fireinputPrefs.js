@@ -54,6 +54,8 @@ Fireinput.pref.prefNames =
     {name: "enableUrlbarInput", type: "BOOL", value: false},
     {name: "enableWordSharing", type: "BOOL", value: true},
     {name: "floatingIMEPanelPos", type: "STRING", value: null},
+    {name: "letterModeFollowIME", type: "BOOL", value: true},
+    {name: "punctModeFollowIME", type: "BOOL", value: true},
 
     /* guest email/name for accessing server resouces */
     {name: "serverGuestName", type: "STRING", value: ''}, 
@@ -115,7 +117,9 @@ Fireinput.pref.prefInterfaceUI = [
             {id: "fireinputAMB", strKey: "fireinput.pref.amb.label", attribute: "label"},
             {id: "imeAdvancedConfig", strKey: "fireinput.pref.ime.advanced.label", attribute: "label"},
             {id: "fireinputConfigHotKey", strKey: "fireinput.pref.hotkey.config.label", attribute: "label"},
-            {id: "fireinputKeyExactMatch", strKey: "fireinput.pref.amb.inputkey.match", attribute: "label"}
+            {id: "fireinputKeyExactMatch", strKey: "fireinput.pref.amb.inputkey.match", attribute: "label"},
+            {id: "fireinputLetterModeFollowIME", strKey: "fireinput.pref.letter.mode.followime", attribute: "label"},
+            {id: "fireinputPunctModeFollowIME", strKey: "fireinput.pref.punct.mode.followime", attribute: "label"}
       ]; 
 
 

@@ -186,7 +186,21 @@ Fireinput.keyBinding = Fireinput.extend(Fireinput.keyBinding,
        for (var i=0; i<this.keyActions.length; i++)
        {
           this.keyActions[i].value = Fireinput.pref.getDefault(this.keyActions[i].name); 
-          this.keyValueHash.setItem(this.keyActions[i].value, this.keyActions[i]); 
+          if(this.keyValueHash.hasItem(this.keyActions[i].value)) {
+            var pAction = this.keyValueHash.getItem(this.keyActions[i].value);
+            if(Array.isArray(pAction))
+               pAction[pAction.length] = this.keyActions[i]; 
+            else {
+               pArray = [];
+               pArray[pArray.length] = pAction; 
+               pArray[pArray.length] = this.keyActions[i];
+               this.keyValueHash.setItem(this.keyActions[i].value, pArray);
+            }
+            
+          }
+          else 
+            this.keyValueHash.setItem(this.keyActions[i].value, this.keyActions[i]); 
+
           this.keyValueHash.setItem(this.keyActions[i].name, this.keyActions[i]); 
        }
 
@@ -248,7 +262,12 @@ Fireinput.keyBinding = Fireinput.extend(Fireinput.keyBinding,
           if(this.keyValueHash.hasItem(keyCode))
           {
              var keyAction = this.keyValueHash.getItem(keyCode); 
-             keyAction.disabled = true; 
+             if(Array.isArray(keyAction)) {
+               for(var s in keyAction)
+                  keyAction[s].disabled = true; 
+             }
+             else 
+               keyAction.disabled = true; 
           }
        }
 
@@ -287,6 +306,16 @@ Fireinput.keyBinding = Fireinput.extend(Fireinput.keyBinding,
     {
        var keyvalue = this.getEncodedKeyEvent(event); 
        var keyAction = this.keyValueHash.getItem(keyvalue); 
+       if(Array.isArray(keyAction)) {
+          for(var s in keyAction)
+               this.invokeKeyEvent(event, keyAction[s]); 
+       }
+       else
+          this.invokeKeyEvent(event, keyAction); 
+    },
+
+    invokeKeyEvent: function(event, keyAction)
+    {
        if(keyAction && keyAction.command)
        {
           event.preventDefault();
@@ -333,6 +362,12 @@ Fireinput.keyBinding = Fireinput.extend(Fireinput.keyBinding,
 
     getEncodedModifierEvent: function(event) 
     {
+       if (event.keyCode == KeyEvent.DOM_VK_META ||
+           event.keyCode == KeyEvent.DOM_VK_SHIFT ||
+           event.keyCode == KeyEvent.DOM_VK_CONTROL ||
+           event.keyCode == KeyEvent.DOM_VK_ALT) 
+            return 0; 
+
        return event.altKey   * Event.ALT_MASK     |
               event.ctrlKey  * Event.CONTROL_MASK |
               event.shiftKey * Event.SHIFT_MASK   |

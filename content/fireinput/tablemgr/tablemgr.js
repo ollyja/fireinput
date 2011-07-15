@@ -733,8 +733,8 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
           method: 'post',
           postBody: params,
           contentType: 'application/x-www-form-urlencoded',
-          onSuccess: function(p) { alert(p.responseText); self.addWordServerSuccess(p); self.disableButton("addNewServer", false);},
-          onFailure: function(p) { alert(p.responseText); self.addWordServerFailure(p); self.disableButton("addNewServer", false);}
+          onSuccess: function(p) { self.addWordServerSuccess(p); self.disableButton("addNewServer", false);},
+          onFailure: function(p) { self.addWordServerFailure(p); self.disableButton("addNewServer", false);}
         });
 
        this.disableButton("addNewServer", true);
@@ -1376,7 +1376,7 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
                   }          
                   
               },
-             onFailure: function(p) {  alert(p.responseText); cb.call(this, false); }
+             onFailure: function(p) {  cb.call(this, false); }
           });
      ajax.request(Fireinput.SERVER_URL + item[1] + "/" + item[0]); 
    }, 

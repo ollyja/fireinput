@@ -289,7 +289,13 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
    getIME: function () {
       var gs = Fireinput.util.xpc.getService("@fireinput.com/fireinput;1", "nsIFireinput");
 
-      var fi = gs.getChromeWindow() ? gs.getChromeWindow().getFireinput() : null;
+      var fi = null; 
+      try { 
+         var win = gs.getChromeWindow(); 
+         if(win)
+            fi = win.getFireinput(); 
+      }
+      catch(ex) { }
 
       if (!fi) {
          window.getFireinput = function () {
@@ -1027,24 +1033,6 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       default:
          this.setEncodingMode(Fireinput.ENCODING_ZH);
       }
-   },
-
-   toggleEncodingMode: function () {
-      if (this.myIMEMode == Fireinput.IME_MODE_EN) return;
-
-      switch (this.myEncodingMode) {
-      case Fireinput.ENCODING_ZH:
-         this.setEncodingMode(Fireinput.ENCODING_BIG5);
-         // remember encoding 
-         Fireinput.pref.save("defaultInputEncoding", Fireinput.ENCODING_BIG5);
-         break;
-
-      case Fireinput.ENCODING_BIG5:
-         this.setEncodingMode(Fireinput.ENCODING_ZH);
-         Fireinput.pref.save("defaultInputEncoding", Fireinput.ENCODING_ZH);
-         break;
-      }
-
    },
 
    setLetterMode: function() {
@@ -1976,6 +1964,9 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       // remember the caret position before focus switch 
       // only for HTMLInputElement or TextAreaElement 
       if (this.myTarget.target.setSelectionRange) {
+         // before leaving the curren input box, remember current text. some inputbox do onblur so we need to prevent value resetting 
+         this.myTarget.currentText = this.myTarget.originalTarget.value; 
+
          this.myTarget.selectionStart = this.myTarget.target.selectionStart;
          this.myTarget.selectionEnd = this.myTarget.target.selectionEnd;
 
@@ -2053,6 +2044,7 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
                if (ypos <= 50) ypos = 50;
                //Fireinput.log.debug(this,"xpos:" + xpos); 
                //Fireinput.log.debug(this,"ypos:" + ypos); 
+               
                var id = document.getElementById("fireinputIMEContainer");
                id.openPopup(document.documentElement, "after_pointer", xpos, ypos);
             }
@@ -2151,7 +2143,9 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
             // thus either idf.selectionEnd or idf.value will throw exception. It only happens when fireinput is loaded first time 
             var idf = document.getElementById("fireinputField");
             Fireinput.imePanel.setInputChar(key);
-            idf.value = key;
+
+            idf.value = key; 
+            Fireinput.util.setCaretTo(idf, 1);
          }
          else {
             var idf = document.getElementById("fireinputField");
@@ -2181,7 +2175,6 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          //set tab index, so it has chance to take this browser's on-demand data as high priority 
          var tabId = Fireinput.util.getBrowserUniqueId(); 
          this.myIME.setBrowserId(tabId);
-
          Fireinput.imePanel.findChar(true);
          return;
       }

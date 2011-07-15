@@ -197,6 +197,12 @@
 
                    <menuitem id="fireinputAutoLoad" label="" type="checkbox" checked="true"
                            oncommand="Fireinput.pref.save(this)" option="autoLoad"/>
+
+                   <menuitem id="fireinputLetterModeFollowIME" label="" type="checkbox" checked="true"
+                           oncommand="Fireinput.pref.save(this)" option="letterModeFollowIME"/>
+
+                   <menuitem id="fireinputPunctModeFollowIME" label="" type="checkbox" checked="true"
+                           oncommand="Fireinput.pref.save(this)" option="punctModeFollowIME"/>
                 </menupopup>
               </menu>
 
@@ -360,6 +366,12 @@
 
                    <menuitem id="fireinputAutoLoad" label="" type="checkbox" checked="true"
                            oncommand="Fireinput.pref.save(this)" option="autoLoad"/>
+
+                   <menuitem id="fireinputLetterModeFollowIME" label="" type="checkbox" checked="true"
+                           oncommand="Fireinput.pref.save(this)" option="letterModeFollowIME"/>
+
+                   <menuitem id="fireinputPunctModeFollowIME" label="" type="checkbox" checked="true"
+                           oncommand="Fireinput.pref.save(this)" option="punctModeFollowIME"/>
                 </menupopup>
               </menu>
 
