@@ -965,7 +965,11 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       default:
          return;
       }
+      /* auto update letter/punct mode */
+      this.setLetterPunctModeAuto(); 
+
       this.updateIMETabSetting("imemode", this.myIMEMode); 
+      
    },
 
    toggleIMEMode: function () {
@@ -1007,9 +1011,13 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          return;
       }
 
+      /* auto update letter/punct mode */
+      this.setLetterPunctModeAuto(); 
+
       /* update per tab setting if necessary */
       this.updateIMETabSetting("encodingmode", this.myEncodingMode); 
       this.updateIMETabSetting("imemode", this.myIMEMode); 
+
    },
 
    toggleEncodingMode: function () {
@@ -1035,10 +1043,31 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       }
    },
 
-   setLetterMode: function() {
+   setLetterPunctModeAuto: function() {
+      if(Fireinput.pref.getDefault("letterModeFollowIME")) {
+         if(this.myIMEMode == Fireinput.IME_MODE_EN)
+            this.setLetterMode(true);
+         else
+            this.setLetterMode(false);
+      }
+
+      if(Fireinput.pref.getDefault("punctModeFollowIME")) {
+         if(this.myIMEMode == Fireinput.IME_MODE_EN)
+            this.setPunctMode(true);
+         else
+            this.setPunctMode(false);
+      }
+   },
+
+   setLetterMode: function(halfmode) {
      var doc = Fireinput.util.getDocument();
       if(!doc)
          return;
+
+      if(typeof(halfmode) != 'undefined') {
+         halfmode ? this.myIME.setHalfLetterMode() : this.myIME.setFullLetterMode();
+      }
+         
       if (this.myIME.isHalfLetterMode()) {
          var id = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputToggleHalfButton");
          if (id) {
@@ -1078,10 +1107,15 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
       this.updateIMETabSetting("lettermode", this.myIME.isHalfLetterMode()); 
    },
 
-   setPunctMode: function() {
+   setPunctMode: function(halfmode) {
       var doc = Fireinput.util.getDocument();
       if(!doc)
          return;
+
+      if(typeof(halfmode) != 'undefined') {
+         halfmode ? this.myIME.setHalfPunctMode() : this.myIME.setFullPunctMode();
+      }
+
       if (this.myIME.isHalfPunctMode()) {
          var id = Fireinput.util.getElementById(doc, "toolbarbutton", "fireinputTogglePunctButton");
          if (id) {
@@ -1601,14 +1635,12 @@ Fireinput.main = Fireinput.extend(Fireinput.main, {
          var halflettermode   = typeof(this.mySettingTabs[tabId]['lettermode']) == 'undefined' ? 
                               this.myIME.isHalfLetterMode() : this.mySettingTabs[tabId]['lettermode']; 
 
-         halflettermode ? this.myIME.setHalfLetterMode() : this.myIME.setFullLetterMode(); 
-         this.setLetterMode(); 
+         this.setLetterMode(halflettermode); 
 
          var halfpunctmode   = typeof(this.mySettingTabs[tabId]['punctmode']) == 'undefined' ? 
                               this.myIME.isHalfPunctMode() : this.mySettingTabs[tabId]['punctmode']; 
 
-         halfpunctmode ? this.myIME.setHalfPunctMode() : this.myIME.setFullPunctMode(); 
-         this.setPunctMode(); 
+         this.setPunctMode(halfpunctmode); 
 
       }
 
