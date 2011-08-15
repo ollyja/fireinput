@@ -42,6 +42,8 @@ Fireinput.composer =
 
     composedNumber: 0, 
 
+    preComposedNumber: 0, 
+
     hasSet: function()
     {
        return this.composedNumber > 0; 
@@ -61,9 +63,29 @@ Fireinput.composer =
           wlist[i].style.display = "none";
        }
 
+       this.preComposedNumber = this.composedNumber; 
        this.composedNumber = 0; 
        Fireinput.imePanel.enableComposeEditor(false);
     }, 
+
+    autoSelected: function() 
+    {
+
+      if(this.preComposedNumber <= 0)
+          return true; 
+
+       var composerFieldsElement = document.getElementById("fireinputComposeField");
+       var wlist = composerFieldsElement.getElementsByTagName("label");
+       for(var i=0; i < this.preComposedNumber && i < wlist.length; i++)
+       {
+dump(i + "," + wlist[i].getAttribute("autoselected") + "\n");
+          if(wlist[i].hasAttribute("autoselected") && wlist[i].getAttribute("autoselected") == "false")
+            return false; 
+       }
+dump('return true\n');
+       return true; 
+
+    },
 
     getLastAutoSelected: function()
     {
@@ -135,7 +157,7 @@ Fireinput.composer =
     addToPanel: function(autoselected, result)
     {
        Fireinput.log.debug(this, "addToPanel: result.value: " + result.value);
-
+dump("addtoPanel: autoselected : " + autoselected + ", " + result.value + "\n");
        if(this.composedNumber >= this.maxComposedNumber)
           return; 
 

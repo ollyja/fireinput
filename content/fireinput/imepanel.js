@@ -512,7 +512,7 @@ Fireinput.imePanel =
 
           //Fireinput.log.debug(this, "word: " + word + ", key: " + key + ", ufreq: " +  ufreq); 
           // update the frequency or save as new word 
-          if(composeWord.key.length > 0)
+          if(composeWord.key.length > 0 && !Fireinput.composer.autoSelected())
           {
              var newPhraseArray = []; 
              newPhraseArray.push({key: composeWord.key + " " + key, word: composeWord.word + word}); 
