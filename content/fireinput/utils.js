@@ -952,6 +952,11 @@ Fireinput.util.time  =
        this.starttime  = d.getTime();
     },
 
+    getTime: function() {
+       var d = new Date();
+       return d.getTime();
+    }, 
+
     getDiff:function (){
        var d = new Date();
        return (d.getTime()-this.starttime);

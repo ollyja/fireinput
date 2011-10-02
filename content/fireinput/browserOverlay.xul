@@ -106,14 +106,15 @@
       </menu>
 </popup>
 
-<toolbarpalette id="BrowserToolbarPalette">
+<toolbar id="nav-bar">
       <toolbarbutton id="fireinput-toolbarbutton" label="Fireinput(火输)"
                      class="toolbarbutton-1 chromeclass-toolbar-additional"
+                     persist="class" removable="true" 
                      oncommand="Fireinput.main.toggleFireinput()" tooltiptext="Fireinput Chinese IME For Firefox"/>
-</toolbarpalette>
+</toolbar>
 
 <toolbox id="navigator-toolbox">
-   <toolbar id="fireinputIMEBar_top" toolbarname="Fireinput Chinese IME" hidden="true" checked="true" align="center" fullscreentoolbar="true">
+   <toolbar id="fireinputIMEBar_top" toolbarname="Fireinput Chinese IME" hidden="true" checked="true" align="center" fullscreentoolbar="true" insertafter="nav-bar">
       <hbox id="fireinputOptionBox">
         <vbox id="fireinputMoveButton" hidden="true"></vbox>
         <toolbarbutton id="fireinputMenu" tooltiptext="Fireinput menu">

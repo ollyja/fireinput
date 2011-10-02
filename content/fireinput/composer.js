@@ -76,13 +76,24 @@ Fireinput.composer =
 
        var composerFieldsElement = document.getElementById("fireinputComposeField");
        var wlist = composerFieldsElement.getElementsByTagName("label");
+       var pcomposetimer = 0; 
        for(var i=0; i < this.preComposedNumber && i < wlist.length; i++)
        {
-dump(i + "," + wlist[i].getAttribute("autoselected") + "\n");
-          if(wlist[i].hasAttribute("autoselected") && wlist[i].getAttribute("autoselected") == "false")
+          var autoselected = wlist[i].hasAttribute("autoselected") && wlist[i].getAttribute("autoselected") != "false"; 
+          var timegap = -1; 
+          if(wlist[i].hasAttribute("composetimer")) {
+            if(!pcomposetimer) {
+               pcomposetimer = wlist[i].getAttribute("composetimer"); 
+            } else {
+               timegap = wlist[i].getAttribute("composetimer") - pcomposetimer; 
+            }
+          }
+
+          /* if there is one not autoselected or timer has broken off for more than 500 milliseconds, it should be a fine choice */
+          if(!autoselected || timegap > 500)
             return false; 
        }
-dump('return true\n');
+
        return true; 
 
     },
@@ -157,7 +168,7 @@ dump('return true\n');
     addToPanel: function(autoselected, result)
     {
        Fireinput.log.debug(this, "addToPanel: result.value: " + result.value);
-dump("addtoPanel: autoselected : " + autoselected + ", " + result.value + "\n");
+
        if(this.composedNumber >= this.maxComposedNumber)
           return; 
 
@@ -207,6 +218,7 @@ dump("addtoPanel: autoselected : " + autoselected + ", " + result.value + "\n");
           element.setAttribute("cfindex", this.composedNumber);
           element.setAttribute("composeopened", "false");
           element.setAttribute("autoselected", autoselected);
+          element.setAttribute("composetimer", Fireinput.util.time.getTime()); 
 
           Fireinput.log.debug(this, "element.value: " + element.value);
           hboxElement.appendChild(element);
@@ -231,6 +243,7 @@ dump("addtoPanel: autoselected : " + autoselected + ", " + result.value + "\n");
           element.setAttribute("hiddenword", result.word);
           element.setAttribute("composeopened", "false");
           element.setAttribute("autoselected", autoselected);
+          element.setAttribute("composetimer", Fireinput.util.time.getTime()); 
 
           hboxElement.style.display = ""; 
        }

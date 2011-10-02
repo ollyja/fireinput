@@ -1,10 +1,10 @@
 #include "nsISupports.idl" 
-#include "nsIURI.idl"
-#include "nsIDOMWindow.idl" 
+
+interface nsIDOMWindow;
 
 [scriptable, uuid(b3d34bb1-405f-485d-a11b-39d90de735b4)]
 interface nsIFireinput: nsISupports
 {
-    void register(in nsIDOMWindow root);
+    void register(in nsIDOMWindow win);
     nsIDOMWindow getChromeWindow(); 
 };
