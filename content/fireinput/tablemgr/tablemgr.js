@@ -398,9 +398,18 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
     {
        var n = 'f' + Math.floor(Math.random() * 99999);
        var d = document.createElement('div');
-       d.appendChild(Fireinput.util.parseHTML(document, '<iframe type="content" style="display:none" src="about:blank" id="'+n+'" name="'+n+'" onload="TableMgr.uploadLoaded(\''+n+'\')"></iframe>'));
 
+       var f = document.createElement('iframe');
+       f.setAttribute("type", "content");
+       f.setAttribute("src", "about:blank");
+       f.setAttribute("id", n);
+       f.setAttribute("name", n);
+       f.addEventListener("load", function() { Fireinput.tableMgr.uploadLoaded(n); }, false);
+       f.style.display = "none";
+
+       d.appendChild(f);
        document.body.appendChild(d);
+
        var i = document.getElementById(n);
        if (cb && typeof(cb.onComplete) == 'function') {
            i.onComplete = cb.onComplete;

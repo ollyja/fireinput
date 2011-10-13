@@ -143,26 +143,42 @@ Fireinput.pagination = {
      
        var paginateHTML='<div>\n'
        paginateHTML += "<div class='pagerowtitle'><span class='pageimgtitle'>网络图案(已加入)</span>";
-       paginateHTML += "<span class='pagecheckboxtitle'>选择</span></div>"; 
+       paginateHTML += "<span class='pagecheckboxtitle'>管理(不选为删除)</span></div>"; 
        for(var i=sindex; i<sindex+this.numPerPage && i<this.pageinfo.page.length; i++)
        {
           paginateHTML += "<div class='pagerow'>";
-          paginateHTML += "<span class='pageimg' title='" + this.pageinfo.page[i].url + "' onclick='Fireinput.emotionMgr.goToPage(\"" + this.pageinfo.page[i].url + "\")'>"; 
+          paginateHTML += "<span class='pageimg' title='" + this.pageinfo.page[i].url + "'>"; 
           paginateHTML += "<img width='32px' height='32px' src='" + this.pageinfo.page[i].url + "'/></span>";
           paginateHTML += "<span class='pagecheckbox'>";
           var shouldchecked = this.pageinfo.page[i].saved ? this.pageinfo.page[i].saved : Fireinput.emotionMgr.getCheckedStatus(this.pageinfo.page[i].url);
-          var checked = shouldchecked ? "checked": ""; 
-            paginateHTML += "<input type='checkbox' " + checked + "' onclick='Fireinput.emotionMgr.updateUserEmotionList(this, \"" + this.pageinfo.page[i].url + "\")'/></span></div>"; 
+          var checked = shouldchecked ? "checked='checked'": ""; 
+            paginateHTML += "<input class='imgchecked' type='checkbox' " + checked + "' title=\"" + this.pageinfo.page[i].url + "\"'/></span></div>"; 
          
        }
        paginateHTML += "</div>";
+
+       var paginateHTMLFrag = Fireinput.util.parseHTML(document, paginateHTML); 
 
        var prevlinkoffset=1; 
        var paginatediv=document.getElementById(this.paginateId); 
        var paginatelinks=paginatediv.getElementsByTagName("a"); 
        var pagecontentdiv = document.getElementById(this.divId);
        Fireinput.util.emptyNode(pagecontentdiv); 
-       pagecontentdiv.appendChild(Fireinput.util.parseHTML(document, paginateHTML));
+       pagecontentdiv.appendChild(paginateHTMLFrag);
+
+       var pageimgs = pagecontentdiv.getElementsByTagName("span"); 
+       for(var i=0; i<pageimgs.length; i++) {
+          if(pageimgs[i].className == "pageimg") {
+            pageimgs[i].addEventListener("click", function(event) { Fireinput.emotionMgr.goToPage(event.target,event.target.title); }, false); 
+          }
+       }
+
+       var inputimgs = pagecontentdiv.getElementsByTagName("input"); 
+       for(var i=0; i<inputimgs.length; i++) {
+          if(inputimgs[i].className == "imgchecked") {
+            inputimgs[i].addEventListener("click", function(event) { Fireinput.emotionMgr.updateUserEmotionList(event.target, event.target.title); }, false); 
+          }
+       }
        if(paginatelinks.length <=0)
           return; 
 
@@ -193,22 +209,39 @@ Fireinput.pagination = {
        for(var i=sindex; i<sindex+this.numPerPage && i<this.remotePages.length; i++)
        {
           paginateHTML += "<div class='pagerow'>";
-          paginateHTML += "<span class='pageimg'  title='" + this.remotePages[i] + "' onclick='Fireinput.emotionMgr.goToPage(\"" + this.remotePages[i] + "\")'>"; 
+          paginateHTML += "<span class='rpageimg'  title='" + this.remotePages[i] + "'>"; 
           paginateHTML += "<a target='_blank' href='" + this.remotePages[i] + "'><img width='32px' height='32px' src='" + this.remotePages[i] + "'/></a></span>";
           paginateHTML += "<span class='pagecheckbox'>";
           var shouldchecked = Fireinput.emotionMgr.getCheckedStatus(this.remotePages[i]);
           var checked = shouldchecked ? "checked": ""; 
-            paginateHTML += "<input type='checkbox' " + checked + "' onclick='Fireinput.emotionMgr.updateUserEmotionList(this, \"" + this.remotePages[i] + "\")'/></span></div>"; 
+            paginateHTML += "<input type='checkbox' class='rimgchecked' " + checked + "' title=\"" + this.remotePages[i] + "\"'/></span></div>"; 
          
        }
        paginateHTML += "</div>";
+
+       var paginateHTMLFrag = Fireinput.util.parseHTML(document, paginateHTML);
 
        var prevlinkoffset=1; 
        var paginatediv=document.getElementById(this.paginateId); 
        var paginatelinks=paginatediv.getElementsByTagName("a"); 
        var pagecontentdiv = document.getElementById(this.divId);
        Fireinput.util.emptyNode(pagecontentdiv); 
-       pagecontentdiv.appendChild(Fireinput.util.parseHTML(document, paginateHTML));
+       pagecontentdiv.appendChild(paginateHTMLFrag);
+
+       var pageimgs = pagecontentdiv.getElementsByTagName("span");
+       for(var i=0; i<pageimgs.length; i++) {
+          if(pageimgs[i].className == "rpageimg") {
+            pageimgs[i].addEventListener("click", function(event) { Fireinput.emotionMgr.goToPage(event.target,event.target.title); }, false);
+          }
+       }
+
+       var inputimgs = pagecontentdiv.getElementsByTagName("input");
+       for(var i=0; i<inputimgs.length; i++) {
+          if(inputimgs[i].className == "rimgchecked") {
+            inputimgs[i].addEventListener("click", function(event) { Fireinput.emotionMgr.updateUserEmotionList(event.target, event.target.title); }, false);
+          }
+       }
+
        if(paginatelinks.length <=0)
           return; 
 
