@@ -140,7 +140,7 @@
              this.setHTML(BLANK_DOC); 
              this.savedFileName = null; 
              this.savedContent = BLANK_DOC; 
-             document.getElementById('savedFileName').innerHTML = '<span style="color:#EDC555">草稿</span>'; 
+             document.getElementById('savedFileName').textContent = "草稿"; 
 
              // clear autosave stuff 
              this.dirty = false; 
@@ -198,7 +198,7 @@
              var editor = document.getElementById('fireinputEditor');
              var readDone = function(docData)
              {
-                    var openContent = FireinputUnicode.getUnicodeString(docData);
+                    var openContent = Fireinput.util.unicode.getUnicodeString(docData);
                     FireinputEditor.setHTML(openContent); 
                     FireinputEditor.savedContent = openContent; 
                     var textarea = document.getElementById('fireinputText'); 
@@ -207,7 +207,7 @@
 
              Fireinput.docSaver.read(openfile, readDone);
              this.savedFileName = openfile; 
-             document.getElementById('savedFileName').innerHTML = openfile; 
+             document.getElementById('savedFileName').textContent = openfile; 
              this.clearAutoSave();    
          }, 
             
@@ -221,7 +221,7 @@
                    return false; 
 
                 this.savedContent = html; 
-                document.getElementById('savedFileName').innerHTML = this.savedFileName; 
+                document.getElementById('savedFileName').textContent = this.savedFileName; 
 
                 // file has been saved. clear auto save 
                 this.clearAutoSave();    
@@ -255,7 +255,7 @@
 
                 this.savedFileName = path; 
                 this.savedContent = html; 
-                document.getElementById('savedFileName').innerHTML = this.savedFileName; 
+                document.getElementById('savedFileName').textContent = this.savedFileName; 
              }
                 
          }, 
@@ -331,7 +331,8 @@
              var readDone = function(docData)
              {
                     var openContent = Fireinput.util.unicode.getUnicodeString(docData);
-                    editor.contentWindow.document.body.innerHTML = openContent; 
+                    Fireinput.util.emptyNode(editor.contentWindow.document.body); 
+                    editor.contentWindow.document.body.appendChild(Fireinput.util.parseHTML(document, openContent)); 
                     FireinputEditor.audosavedContent = openContent; 
              }; 
 
@@ -514,7 +515,8 @@
                     document.getElementById("fireinputEditor").contentWindow.focus();
                     return; 
                 } 
-                handle.innerHTML = form.innerHTML; 
+                Fireinput.util.emptyNode(handle); 
+                handle.appendChild(Fireinput.util.parseHTML(document, form.innerHTML)); 
                 handle.style.display = "block"; 
                 document.getElementById('linkFormField').focus(); 
                 handle.setAttribute("showup", "linkForm"); 
@@ -528,7 +530,8 @@
                     document.getElementById("fireinputEditor").contentWindow.focus();
                     return; 
                 } 
-                handle.innerHTML = form.innerHTML; 
+                Fireinput.util.emptyNode(handle); 
+                handle.appendChild(Fireinput.util.parseHTML(document, form.innerHTML)); 
                 handle.style.display = "block"; 
                 document.getElementById('imageFormField').focus(); 
                 handle.setAttribute("showup", "imageForm"); 
@@ -543,7 +546,8 @@
                     document.getElementById("fireinputEditor").contentWindow.focus();
                     return; 
                 } 
-                handle.innerHTML = form.innerHTML; 
+                Fireinput.util.emptyNode(handle); 
+                handle.appendChild(Fireinput.util.parseHTML(document, form.innerHTML)); 
                 handle.style.display = "block"; 
                 document.getElementById('tableFormColField').focus(); 
                 handle.setAttribute("showup", "tableForm"); 
@@ -702,7 +706,7 @@
             if(!this.viewsourcing) {
                this.viewsourcing = true; 
                html = document.createTextNode(editor.contentWindow.document.body.innerHTML);
-               editor.contentWindow.document.body.innerHTML = "";
+               Fireinput.util.emptyNode(editor.contentWindow.document.body);
                html = editor.contentWindow.document.importNode(html,false);
                editor.contentWindow.document.body.appendChild(html);
                button.className = 'imagebutton textbutton viewsourcing'; 
@@ -710,7 +714,7 @@
                this.viewsourcing = false; 
                html = editor.contentWindow.document.body.ownerDocument.createRange();
                html.selectNodeContents(editor.contentWindow.document.body);
-               editor.contentWindow.document.body.innerHTML = html.toString();
+               editor.contentWindow.document.body.textContent = html.toString();
                button.className = 'imagebutton textbutton viewsource'; 
             }
          }, 
@@ -738,12 +742,17 @@
             var editor = document.getElementById('fireinputEditor');
             if(!this.viewsourcing)
             {
-               editor.contentWindow.document.body.innerHTML = html; 
+               while (node.hasChildNodes()) {
+                  node.removeChild(node.lastChild);
+               }
+
+               Fireinput.util.emptyNode(editor.contentWindow.document.body);
+               editor.contentWindow.document.body.appendChild(Fireinput.util.parseHTML(document, html)); 
                return; 
             }
 
             var texthtml = document.createTextNode(html); 
-            editor.contentWindow.document.body.innerHTML = "";
+            Fireinput.util.emptyNode(editor.contentWindow.document.body);
             texthtml = editor.contentWindow.document.importNode(texthtml,false);
             editor.contentWindow.document.body.appendChild(texthtml);
          }, 
@@ -859,7 +868,7 @@
 </head>
 <body onLoad="editor_start()">
   <div id="localEditor" class="localEditor">
-    <div class="editorHead">火输文本编辑器<span style="font-size: 10px; font-style: italic" id="savedFileName"><span style="color: #EDC555">草稿</span></span></div>
+    <div class="editorHead">火输文本编辑器<span style="font-size: 10px; font-style: italic; color: #EDC555" id="savedFileName">草稿</span></div>
     <div class="editorHeadSaveFile"><span  id="autoSavedMessage" style="display: none; background-color: #EDC555">自动保存草稿</span></div>
     <div id="editorToolbar">
        <table cellpadding=0> 

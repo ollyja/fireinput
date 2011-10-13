@@ -76,7 +76,7 @@ Fireinput.serverLogin =
        } 
        
        var handle = document.getElementById("logonUser");
-       handle.innerHTML = "您好! " + jsonResp.name; 
+       handle.textContent = "您好! " + jsonResp.name; 
        handle = document.getElementById("logonUserBox");
        handle.style.display = ""; 
 
@@ -98,7 +98,7 @@ Fireinput.serverLogin =
     {
 
        var handle = document.getElementById("logonUser");
-       handle.innerHTML = "";
+       handle.textContent = "";
 
        handle = document.getElementById("logonUserBox");
        handle.style.display = "none";
@@ -122,7 +122,8 @@ Fireinput.serverLogin =
        var py = event.pageY+1; 
        var target = event.target; 
        target.oldInnerHTML = target.innerHTML; 
-       target.innerHTML = '<img src="chrome://fireinput/skin/loading.gif"/>'; 
+       Fireinput.util.emptyNode(target); 
+       target.appendChild(Fireinput.util.parseHTML(document, '<img src="chrome://fireinput/skin/loading.gif"/>')); 
        ajax.setOptions(
           {
              method: 'get',
@@ -134,7 +135,9 @@ Fireinput.serverLogin =
  
     showLogonFormSuccess: function(p, px, py,target)
     {
-       target.innerHTML = target.oldInnerHTML; 
+       Fireinput.util.emptyNode(target); 
+       target.appendChild(Fireinput.util.parseHTML(document, target.oldInnerHTML)); 
+
        var handle = document.getElementById("logonSeed");
        handle.value =  p.responseText; 
        $("#logonForm").css("left", px);
@@ -145,7 +148,8 @@ Fireinput.serverLogin =
 
     showLogonFormFailure: function(p, px, py,target)
     {
-       target.innerHTML = target.oldInnerHTML; 
+       Fireinput.util.emptyNode(target); 
+       target.appendChild(Fireinput.util.parseHTML(document, target.oldInnerHTML)); 
        $("#logonForm").css("left", px);
        $("#logonForm").css("top", py);
        $("#logonForm").css("height", 50);
@@ -205,7 +209,7 @@ Fireinput.serverLogin =
     loginServerFailure: function(p)
     {
        var handle = document.getElementById("logonMessage"); 
-       handle.innerHTML="登录失败，您输入的邮箱或密码不正确"; 
+       handle.textContent="登录失败，您输入的邮箱或密码不正确"; 
 
        handle = document.getElementById("logonButton");
        handle.type = "button";

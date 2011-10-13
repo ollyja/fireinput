@@ -398,7 +398,8 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
     {
        var n = 'f' + Math.floor(Math.random() * 99999);
        var d = document.createElement('div');
-       d.innerHTML = '<iframe type="content" style="display:none" src="about:blank" id="'+n+'" name="'+n+'" onload="TableMgr.uploadLoaded(\''+n+'\')"></iframe>';
+       d.appendChild(Fireinput.util.parseHTML(document, '<iframe type="content" style="display:none" src="about:blank" id="'+n+'" name="'+n+'" onload="TableMgr.uploadLoaded(\''+n+'\')"></iframe>'));
+
        document.body.appendChild(d);
        var i = document.getElementById(n);
        if (cb && typeof(cb.onComplete) == 'function') {
@@ -1167,16 +1168,16 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
        var ptarget = e.target.parentNode; 
        var ohtml = ptarget.innerHTML; 
     
-       ptarget.innerHTML = '';
+       Fireinput.util.emptyNode(ptarget);
        this.importTimer = setInterval(function() {
                                 var percent = Fireinput.importer.getStorePhrasePercent();
                                 if(percent >=0)
                                 {
-                                   ptarget.innerHTML = "<span style='margin-right: 8px; color: green'>" + percent+"%</span><img  src='chrome://fireinput/skin/loading.gif'/>";
+                                   ptarget.appendChild(Fireinput.util.parseHTML(document, "<span style='margin-right: 8px; color: green'>" + percent+"%</span><img  src='chrome://fireinput/skin/loading.gif'/>"));
                                 }
                                 else {
                                    clearInterval(Fireinput.tableMgr.importTimer);
-                                   ptarget.innerHTML = ohtml;
+                                   ptarget.appendChild(Fireinput.util.parseHTML(document, ohtml));
                                    $("#installError", ptarget).html("<span>导入失败</span>");
                                 }
                                 if(percent >= 100) {
@@ -1185,7 +1186,7 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
                                    // remember history 
                                    Fireinput.importer.updateHistory(remotefile, tablename);
                                    clearInterval(Fireinput.tableMgr.importTimer);
-                                   ptarget.innerHTML = ohtml;
+                                   ptarget.appendChild(Fireinput.util.parseHTML(document, ohtml));
                                    $("#installError", ptarget).html("<span style='color:green'>成功导入</span>");
 
                                    // reload imported list 
@@ -1202,12 +1203,14 @@ Fireinput.tableMgr = Fireinput.extend(Fireinput.tableMgr, {
 
        var deleted = function()
        {
-          ptarget.innerHTML = ohtml;  
+          Fireinput.util.emptyNode(ptarget); 
+          ptarget.appendChild(Fireinput.util.parseHTML(document, ohtml));  
           Fireinput.tableMgr.loadImportedTableList();
        }; 
  
        setTimeout(function() { Fireinput.importer.deleteExtPhraseTable(signature, deleted)}, 1000);
-       ptarget.innerHTML = "<img  src='chrome://fireinput/skin/loading.gif'/>";
+       Fireinput.util.emptyNode(ptarget); 
+       ptarget.appendChild(Fireinput.util.parseHTML(document, "<img src='chrome://fireinput/skin/loading.gif'/>"));
    }, 
 
    /* handles network table installation */

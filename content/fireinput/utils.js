@@ -744,7 +744,25 @@ Fireinput.util = Fireinput.extend(Fireinput.util, {
       }
       else
          return document.getElementById(id); 
-    }
+    },
+
+    emptyNode: function(node)
+    {
+       while (node.hasChildNodes()) {
+           node.removeChild(node.lastChild);
+       }
+    },
+
+    escapeHTML: function(str) {
+      if(!str) return '';
+      return str.replace(/[&"<>]/g, function (m) "&" + ({ "&": "amp", '"': "quot", "<": "lt", ">": "gt" })[m] + ";");
+    },
+
+    parseHTML: function(doc, html) {  
+      return Components.classes["@mozilla.org/feed-unescapehtml;1"]  
+                         .getService(Components.interfaces.nsIScriptableUnescapeHTML)  
+                         .parseFragment(html, false, null, doc.documentElement);  
+    }  
 
 }); 
 

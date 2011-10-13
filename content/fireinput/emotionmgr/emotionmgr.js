@@ -74,9 +74,7 @@ Fireinput.emotionMgr =
    
     clearAddFileMessage: function()
     {
-       var handle = document.getElementById("addFileMessage");
-       handle.innerHTML = "";
-
+       Fireinput.util.emptyNode(document.getElementById("addFileMessage"));
     },
 
     showAddFileMessage: function(flag, message)
@@ -88,7 +86,7 @@ Fireinput.emotionMgr =
           handle.style.color = "red";
        }
 
-       handle.innerHTML = message; 
+       handle.textContent = message; 
     }, 
           
     addFileOnFocus: function(event)
@@ -169,7 +167,7 @@ Fireinput.emotionMgr =
          handle = document.getElementById("uploadForm");
          handle.style.display = "none";
          handle = document.getElementById("uploadLink");
-         handle.innerHTML = "上传"; 
+         handle.textContent = "上传"; 
 
          this.showAddFileForm(true);     
          return;
@@ -177,7 +175,7 @@ Fireinput.emotionMgr =
 
        handle.style.display = "";
        handle = document.getElementById("uploadLink");
-       handle.innerHTML = "取消上传"; 
+       handle.textContent = "取消上传"; 
 
        handle = document.getElementById("needLogonHelp");
        handle.style.display = document.getElementById("logonUserBox").style.display == "none" ? "":"none";
@@ -251,7 +249,7 @@ Fireinput.emotionMgr =
     {
        var n = 'f' + Math.floor(Math.random() * 99999);
        var d = document.createElement('div');
-       d.innerHTML = '<iframe type="content" style="display:none" src="about:blank" id="'+n+'" name="'+n+'" onload="Fireinput.emotionMgr.uploadLoaded(\''+n+'\')"></iframe>';
+       d.appendChild(Fireinput.util.parseHTML(document, '<iframe type="content" style="display:none" src="about:blank" id="'+n+'" name="'+n+'" onload="Fireinput.emotionMgr.uploadLoaded(\''+n+'\')"></iframe>'));
        document.body.appendChild(d);
        var i = document.getElementById(n);
        if (cb && typeof(cb.onComplete) == 'function') {
@@ -473,7 +471,7 @@ Fireinput.emotionMgr =
           handle.style.color = "red";
        }
 
-       handle.innerHTML = message;
+       handle.textContent = message;
     },
 
     showSaveFileMessage: function(flag, message)
@@ -485,7 +483,7 @@ Fireinput.emotionMgr =
           handle.style.color = "red";
        }
 
-       handle.innerHTML = message;
+       handle.textContent = message;
     },
 
     saveFileToList: function()

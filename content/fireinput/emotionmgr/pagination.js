@@ -78,7 +78,8 @@ Fireinput.pagination = {
 
        var paginatediv=document.getElementById(this.paginateId);
        paginatediv._currentpage=selectedPage - this.startPage; 
-       paginatediv.innerHTML=paginateHTML;
+       Fireinput.util.emptyNode(paginatediv); 
+       paginatediv.appendChild(Fireinput.util.parseHTML(document, paginateHTML));
        var pageinstance=this;
        paginatediv.onclick=function(e){
             var targetobj=e.target;
@@ -113,7 +114,9 @@ Fireinput.pagination = {
 
        var paginatediv=document.getElementById(this.paginateId);
        paginatediv._currentpage=selectedpage; 
-       paginatediv.innerHTML=paginateHTML;
+       Fireinput.util.emptyNode(paginatediv); 
+       paginatediv.appendChild(Fireinput.util.parseHTML(document, paginateHTML));
+
        var pageinstance=this;
        paginatediv.onclick=function(e){
             var targetobj=e.target;
@@ -132,7 +135,7 @@ Fireinput.pagination = {
        if(!this.pageinfo || this.pageinfo.page.length <= 0)
        { 
           var pagecontentdiv = document.getElementById(this.divId);
-          pagecontentdiv.innerHTML = ""; 
+          Fireinput.util.emptyNode(pagecontentdiv); 
           return; 
        }
  
@@ -158,7 +161,8 @@ Fireinput.pagination = {
        var paginatediv=document.getElementById(this.paginateId); 
        var paginatelinks=paginatediv.getElementsByTagName("a"); 
        var pagecontentdiv = document.getElementById(this.divId);
-       pagecontentdiv.innerHTML = paginateHTML; 
+       Fireinput.util.emptyNode(pagecontentdiv); 
+       pagecontentdiv.appendChild(Fireinput.util.parseHTML(document, paginateHTML));
        if(paginatelinks.length <=0)
           return; 
 
@@ -178,7 +182,7 @@ Fireinput.pagination = {
        if(!this.remotePages || this.remotePages.length <= 0)
        {
           var pagecontentdiv = document.getElementById(this.divId);
-          pagecontentdiv.innerHTML = ""; 
+          Fireinput.util.emptyNode(pagecontentdiv); 
           return; 
        } 
 
@@ -190,7 +194,7 @@ Fireinput.pagination = {
        {
           paginateHTML += "<div class='pagerow'>";
           paginateHTML += "<span class='pageimg'  title='" + this.remotePages[i] + "' onclick='Fireinput.emotionMgr.goToPage(\"" + this.remotePages[i] + "\")'>"; 
-          paginateHTML += "<img width='32px' height='32px' src='" + this.remotePages[i] + "'/></span>";
+          paginateHTML += "<a target='_blank' href='" + this.remotePages[i] + "'><img width='32px' height='32px' src='" + this.remotePages[i] + "'/></a></span>";
           paginateHTML += "<span class='pagecheckbox'>";
           var shouldchecked = Fireinput.emotionMgr.getCheckedStatus(this.remotePages[i]);
           var checked = shouldchecked ? "checked": ""; 
@@ -203,7 +207,8 @@ Fireinput.pagination = {
        var paginatediv=document.getElementById(this.paginateId); 
        var paginatelinks=paginatediv.getElementsByTagName("a"); 
        var pagecontentdiv = document.getElementById(this.divId);
-       pagecontentdiv.innerHTML = paginateHTML; 
+       Fireinput.util.emptyNode(pagecontentdiv); 
+       pagecontentdiv.appendChild(Fireinput.util.parseHTML(document, paginateHTML));
        if(paginatelinks.length <=0)
           return; 
 

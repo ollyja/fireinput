@@ -34,125 +34,10 @@
  * ***** END LICENSE BLOCK ***** 
  */
 
-/* get history/bookmark util */
-try {
-  Components.utils.import("resource://gre/modules/PlacesUtils.jsm");
-} catch(ex) {
-  Components.utils.import("resource://gre/modules/utils.js");
-}
-
-Fireinput.namespace("Fireinput.contextReader");
-
-
-Fireinput.contextReader = {
-
+var contextReaderThread = {
     maxStep: 30000,
     maxPhraseLen: 20, 
     beginTime: 0, 
-
-    init: function()
-    {
-       gBrowser.addEventListener("load", function (event) {
-            if (event.target.defaultView && !event.target.defaultView.frameElement) 
-               Fireinput.contextReader.run(event.originalTarget);
-       }, true);
-
-       // if tab is closed, remove all data from context reader to claim memory 
-       if(gBrowser.tabContainer) {
-          // FF 4 
-          gBrowser.tabContainer.addEventListener("TabClose", function(event) {
-            Fireinput.contextReader.remove(event.target);
-          }, false);
-       }
-       else {
-          // FF 3 or older  
-          gBrowser.addEventListener("TabClose", function(event) {
-            contextReader.remove(event.target);
-          }, false);
-       }
-    }, 
-
-
-    run: function(tab)
-    {
-       /* if it's disabled from config, just return */
-       if(!Fireinput.pref.getDefault("enableContextReader"))
-          return; 
-
-       /* only run contextReader when IME is Fireinput.SMART_PINYIN */
-       if(Fireinput.util.getCurrentIME().getIMEType() != Fireinput.SMART_PINYIN)
-          return; 
-
-       if(this.beginTime <= 0)
-          this.beginTime = Date.now() * 1000; // now in microseconds 
-
-       /*FIXME: do we need to use a different thread id ? */
-       /*FIXME: we use tab index here but the index is same for different window. Something need to be figured out how 
-        *       how to support multiple window opening  
-        */
-       if(Fireinput.contextReader.validContext(tab)) 
-          Fireinput.contextReader.readerMainThread.dispatch(new Fireinput.contextReader.workingThread(
-                  1,Fireinput.util.getBrowserUniqueId(), tab.defaultView.document.documentElement.innerHTML),
-          Fireinput.contextReader.readerMainThread.DISPATCH_NORMAL);
-    }, 
-       
-    validContext: function(tab)
-    {
-       var wintype = document.documentElement.getAttribute('windowtype');
-       /* if and only if the current window is a browser window and it has a document with a character set
-        */
-       if (window && (wintype == "navigator:browser") && window.content && window.content.document)
-       {
-          var docCharset = tab.defaultView.content.document.characterSet.toUpperCase();
-          if(docCharset == "UTF-8" || docCharset == "GB2312" || docCharset =="GB18030" ||
-             /^(GBK|X-GBK)$/.test(docCharset) || docCharset == "HZ" || docCharset == "ISO-2022-CN" || 
-             docCharset == "BIG5" || docCharset == "BIG5-HKSCS" || /^(EUC-TW|X-EUC-TW)$/.test(docCharset))
-          {
-             // valid charset. If the content length is too small, don't do any processing  
-             try {
-                var uri = makeURI(tab.defaultView.location.href); 
-                // ignore if the url has been visited recently 
-                if(this.hasVisited(uri))
-                   return false; 
-
-                if(tab.defaultView.document.documentElement.textContent.length > 100)
-                   return true; 
-             } catch(e) { }
-             
-          }
-       }
-
-       return false; 
-    }, 
-
-    hasVisited: function(uri) {
-
-       var query = PlacesUtils.history.getNewQuery();
-       var options = PlacesUtils.history.getNewQueryOptions();
-
-       options.queryType  = options.QUERY_TYPE_HISTORY;
-       options.resultType = options.RESULTS_AS_VISIT; 
-       query.beginTime = this.beginTime; 
-       query.beginTimeReference = query.TIME_RELATIVE_EPOCH; 
-       query.endTime = Date.now() * 1000 - 30 * 60 * 1000000; // 30 minutes ago 
-       query.endTimeReference = query.TIME_RELATIVE_EPOCH; 
-       query.uri = uri; 
-       try {
-
-          var result = PlacesUtils.history.executeQuery(query, options);
-          result.root.containerOpen = true;
-          var count = result.root.childCount; 
-          result.root.containerOpen = false; 
-          /* if the visit count is larger than 0, ignore this uri */
-          return (count > 0 ? true : false); 
-      } catch(e) { }
-
-      return false; 
-    },
-
-    remove: function(tab) {
-      Fireinput.importer.removePhraseFromRemoteOnDemand(gBrowser.getBrowserIndexForDocument(tab)); 
-    }, 
 
     start: function(str)
     {
@@ -198,76 +83,20 @@ Fireinput.contextReader = {
 
 }; 
 
-Fireinput.contextReader.readerMainThread = Fireinput.util.xpc.getService("@mozilla.org/thread-manager;1").currentThread; 
-
-Fireinput.contextReader.workingThread = function(threadID, tabId, context) {
-    this.threadID = threadID;
-    this.tabId = tabId; 
-    this.context = context; 
-    this.result = "";
-};
-
-Fireinput.contextReader.workingThread.prototype = {
-    run: function() {
-      try {
+onmessage = function(event) {  
+    var context = event.data.context; 
+    var tabId = event.data.tabId; 
+    try {
      
-          // if the document is valid document we want to process, start the reader   
-          this.result = Fireinput.contextReader.start(this.context);
+        // if the document is valid document we want to process, start the reader   
+        var result = contextReaderThread.start(context);
 
-          // When it's done, call back to the main thread to let it know
-          // we're finished.
-          Fireinput.contextReader.readerMainThread.dispatch(new Fireinput.contextReader.mainThread(this.threadID, this.result, this.tabId), Fireinput.contextReader.readerMainThread.DISPATCH_NORMAL);
+        // When it's done, call back to the main thread to let it know
+        // we're finished.
+        postMessage({'tabId': tabId, 'result': result}); 
+    } catch(err) { }
+}
 
-          // okay, we are almost done, check to see if there are pending events
-          try { 
-             if(this.hasPendingEvents())
-                this.processNextEvent(); 
-          } catch(e) {} 
-
-      } catch(err) {
-         Components.utils.reportError(err);
-      }
-    },
-  
-    QueryInterface: function(iid) {
-      if (iid.equals(Components.interfaces.nsIRunnable) ||
-          iid.equals(Components.interfaces.nsISupports)) {
-            return this;
-      }
-      throw Components.results.NS_ERROR_NO_INTERFACE;
-    }
-};
-
-
-Fireinput.contextReader.mainThread = function(threadID, result, tabId) {
-    this.threadID = threadID;
-    this.result = result;
-    this.tabId = tabId; 
-};
-
-Fireinput.contextReader.mainThread.prototype = {
-    run: function() {
-      try {
-         // we got data from the working thread.
-         if(!this.result || this.result.length <= 0)
-            return; 
-
-         // it's up to importer to handle it now 
-         Fireinput.importer.processPhraseFromRemoteOnDemand(this.tabId, this.result, this.result.length);
-
-      } catch(err) {
-         Components.utils.reportError(err);
-      }
-    },
-  
-    QueryInterface: function(iid) {
-       if (iid.equals(Components.interfaces.nsIRunnable) ||
-           iid.equals(Components.interfaces.nsISupports)) {
-            return this;
-       }
-       throw Components.results.NS_ERROR_NO_INTERFACE;
-    }
-};
 
 
 

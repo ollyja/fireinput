@@ -17,6 +17,10 @@ body {
     background: #CCCCAA;
 }
 
+a {
+	cursor: pointer; 
+}
+
 .textLink {
 	color: blue; 
         margin: 0; 

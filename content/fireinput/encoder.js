@@ -136,7 +136,11 @@ Fireinput.encoding =
              target = content.document.body; 
 
           this.switchEncodingAsync(target.innerHTML, encoding, 
-                                   { oncomplete: function(p) { target.innerHTML = p;}}); 
+                                   { oncomplete: function(p) { 
+                                                   Fireinput.util.emptyNode(target); 
+                                                   target.appendChild(Fireinput.util.parseHTML(document, p)); 
+                                                 }
+                                   }); 
        }
     }, 
 

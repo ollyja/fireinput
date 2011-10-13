@@ -41,7 +41,7 @@
 <script type="application/x-javascript" src="chrome://fireinput/content/table.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/help.js"/>
 <script type="application/x-javascript" src="chrome://fireinput/content/md5.js"/>
-<script type="application/x-javascript" src="chrome://fireinput/content/plugins/contextReader/readerThread.js"/>
+<script type="application/x-javascript" src="chrome://fireinput/content/plugins/contextReader/contextReader.js"/>
 
 <commandset id="mainCommandSet">
 	<command id="cmd_fireinputFocusSearchBox" oncommand="Fireinput.webSearch.focusSearchbox();"/>
@@ -106,12 +106,12 @@
       </menu>
 </popup>
 
-<toolbar id="nav-bar">
+<toolbarpalette id="BrowserToolbarPalette">
       <toolbarbutton id="fireinput-toolbarbutton" label="Fireinput(火输)"
                      class="toolbarbutton-1 chromeclass-toolbar-additional"
                      persist="class" removable="true" 
                      oncommand="Fireinput.main.toggleFireinput()" tooltiptext="Fireinput Chinese IME For Firefox"/>
-</toolbar>
+</toolbarpalette>
 
 <toolbox id="navigator-toolbox">
    <toolbar id="fireinputIMEBar_top" toolbarname="Fireinput Chinese IME" hidden="true" checked="true" align="center" fullscreentoolbar="true" insertafter="nav-bar">
