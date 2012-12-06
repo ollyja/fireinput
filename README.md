@@ -2,8 +2,11 @@
 ===============
 Fireinput provides Firefox add-on to have Chinese input for all editable HTML fields. It has most of functionalities of traditional desktop input software, but with the intelligence of interacting with users.
 
+Installation
+-------------
+https://addons.mozilla.org/en-US/firefox/addon/fireinput/
 
-How to setup development environment 
+Setup development environment 
 -------------------------------------
 1. create dev profile and enable options based on this link: 
    https://developer.mozilla.org/en-US/docs/Setting_up_extension_development_environment
@@ -31,5 +34,3 @@ How to setup development environment
 www.fireinput.com
 ------------------
 Visit http://www.fireinput.com for screenshots and other details 
-
-
